@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useSpaceAudio } from './AudioPlayer';
-import { Sparkles, Radio, Rocket } from 'lucide-react';
+import SolarSystemView from './SolarSystemView';
+import { Sparkles, Radio, Rocket, Orbit, Globe } from 'lucide-react';
 
 /**
  * Cartoon Astronaut Character Component (Olivia or Anna)
@@ -374,6 +375,7 @@ export default function Cockpit({ celestialBodies = [], onSelectDestination, onR
   const [isBlasting, setIsBlasting] = useState(false);
   const [usePhotoFace, setUsePhotoFace] = useState(true); // Default to personalized real photos!
   const [activeCategory, setActiveCategory] = useState('all'); // 'all' | 'planets' | 'moons' | 'sun_dwarf'
+  const [cockpitViewMode, setCockpitViewMode] = useState('solarsystem'); // 'solarsystem' | 'earth'
 
   // Big push-button click handler
   const handleDestinationTap = (body) => {
@@ -414,20 +416,50 @@ export default function Cockpit({ celestialBodies = [], onSelectDestination, onR
       <div className="relative flex-1 w-full h-full flex flex-col justify-between overflow-hidden">
         
         {/* Cockpit Canopy Top Arc / Metallic Hull Frame */}
-        <div className="absolute top-0 inset-x-0 h-10 md:h-14 bg-gradient-to-b from-slate-900 via-slate-800 to-transparent border-b-2 border-slate-700/80 z-20 flex items-center justify-between px-6 pointer-events-none">
-          {/* Rivets and Bolt Details */}
-          <div className="flex gap-4">
-            <div className="w-2.5 h-2.5 rounded-full bg-slate-600 border border-slate-400 shadow-inner" />
+        <div className="absolute top-0 inset-x-0 h-11 md:h-14 bg-gradient-to-b from-slate-900 via-slate-800 to-transparent border-b-2 border-slate-700/80 z-20 flex items-center justify-between px-4 sm:px-6 pointer-events-auto">
+          {/* Left Hull Rivets */}
+          <div className="hidden sm:flex gap-3">
             <div className="w-2.5 h-2.5 rounded-full bg-slate-600 border border-slate-400 shadow-inner" />
             <div className="w-2.5 h-2.5 rounded-full bg-slate-600 border border-slate-400 shadow-inner" />
           </div>
-          <div className="text-[11px] md:text-xs font-black tracking-widest text-cyan-300 uppercase px-3 py-0.5 rounded-full bg-slate-950/80 border border-cyan-500/40">
+
+          {/* View Mode Switcher: Top-Down Solar System Map vs Earth Orbit */}
+          <div className="flex items-center gap-1.5 bg-slate-950/90 p-1 rounded-2xl border border-cyan-500/40 shadow-lg">
+            <button
+              onClick={() => {
+                triggerSynth('beep');
+                setCockpitViewMode('solarsystem');
+                speak('Top-down Solar System Star Map!');
+              }}
+              style={{ touchAction: 'manipulation' }}
+              className={`cockpit-btn px-3 py-1 rounded-xl text-xs font-black transition-all ${
+                cockpitViewMode === 'solarsystem'
+                  ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-950 shadow-md scale-105'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              🪐 Solar System Map
+            </button>
+            <button
+              onClick={() => {
+                triggerSynth('beep');
+                setCockpitViewMode('earth');
+                speak('Earth Orbit View!');
+              }}
+              style={{ touchAction: 'manipulation' }}
+              className={`cockpit-btn px-3 py-1 rounded-xl text-xs font-black transition-all ${
+                cockpitViewMode === 'earth'
+                  ? 'bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-950 shadow-md scale-105'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              🌍 Earth Orbit
+            </button>
+          </div>
+
+          {/* Starship Hull Tag */}
+          <div className="text-[10px] md:text-xs font-black tracking-widest text-cyan-300 uppercase px-3 py-0.5 rounded-full bg-slate-950/80 border border-cyan-500/40 hidden md:inline-block">
             Astro-Lab Starship MK-IV
-          </div>
-          <div className="flex gap-4">
-            <div className="w-2.5 h-2.5 rounded-full bg-slate-600 border border-slate-400 shadow-inner" />
-            <div className="w-2.5 h-2.5 rounded-full bg-slate-600 border border-slate-400 shadow-inner" />
-            <div className="w-2.5 h-2.5 rounded-full bg-slate-600 border border-slate-400 shadow-inner" />
           </div>
         </div>
 
@@ -447,73 +479,18 @@ export default function Cockpit({ celestialBodies = [], onSelectDestination, onR
         <div className="absolute inset-0 bg-gradient-to-tr from-cyan-950/20 via-transparent to-indigo-950/30 pointer-events-none z-10" />
         <div className="absolute top-10 left-12 w-64 h-96 bg-white/[0.03] -rotate-12 blur-sm pointer-events-none z-10" />
 
-        {/* Windshield Viewport (Deep Space Looking Down at Rotating Cartoon Earth) */}
-        <div className="relative flex-1 w-full flex flex-col items-center justify-center overflow-hidden pt-8 pb-4">
-          
-          {/* Animated Stars in Horizon */}
-          <div className="absolute inset-0 stars-bg opacity-75" />
+        {/* ======================================================== */}
+        {/* VIEW 1: TOP-DOWN SOLAR SYSTEM HOME SELECTION VIEW        */}
+        {/* ======================================================== */}
+        {cockpitViewMode === 'solarsystem' ? (
+          <div className="relative flex-1 w-full h-full flex flex-col justify-between overflow-hidden pt-12">
+            <SolarSystemView
+              celestialBodies={celestialBodies}
+              onSelectDestination={handleDestinationTap}
+            />
 
-          {/* ROTATING CARTOON EARTH (Windshield Centerpiece) */}
-          <div className="relative flex flex-col items-center z-10">
-            {/* Atmospheric Blue Glow Ring */}
-            <div className="relative w-52 h-52 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-full flex items-center justify-center shadow-[0_0_90px_rgba(56,189,248,0.55)] border-4 border-cyan-400/50 bg-gradient-to-b from-[#1e40af] via-[#0284c7] to-[#0369a1] overflow-hidden">
-              
-              {/* Rotating Cartoon Continents & Landmass Layer */}
-              <div className="absolute inset-0 animate-spin-slow opacity-95">
-                {/* SVG Cartoon Landmasses */}
-                <svg viewBox="0 0 200 200" className="w-full h-full">
-                  {/* Continent 1 */}
-                  <path
-                    d="M40,55 Q65,40 85,60 Q110,50 120,80 Q95,110 70,95 Q45,100 40,55 Z"
-                    fill="#22c55e"
-                    stroke="#16a34a"
-                    strokeWidth="3"
-                  />
-                  {/* Continent 2 */}
-                  <path
-                    d="M125,100 Q155,90 170,120 Q160,150 135,160 Q110,140 125,100 Z"
-                    fill="#22c55e"
-                    stroke="#16a34a"
-                    strokeWidth="3"
-                  />
-                  {/* Cute Islands */}
-                  <circle cx="50" cy="130" r="7" fill="#4ade80" />
-                  <circle cx="150" cy="50" r="6" fill="#4ade80" />
-                  <circle cx="95" cy="140" r="9" fill="#4ade80" />
-                </svg>
-              </div>
-
-              {/* Swirling Semi-Transparent Cartoon Clouds */}
-              <div className="absolute inset-0 animate-[spin_45s_linear_infinite_reverse] pointer-events-none opacity-60">
-                <div className="absolute top-8 left-6 w-28 h-10 rounded-full bg-white/50 blur-[2px] rotate-6" />
-                <div className="absolute bottom-12 right-6 w-36 h-12 rounded-full bg-white/45 blur-[2px] -rotate-12" />
-                <div className="absolute top-28 right-12 w-20 h-7 rounded-full bg-white/40 blur-[1px]" />
-              </div>
-
-              {/* Atmospheric Sunlight Arc */}
-              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-transparent to-white/35 rounded-full pointer-events-none" />
-
-              {/* Earth Orbit Label */}
-              <div className="z-10 text-center pointer-events-none select-none">
-                <div className="text-3xl md:text-4xl filter drop-shadow">🌍</div>
-                <div className="text-xs md:text-sm font-black text-white uppercase tracking-wider drop-shadow-md">
-                  Orbit View
-                </div>
-              </div>
-            </div>
-
-            {/* Toy Rocket In Orbit (Idle State) */}
-            <div className="absolute -top-4 right-6 sm:right-16 z-20">
-              <FlyingToyRocket isBlasting={false} usePhotoFace={usePhotoFace} />
-            </div>
-          </div>
-
-          {/* ======================================================== */}
-          {/* 3. CHARACTERS: Cartoon Olivia (Driver) & Anna (Navigator) */}
-          {/* ======================================================== */}
-          <div className="w-full max-w-5xl px-6 md:px-12 flex justify-between items-end z-20 pointer-events-auto">
-            {/* Driver Seat: Captain Olivia (Left) */}
-            <div className="flex flex-col items-center">
+            {/* Astronaut Crew on Flight Bridge (Left: Olivia, Right: Anna) */}
+            <div className="absolute top-16 left-4 z-20 hidden lg:flex flex-col items-center pointer-events-auto">
               <CartoonAstronaut
                 name="Olivia"
                 role="Pilot 🚀"
@@ -523,49 +500,119 @@ export default function Cockpit({ celestialBodies = [], onSelectDestination, onR
               />
             </div>
 
-            {/* Radio / Intercom & Photo Mode Controls (Center Console HUD) */}
-            <div className="mb-4 flex flex-col items-center gap-2">
+            <div className="absolute top-16 right-4 z-20 hidden lg:flex flex-col items-center pointer-events-auto">
+              <CartoonAstronaut
+                name="Anna"
+                role="Navigator 🧭"
+                isDriver={false}
+                isCheering={isBlasting}
+                usePhotoFace={usePhotoFace}
+              />
+            </div>
+
+            {/* Center HUD Controls: Photo Mode, Radio, Return to Earth */}
+            <div className="absolute top-14 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 pointer-events-auto">
               <button
                 onClick={() => {
                   triggerSynth('twinkle');
-                  setUsePhotoFace(prev => !prev);
-                  speak(usePhotoFace ? "Cartoon art mode!" : "Olivia and Anna's photo mode!");
+                  setUsePhotoFace((prev) => !prev);
+                  speak(usePhotoFace ? 'Cartoon art mode!' : "Olivia and Anna's photo mode!");
                 }}
                 style={{ touchAction: 'manipulation' }}
-                title="Toggle between real photo faces and cartoon illustrations"
-                className="cockpit-btn px-3.5 py-1.5 bg-slate-800/90 hover:bg-slate-700 text-yellow-300 border-2 border-yellow-400/50 rounded-2xl flex items-center gap-1.5 text-xs font-black shadow-lg"
+                className="cockpit-btn px-2.5 py-1 bg-slate-900/90 hover:bg-slate-800 text-yellow-300 border border-yellow-400/60 rounded-xl flex items-center gap-1 text-[11px] font-black shadow-lg"
               >
                 <span>{usePhotoFace ? '📸 Real Photo Face' : '🎨 Cartoon Face'}</span>
               </button>
 
-              <div className="flex gap-2">
-                <button
-                  onClick={handleRadioCheck}
-                  style={{ touchAction: 'manipulation' }}
-                  className="cockpit-btn px-3 py-1.5 bg-indigo-900/90 hover:bg-indigo-800 text-cyan-200 border-2 border-indigo-400/60 rounded-2xl flex items-center gap-1.5 text-xs font-black shadow-lg"
-                >
-                  <Radio className="w-3.5 h-3.5 text-yellow-300 animate-pulse" />
-                  <span>Radio</span>
-                </button>
+              <button
+                onClick={handleRadioCheck}
+                style={{ touchAction: 'manipulation' }}
+                className="cockpit-btn px-2.5 py-1 bg-indigo-950/90 hover:bg-indigo-900 text-cyan-200 border border-indigo-400/60 rounded-xl flex items-center gap-1 text-[11px] font-black shadow-lg"
+              >
+                <Radio className="w-3.5 h-3.5 text-yellow-300 animate-pulse" />
+                <span>Radio</span>
+              </button>
 
-                {onReturnToEarth && (
-                  <button
-                    onClick={() => {
-                      triggerSynth('twinkle');
-                      speak('Returning to Earth Spaceport!');
-                      onReturnToEarth();
-                    }}
-                    style={{ touchAction: 'manipulation' }}
-                    className="cockpit-btn px-3 py-1.5 bg-emerald-900/90 hover:bg-emerald-800 text-emerald-200 border-2 border-emerald-400/60 rounded-2xl flex items-center gap-1.5 text-xs font-black shadow-lg"
-                  >
-                    <span>🌍 Earth</span>
-                  </button>
-                )}
+              {onReturnToEarth && (
+                <button
+                  onClick={() => {
+                    triggerSynth('twinkle');
+                    speak('Returning to Earth Spaceport!');
+                    onReturnToEarth();
+                  }}
+                  style={{ touchAction: 'manipulation' }}
+                  className="cockpit-btn px-2.5 py-1 bg-emerald-950/90 hover:bg-emerald-900 text-emerald-200 border border-emerald-400/60 rounded-xl flex items-center gap-1 text-[11px] font-black shadow-lg"
+                >
+                  <span>🌍 Earth</span>
+                </button>
+              )}
+            </div>
+          </div>
+        ) : (
+          /* ======================================================== */
+          /* VIEW 2: CLASSIC ROTATING EARTH ORBIT VIEW                */
+          /* ======================================================== */
+          <div className="relative flex-1 w-full flex flex-col justify-between overflow-hidden pt-8 pb-4">
+            {/* Animated Stars in Horizon */}
+            <div className="absolute inset-0 stars-bg opacity-75" />
+
+            {/* ROTATING CARTOON EARTH (Windshield Centerpiece) */}
+            <div className="relative flex flex-col items-center z-10 my-auto">
+              {/* Atmospheric Blue Glow Ring */}
+              <div className="relative w-52 h-52 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-full flex items-center justify-center shadow-[0_0_90px_rgba(56,189,248,0.55)] border-4 border-cyan-400/50 bg-gradient-to-b from-[#1e40af] via-[#0284c7] to-[#0369a1] overflow-hidden">
+                {/* Rotating Cartoon Continents & Landmass Layer */}
+                <div className="absolute inset-0 animate-spin-slow opacity-95">
+                  <svg viewBox="0 0 200 200" className="w-full h-full">
+                    <path
+                      d="M40,55 Q65,40 85,60 Q110,50 120,80 Q95,110 70,95 Q45,100 40,55 Z"
+                      fill="#22c55e"
+                      stroke="#16a34a"
+                      strokeWidth="3"
+                    />
+                    <path
+                      d="M125,100 Q155,90 170,120 Q160,150 135,160 Q110,140 125,100 Z"
+                      fill="#22c55e"
+                      stroke="#16a34a"
+                      strokeWidth="3"
+                    />
+                    <circle cx="50" cy="130" r="7" fill="#4ade80" />
+                    <circle cx="150" cy="50" r="6" fill="#4ade80" />
+                    <circle cx="95" cy="140" r="9" fill="#4ade80" />
+                  </svg>
+                </div>
+
+                {/* Swirling Semi-Transparent Clouds */}
+                <div className="absolute inset-0 animate-[spin_45s_linear_infinite_reverse] pointer-events-none opacity-60">
+                  <div className="absolute top-8 left-6 w-28 h-10 rounded-full bg-white/50 blur-[2px] rotate-6" />
+                  <div className="absolute bottom-12 right-6 w-36 h-12 rounded-full bg-white/45 blur-[2px] -rotate-12" />
+                  <div className="absolute top-28 right-12 w-20 h-7 rounded-full bg-white/40 blur-[1px]" />
+                </div>
+
+                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-transparent to-white/35 rounded-full pointer-events-none" />
+
+                <div className="z-10 text-center pointer-events-none select-none">
+                  <div className="text-3xl md:text-4xl filter drop-shadow">🌍</div>
+                  <div className="text-xs md:text-sm font-black text-white uppercase tracking-wider drop-shadow-md">
+                    Earth Orbit View
+                  </div>
+                </div>
+              </div>
+
+              {/* Toy Rocket in Orbit */}
+              <div className="absolute -top-4 right-6 sm:right-16 z-20">
+                <FlyingToyRocket isBlasting={false} usePhotoFace={usePhotoFace} />
               </div>
             </div>
 
-            {/* Navigator Seat: Co-Pilot Anna (Right) */}
-            <div className="flex flex-col items-center">
+            {/* Astronaut Characters at bottom of Earth view */}
+            <div className="w-full max-w-5xl px-6 md:px-12 flex justify-between items-end z-20 pointer-events-auto mb-2">
+              <CartoonAstronaut
+                name="Olivia"
+                role="Pilot 🚀"
+                isDriver={true}
+                isCheering={isBlasting}
+                usePhotoFace={usePhotoFace}
+              />
               <CartoonAstronaut
                 name="Anna"
                 role="Navigator 🧭"
@@ -575,118 +622,52 @@ export default function Cockpit({ celestialBodies = [], onSelectDestination, onR
               />
             </div>
           </div>
-
-        </div>
+        )}
       </div>
 
-      {/* ======================================================== */}
-      {/* 2 & 5. DASHBOARD: Oversized High-Contrast Push Buttons     */}
-      {/* ======================================================== */}
-      <div className="relative z-30 w-full bg-gradient-to-t from-slate-950 via-slate-900 to-slate-900/95 border-t-8 border-slate-700 shadow-[0_-15px_30px_rgba(0,0,0,0.8)] px-3 sm:px-6 pt-2 pb-4">
-        
-        {/* Top Control Bar: Title & Category Filter Tabs */}
-        <div className="w-full max-w-6xl mx-auto mb-2.5 flex flex-wrap items-center justify-between gap-2 px-1">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-emerald-400 animate-ping" />
-            <span className="text-xs sm:text-sm font-black tracking-widest uppercase text-yellow-300">
-              ⚡ DESTINATION CONSOLE: CHOOSE WHERE TO FLY! ⚡
-            </span>
+      {/* Classic Bottom Dashboard Console (Only visible in Earth Orbit mode) */}
+      {cockpitViewMode === 'earth' && (
+        <div className="relative z-30 w-full bg-gradient-to-t from-slate-950 via-slate-900 to-slate-900/95 border-t-8 border-slate-700 shadow-[0_-15px_30px_rgba(0,0,0,0.8)] px-3 sm:px-6 pt-2 pb-4">
+          <div className="w-full max-w-6xl mx-auto mb-2.5 flex flex-wrap items-center justify-between gap-2 px-1">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-emerald-400 animate-ping" />
+              <span className="text-xs sm:text-sm font-black tracking-widest uppercase text-yellow-300">
+                ⚡ DESTINATION CONSOLE: CHOOSE WHERE TO FLY! ⚡
+              </span>
+            </div>
           </div>
 
-          {/* Category Filter Pills for Toddlers & Parents */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full">
-            {[
-              { id: 'all', label: '🌟 All (20)' },
-              { id: 'planets', label: '🪐 Planets (8)' },
-              { id: 'moons', label: '🌙 Moons (9)' },
-              { id: 'sun_dwarf', label: '☀️ Sun & Dwarfs (3)' },
-            ].map((cat) => (
+          <div className="w-full max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 sm:gap-3.5 max-h-[220px] overflow-y-auto pr-1">
+            {celestialBodies.map((body) => (
               <button
-                key={cat.id}
-                onClick={() => {
-                  triggerSynth('beep');
-                  setActiveCategory(cat.id);
+                key={body.id}
+                onClick={() => handleDestinationTap(body)}
+                disabled={isBlasting}
+                style={{
+                  touchAction: 'manipulation',
+                  borderColor: body.color || '#38bdf8',
                 }}
-                style={{ touchAction: 'manipulation' }}
-                className={`cockpit-btn px-2.5 sm:px-3 py-1 rounded-xl text-xs font-black whitespace-nowrap border transition-all ${
-                  activeCategory === cat.id
-                    ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 border-yellow-200 shadow-md scale-105'
-                    : 'bg-slate-800/90 text-slate-300 border-slate-600 hover:bg-slate-700'
-                }`}
+                className="cockpit-btn min-h-[96px] p-2.5 rounded-2xl border-2 flex flex-col items-center justify-center gap-1 bg-slate-900/90 text-white shadow-lg"
               >
-                {cat.label}
+                <div className="flex items-center gap-2">
+                  <img
+                    src={body.thumbnail_image_path}
+                    alt={body.name}
+                    className="w-10 h-10 rounded-full object-cover border border-white/80"
+                  />
+                  <div className="flex flex-col text-left">
+                    <span className="text-base font-black uppercase">{body.name}</span>
+                    <span className="text-[10px] text-cyan-300 font-extrabold">{body.body_type}</span>
+                  </div>
+                </div>
+                <span className="text-[11px] font-bold text-yellow-200 truncate max-w-full">
+                  {body.tagline}
+                </span>
               </button>
             ))}
           </div>
         </div>
-
-        {/* Oversized High-Contrast Destination Push Buttons with NASA Imagery */}
-        <div className="w-full max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 sm:gap-3.5 max-h-[220px] sm:max-h-[260px] overflow-y-auto pr-1">
-          {celestialBodies
-            .filter((body) => {
-              if (activeCategory === 'planets') return body.body_type === 'Planet';
-              if (activeCategory === 'moons') return body.body_type === 'Moon';
-              if (activeCategory === 'sun_dwarf')
-                return body.body_type === 'Star' || body.body_type === 'Dwarf Planet';
-              return true;
-            })
-            .map((body) => {
-              const isSelected = blastingTarget?.id === body.id;
-
-              return (
-                <button
-                  key={body.id}
-                  onClick={() => handleDestinationTap(body)}
-                  disabled={isBlasting}
-                  style={{
-                    touchAction: 'manipulation',
-                    borderColor: body.color || '#38bdf8',
-                  }}
-                  aria-label={`Blast off to ${body.name}`}
-                  className={`cockpit-btn min-h-[96px] p-2.5 sm:p-3 rounded-2xl sm:rounded-3xl border-3 flex flex-col items-center justify-center gap-1 transition-all transform hover:scale-[1.03] active:scale-95 bg-slate-900/90 text-white relative overflow-hidden group shadow-lg ${
-                    isBlasting && isSelected ? 'ring-4 ring-yellow-300 animate-pulse' : ''
-                  }`}
-                >
-                  {/* Subtle Colored Backdrop Glow */}
-                  <div
-                    className="absolute inset-0 opacity-15 group-hover:opacity-25 pointer-events-none transition-opacity"
-                    style={{ backgroundColor: body.color || '#38bdf8' }}
-                  />
-
-                  {/* Thumbnail / Real Spacecraft Imagery */}
-                  <div className="flex items-center gap-2 z-10">
-                    {body.thumbnail_image_path ? (
-                      <img
-                        src={body.thumbnail_image_path}
-                        alt={body.name}
-                        className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover border-2 border-white/90 shadow-md shrink-0"
-                      />
-                    ) : (
-                      <span className="text-2xl sm:text-3xl filter drop-shadow">
-                        {body.emoji || '🪐'}
-                      </span>
-                    )}
-
-                    <div className="flex flex-col items-start text-left truncate">
-                      <span className="text-base sm:text-lg font-black uppercase tracking-wide truncate max-w-[120px] sm:max-w-[140px]">
-                        {body.name}
-                      </span>
-                      <span className="text-[10px] text-cyan-300 font-extrabold uppercase tracking-wider">
-                        {body.body_type || 'World'}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Toddler Sensory Hook Tagline */}
-                  <span className="z-10 text-[11px] sm:text-xs font-bold text-yellow-200/90 truncate max-w-full px-1 text-center mt-0.5">
-                    {body.tagline || 'Explore now!'}
-                  </span>
-                </button>
-              );
-            })}
-        </div>
-
-      </div>
+      )}
 
       {/* ======================================================== */}
       {/* 4. BLAST-OFF EVENT: Zooming Toy Rocket Transition        */}
