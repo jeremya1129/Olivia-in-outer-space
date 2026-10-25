@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="200" height="220">
+  <!-- Hair: Curls behind helmet -->
+  <g id="curls-back">
+    <circle cx="58" cy="85" r="22" fill="#d97706"/>
+    <circle cx="52" cy="115" r="20" fill="#b45309"/>
+    <circle cx="142" cy="85" r="22" fill="#d97706"/>
+    <circle cx="148" cy="115" r="20" fill="#b45309"/>
+  </g>
+  <!-- Helmet Outer -->
+  <circle cx="100" cy="85" r="54" fill="#f8fafc" stroke="#334155" stroke-width="5"/>
+  <ellipse cx="100" cy="132" rx="40" ry="10" fill="#38bdf8" stroke="#0369a1" stroke-width="3"/>
+  <!-- Helmet Bubble Visor -->
+  <ellipse cx="100" cy="85" rx="42" ry="38" fill="#0f172a" stroke="#475569" stroke-width="3.5"/>
+  <ellipse cx="100" cy="85" rx="40" ry="36" fill="#38bdf8" opacity="0.3"/>
+  <!-- Face -->
+  <g id="face">
+    <!-- Golden curly bangs -->
+    <path d="M72,62 Q85,50 100,60 Q115,50 128,62 Q120,55 100,53 Q80,55 72,62 Z" fill="#d97706"/>
+    <circle cx="74" cy="68" r="8" fill="#f59e0b"/>
+    <circle cx="126" cy="68" r="8" fill="#f59e0b"/>
+    <!-- Big Sparkling Hazel Eyes -->
+    <ellipse cx="85" cy="80" rx="5" ry="7" fill="#451a03"/>
+    <ellipse cx="115" cy="80" rx="5" ry="7" fill="#451a03"/>
+    <circle cx="87" cy="78" r="2" fill="#ffffff"/>
+    <circle cx="117" cy="78" r="2" fill="#ffffff"/>
+    <!-- Cute Button Nose -->
+    <ellipse cx="100" cy="88" rx="2.5" ry="1.5" fill="#f43f5e" opacity="0.4"/>
+    <!-- Cheeky Tongue Out Expression! -->
+    <path d="M92,94 Q100,99 108,94" stroke="#0f172a" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    <path d="M96,96 C96,106 104,106 104,96 Z" fill="#f43f5e" stroke="#be123c" stroke-width="1.5"/>
+    <line x1="100" y1="96" x2="100" y2="102" stroke="#be123c" stroke-width="1"/>
+    <!-- Rosy Cheeks -->
+    <circle cx="77" cy="90" r="6" fill="#f43f5e" opacity="0.5"/>
+    <circle cx="123" cy="90" r="6" fill="#f43f5e" opacity="0.5"/>
+  </g>
+  <!-- Visor Reflection -->
+  <path d="M68,70 Q95,58 126,66" stroke="#ffffff" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.8"/>
+  <!-- Space Suit Body -->
+  <path d="M50,140 Q100,165 150,140 L160,195 Q100,215 40,195 Z" fill="#f1f5f9" stroke="#334155" stroke-width="4"/>
+  <!-- Ladybug Mission Patch -->
+  <g id="ladybug-patch" transform="translate(75, 155)">
+    <rect x="0" y="0" width="50" height="24" rx="6" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>
+    <circle cx="14" cy="12" r="7" fill="#ef4444"/>
+    <circle cx="14" cy="8" r="3" fill="#0f172a"/>
+    <circle cx="12" cy="11" r="1.5" fill="#0f172a"/>
+    <circle cx="16" cy="11" r="1.5" fill="#0f172a"/>
+    <circle cx="14" cy="15" r="1.5" fill="#0f172a"/>
+    <text x="36" y="16" font-family="sans-serif" font-size="9" font-weight="900" fill="#0284c7" text-anchor="middle">PILOT</text>
+  </g>
+  <text x="100" y="200" font-family="sans-serif" font-size="12" font-weight="900" fill="#0284c7" text-anchor="middle">OLIVIA</text>
+</svg>

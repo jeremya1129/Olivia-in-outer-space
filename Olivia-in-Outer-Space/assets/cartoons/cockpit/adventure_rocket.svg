@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" width="200" height="240">
+  <!-- Scalloped Charcoal Cloud Launch Base -->
+  <g id="cloud-base" fill="#475569" stroke="#334155" stroke-width="3">
+    <ellipse cx="60" cy="205" rx="30" ry="18"/>
+    <ellipse cx="100" cy="210" rx="36" ry="20"/>
+    <ellipse cx="140" cy="205" rx="30" ry="18"/>
+  </g>
+  <!-- Rocket Outer Fins -->
+  <path d="M55,145 L25,185 L58,180 Z" fill="#f8fafc" stroke="#64748b" stroke-width="3"/>
+  <path d="M145,145 L175,185 L142,180 Z" fill="#f8fafc" stroke="#64748b" stroke-width="3"/>
+  <!-- Front Center Fin Handle -->
+  <path d="M96,155 L104,155 L106,195 L94,195 Z" fill="#f8fafc" stroke="#cbd5e1" stroke-width="3"/>
+
+  <!-- Main Bulbous White Rocket Capsule Body -->
+  <path d="M100,32 C135,65 148,125 146,180 L54,180 C52,125 65,65 100,32 Z" fill="#f8fafc" stroke="#64748b" stroke-width="4"/>
+
+  <!-- Charcoal/Dark Nosecone -->
+  <path d="M100,32 C118,52 126,70 128,80 L72,80 C74,70 82,52 100,32 Z" fill="#1e293b" stroke="#0f172a" stroke-width="3"/>
+
+  <!-- Charming Red Crayon Scribbles by Olivia! -->
+  <g id="crayon-scribbles" stroke="#ef4444" stroke-width="2.2" fill="none" opacity="0.75" stroke-linecap="round">
+    <path d="M68,95 Q75,82 85,92 T95,84 T110,90"/>
+    <path d="M64,110 Q78,102 72,118 T88,112 T76,126"/>
+    <path d="M125,95 Q135,105 128,118 T136,128"/>
+    <path d="M115,165 Q125,172 135,166"/>
+  </g>
+
+  <!-- Large Purple Starry Bubble Porthole Window -->
+  <circle cx="100" cy="120" r="34" fill="#ffffff" stroke="#94a3b8" stroke-width="4"/>
+  <!-- Bolts on Window Ring -->
+  <circle cx="100" cy="89" r="2.5" fill="#475569"/>
+  <circle cx="100" cy="151" r="2.5" fill="#475569"/>
+  <circle cx="69" cy="120" r="2.5" fill="#475569"/>
+  <circle cx="131" cy="120" r="2.5" fill="#475569"/>
+  <circle cx="78" cy="98" r="2.5" fill="#475569"/>
+  <circle cx="122" cy="98" r="2.5" fill="#475569"/>
+  <circle cx="78" cy="142" r="2.5" fill="#475569"/>
+  <circle cx="122" cy="142" r="2.5" fill="#475569"/>
+
+  <!-- Purple Deep Space Glass Dome -->
+  <circle cx="100" cy="120" r="28" fill="#3b0764"/>
+  <!-- Stars Inside Window -->
+  <circle cx="92" cy="112" r="1.5" fill="#ffffff"/>
+  <circle cx="112" cy="116" r="1.5" fill="#ffffff"/>
+  <circle cx="104" cy="128" r="1.2" fill="#ffffff"/>
+  <circle cx="88" cy="124" r="1" fill="#fde047"/>
+  <!-- Bubble Highlight -->
+  <path d="M84,106 Q100,98 116,104" stroke="#ffffff" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.7"/>
+
+  <!-- Red Little Tikes Oval Badge -->
+  <g id="badge" transform="translate(132, 112)">
+    <rect x="0" y="0" width="18" height="11" rx="5.5" fill="#dc2626" stroke="#ffffff" stroke-width="1.2"/>
+    <text x="9" y="8" font-family="sans-serif" font-size="5" font-weight="900" fill="#ffffff" text-anchor="middle">OLIVIA</text>
+  </g>
+
+  <!-- Orange Corrugated Handle & Side Telescope -->
+  <rect x="135" y="88" width="6" height="16" rx="3" fill="#f97316" stroke="#c2410c" stroke-width="1.5"/>
+  <circle cx="138" cy="92" r="1" fill="#ffffff"/>
+  <circle cx="138" cy="96" r="1" fill="#ffffff"/>
+  <circle cx="138" cy="100" r="1" fill="#ffffff"/>
+
+  <!-- Orange Telescope Nozzle on Left -->
+  <path d="M60,158 L46,164 L46,176 L60,172 Z" fill="#f97316" stroke="#c2410c" stroke-width="2"/>
+  <ellipse cx="46" cy="170" rx="3" ry="6" fill="#fb923c"/>
+
+  <!-- Blue Steering Wheel on Side Door Hatch -->
+  <circle cx="128" cy="168" r="9" fill="#1d4ed8" stroke="#1e40af" stroke-width="2"/>
+  <circle cx="128" cy="168" r="4" fill="#f8fafc"/>
+  <line x1="128" y1="159" x2="128" y2="177" stroke="#ffffff" stroke-width="1.5"/>
+  <line x1="119" y1="168" x2="137" y2="168" stroke="#ffffff" stroke-width="1.5"/>
+</svg>

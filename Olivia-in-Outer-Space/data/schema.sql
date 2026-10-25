@@ -1,0 +1,22 @@
+CREATE TABLE IF NOT EXISTS celestial_bodies (
+    id TEXT PRIMARY KEY,
+    english_name TEXT NOT NULL,
+    body_type TEXT NOT NULL,
+    parent_body TEXT,
+    mean_radius_km REAL,
+    mass_value REAL,
+    mass_exponent INTEGER,
+    gravity_m_s2 REAL,
+    density_g_cm3 REAL,
+    sideral_orbit_days REAL,
+    sideral_rotation_hours REAL,
+    mean_temp_celsius REAL,
+    number_of_moons INTEGER DEFAULT 0,
+    discovery_date TEXT,
+    discovered_by TEXT,
+    toddler_hook TEXT,
+    primary_color_hex TEXT,
+    real_image_path TEXT,
+    thumbnail_image_path TEXT,
+    nasa_asset_id TEXT
+);
