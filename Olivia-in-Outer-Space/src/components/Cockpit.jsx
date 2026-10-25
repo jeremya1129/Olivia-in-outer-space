@@ -368,7 +368,7 @@ function FlyingToyRocket({ isBlasting, targetName, usePhotoFace = true }) {
   );
 }
 
-export default function Cockpit({ celestialBodies = [], onSelectDestination }) {
+export default function Cockpit({ celestialBodies = [], onSelectDestination, onReturnToEarth }) {
   const { playTrackOrSfx, triggerSynth, speak } = useSpaceAudio();
   const [blastingTarget, setBlastingTarget] = useState(null);
   const [isBlasting, setIsBlasting] = useState(false);
@@ -538,14 +538,30 @@ export default function Cockpit({ celestialBodies = [], onSelectDestination }) {
                 <span>{usePhotoFace ? '📸 Real Photo Face' : '🎨 Cartoon Face'}</span>
               </button>
 
-              <button
-                onClick={handleRadioCheck}
-                style={{ touchAction: 'manipulation' }}
-                className="cockpit-btn px-4 py-2 bg-indigo-900/90 hover:bg-indigo-800 text-cyan-200 border-2 border-indigo-400/60 rounded-2xl flex items-center gap-2 text-xs font-black shadow-lg"
-              >
-                <Radio className="w-4 h-4 text-yellow-300 animate-pulse" />
-                <span>Radio Intercom</span>
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleRadioCheck}
+                  style={{ touchAction: 'manipulation' }}
+                  className="cockpit-btn px-3 py-1.5 bg-indigo-900/90 hover:bg-indigo-800 text-cyan-200 border-2 border-indigo-400/60 rounded-2xl flex items-center gap-1.5 text-xs font-black shadow-lg"
+                >
+                  <Radio className="w-3.5 h-3.5 text-yellow-300 animate-pulse" />
+                  <span>Radio</span>
+                </button>
+
+                {onReturnToEarth && (
+                  <button
+                    onClick={() => {
+                      triggerSynth('twinkle');
+                      speak('Returning to Earth Spaceport!');
+                      onReturnToEarth();
+                    }}
+                    style={{ touchAction: 'manipulation' }}
+                    className="cockpit-btn px-3 py-1.5 bg-emerald-900/90 hover:bg-emerald-800 text-emerald-200 border-2 border-emerald-400/60 rounded-2xl flex items-center gap-1.5 text-xs font-black shadow-lg"
+                  >
+                    <span>🌍 Earth</span>
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Navigator Seat: Co-Pilot Anna (Right) */}
