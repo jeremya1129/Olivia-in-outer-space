@@ -1,0 +1,38 @@
+[
+  {
+    "id": "earth",
+    "name": "Earth",
+    "color": "#4BA3E3",
+    "tagline": "Home base!",
+    "factAudio": "audio/voice/earth_home.mp3",
+    "sfx": "audio/sfx/bird_chirp.mp3",
+    "action": "wave"
+  },
+  {
+    "id": "moon",
+    "name": "The Moon",
+    "color": "#E0E0E0",
+    "tagline": "Earth's glowing nightlight!",
+    "factAudio": "audio/voice/moon_glow.mp3",
+    "sfx": "audio/sfx/twinkle.mp3",
+    "action": "yawn"
+  },
+  {
+    "id": "mars",
+    "name": "Mars",
+    "color": "#E2583E",
+    "tagline": "The red planet with rocky hills!",
+    "factAudio": "audio/voice/mars_red.mp3",
+    "sfx": "audio/sfx/rover_beep.mp3",
+    "action": "rover_drive"
+  },
+  {
+    "id": "saturn",
+    "name": "Saturn",
+    "color": "#E4C568",
+    "tagline": "The planet wearing giant rings!",
+    "factAudio": "audio/voice/saturn_rings.mp3",
+    "sfx": "audio/sfx/hula_whoosh.mp3",
+    "action": "spin_rings"
+  }
+]
