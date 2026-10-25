@@ -373,6 +373,7 @@ export default function Cockpit({ celestialBodies = [], onSelectDestination }) {
   const [blastingTarget, setBlastingTarget] = useState(null);
   const [isBlasting, setIsBlasting] = useState(false);
   const [usePhotoFace, setUsePhotoFace] = useState(true); // Default to personalized real photos!
+  const [activeCategory, setActiveCategory] = useState('all'); // 'all' | 'planets' | 'moons' | 'sun_dwarf'
 
   // Big push-button click handler
   const handleDestinationTap = (body) => {
@@ -565,10 +566,10 @@ export default function Cockpit({ celestialBodies = [], onSelectDestination }) {
       {/* ======================================================== */}
       {/* 2 & 5. DASHBOARD: Oversized High-Contrast Push Buttons     */}
       {/* ======================================================== */}
-      <div className="relative z-30 w-full bg-gradient-to-t from-slate-950 via-slate-900 to-slate-900/95 border-t-8 border-slate-700 shadow-[0_-15px_30px_rgba(0,0,0,0.8)] px-3 sm:px-6 pt-3 pb-4">
+      <div className="relative z-30 w-full bg-gradient-to-t from-slate-950 via-slate-900 to-slate-900/95 border-t-8 border-slate-700 shadow-[0_-15px_30px_rgba(0,0,0,0.8)] px-3 sm:px-6 pt-2 pb-4">
         
-        {/* Hazard Caution Stripes Banner */}
-        <div className="w-full max-w-6xl mx-auto mb-2 flex items-center justify-between px-2">
+        {/* Top Control Bar: Title & Category Filter Tabs */}
+        <div className="w-full max-w-6xl mx-auto mb-2.5 flex flex-wrap items-center justify-between gap-2 px-1">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-emerald-400 animate-ping" />
             <span className="text-xs sm:text-sm font-black tracking-widest uppercase text-yellow-300">
@@ -576,67 +577,97 @@ export default function Cockpit({ celestialBodies = [], onSelectDestination }) {
             </span>
           </div>
 
-          <div className="hidden sm:flex items-center gap-1.5 text-xs text-cyan-300 font-extrabold">
-            <Sparkles className="w-4 h-4 text-yellow-300" />
-            <span>TOUCH BUTTON TO LAUNCH</span>
+          {/* Category Filter Pills for Toddlers & Parents */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full">
+            {[
+              { id: 'all', label: '🌟 All (20)' },
+              { id: 'planets', label: '🪐 Planets (8)' },
+              { id: 'moons', label: '🌙 Moons (9)' },
+              { id: 'sun_dwarf', label: '☀️ Sun & Dwarfs (3)' },
+            ].map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => {
+                  triggerSynth('beep');
+                  setActiveCategory(cat.id);
+                }}
+                style={{ touchAction: 'manipulation' }}
+                className={`cockpit-btn px-2.5 sm:px-3 py-1 rounded-xl text-xs font-black whitespace-nowrap border transition-all ${
+                  activeCategory === cat.id
+                    ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 border-yellow-200 shadow-md scale-105'
+                    : 'bg-slate-800/90 text-slate-300 border-slate-600 hover:bg-slate-700'
+                }`}
+              >
+                {cat.label}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Oversized High-Contrast Destination Push Buttons */}
-        <div className="w-full max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-          {celestialBodies.map((body) => {
-            // High contrast button styling tailored for toddlers
-            const isEarth = body.id === 'earth';
-            const isMoon = body.id === 'moon';
-            const isMars = body.id === 'mars';
-            const isSaturn = body.id === 'saturn';
+        {/* Oversized High-Contrast Destination Push Buttons with NASA Imagery */}
+        <div className="w-full max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 sm:gap-3.5 max-h-[220px] sm:max-h-[260px] overflow-y-auto pr-1">
+          {celestialBodies
+            .filter((body) => {
+              if (activeCategory === 'planets') return body.body_type === 'Planet';
+              if (activeCategory === 'moons') return body.body_type === 'Moon';
+              if (activeCategory === 'sun_dwarf')
+                return body.body_type === 'Star' || body.body_type === 'Dwarf Planet';
+              return true;
+            })
+            .map((body) => {
+              const isSelected = blastingTarget?.id === body.id;
 
-            // Distinctive high-contrast background & border palette
-            let bgClass = 'bg-slate-800 text-white border-slate-500';
-            let iconEmoji = '🪐';
+              return (
+                <button
+                  key={body.id}
+                  onClick={() => handleDestinationTap(body)}
+                  disabled={isBlasting}
+                  style={{
+                    touchAction: 'manipulation',
+                    borderColor: body.color || '#38bdf8',
+                  }}
+                  aria-label={`Blast off to ${body.name}`}
+                  className={`cockpit-btn min-h-[96px] p-2.5 sm:p-3 rounded-2xl sm:rounded-3xl border-3 flex flex-col items-center justify-center gap-1 transition-all transform hover:scale-[1.03] active:scale-95 bg-slate-900/90 text-white relative overflow-hidden group shadow-lg ${
+                    isBlasting && isSelected ? 'ring-4 ring-yellow-300 animate-pulse' : ''
+                  }`}
+                >
+                  {/* Subtle Colored Backdrop Glow */}
+                  <div
+                    className="absolute inset-0 opacity-15 group-hover:opacity-25 pointer-events-none transition-opacity"
+                    style={{ backgroundColor: body.color || '#38bdf8' }}
+                  />
 
-            if (isEarth) {
-              bgClass = 'bg-gradient-to-b from-sky-500 to-blue-700 text-white border-cyan-200';
-              iconEmoji = '🌍';
-            } else if (isMoon) {
-              bgClass = 'bg-gradient-to-b from-slate-100 to-slate-300 text-slate-950 border-white font-black';
-              iconEmoji = '🌕';
-            } else if (isMars) {
-              bgClass = 'bg-gradient-to-b from-orange-500 to-red-600 text-white border-yellow-200';
-              iconEmoji = '🔴';
-            } else if (isSaturn) {
-              bgClass = 'bg-gradient-to-b from-amber-400 to-yellow-600 text-slate-950 border-amber-100 font-black';
-              iconEmoji = '🪐';
-            }
+                  {/* Thumbnail / Real Spacecraft Imagery */}
+                  <div className="flex items-center gap-2 z-10">
+                    {body.thumbnail_image_path ? (
+                      <img
+                        src={body.thumbnail_image_path}
+                        alt={body.name}
+                        className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover border-2 border-white/90 shadow-md shrink-0"
+                      />
+                    ) : (
+                      <span className="text-2xl sm:text-3xl filter drop-shadow">
+                        {body.emoji || '🪐'}
+                      </span>
+                    )}
 
-            return (
-              <button
-                key={body.id}
-                onClick={() => handleDestinationTap(body)}
-                disabled={isBlasting}
-                style={{ touchAction: 'manipulation' }}
-                aria-label={`Blast off to ${body.name}`}
-                className={`cockpit-btn min-h-[96px] p-3 sm:p-4 rounded-3xl border-4 flex flex-col items-center justify-center gap-1 transition-all transform hover:scale-[1.03] active:scale-95 ${bgClass} ${
-                  isBlasting && blastingTarget?.id === body.id ? 'ring-4 ring-yellow-300 animate-pulse' : ''
-                }`}
-              >
-                {/* Giant High-Contrast Emoji / Icon */}
-                <div className="flex items-center gap-2">
-                  <span className="text-3xl sm:text-4xl filter drop-shadow">
-                    {iconEmoji}
+                    <div className="flex flex-col items-start text-left truncate">
+                      <span className="text-base sm:text-lg font-black uppercase tracking-wide truncate max-w-[120px] sm:max-w-[140px]">
+                        {body.name}
+                      </span>
+                      <span className="text-[10px] text-cyan-300 font-extrabold uppercase tracking-wider">
+                        {body.body_type || 'World'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Toddler Sensory Hook Tagline */}
+                  <span className="z-10 text-[11px] sm:text-xs font-bold text-yellow-200/90 truncate max-w-full px-1 text-center mt-0.5">
+                    {body.tagline || 'Explore now!'}
                   </span>
-                  <span className="text-xl sm:text-2xl font-black uppercase tracking-wider">
-                    {body.name}
-                  </span>
-                </div>
-
-                {/* Toddler Sensory Tagline */}
-                <span className="text-xs sm:text-sm font-bold opacity-90 truncate max-w-full">
-                  {body.tagline || 'Explore now!'}
-                </span>
-              </button>
-            );
-          })}
+                </button>
+              );
+            })}
         </div>
 
       </div>
