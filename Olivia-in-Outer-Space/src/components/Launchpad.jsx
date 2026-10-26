@@ -5,12 +5,15 @@ import { Sparkles, Camera, Play, Volume2, Compass, ArrowRight } from 'lucide-rea
 /**
  * Cartoon Astronaut Avatar for the Launchpad
  */
-function EarthAstronaut({ name, isOlivia, isWalking, isCheering, usePhotoFace, onClick }) {
+function EarthAstronaut({ name, isOlivia, isWalking, isCheering, usePhotoFace = false, onClick }) {
   const suitAccent = isOlivia ? '#38bdf8' : '#c084fc';
   const visorTint = isOlivia ? 'rgba(56, 189, 248, 0.25)' : 'rgba(216, 180, 254, 0.25)';
   const photoSrc = isOlivia
     ? '/assets/cartoons/characters/olivia_photo_face.png'
     : '/assets/cartoons/characters/anna_photo_face.png';
+  const cartoonSrc = isOlivia
+    ? '/assets/cartoons/characters/olivia_cartoon_circle.png'
+    : '/assets/cartoons/characters/anna_cartoon_circle.png';
 
   const clipId = `earth-visor-${name.toLowerCase()}`;
 
@@ -67,7 +70,7 @@ function EarthAstronaut({ name, isOlivia, isWalking, isCheering, usePhotoFace, o
         {/* Helmet Bubble Glass Visor */}
         <ellipse cx="85" cy="72" rx="43" ry="38" fill="#0f172a" stroke="#475569" strokeWidth="3.5" />
 
-        {/* Face Content */}
+        {/* Face Content: Real Photo Cutout or New Cartoon Face */}
         {usePhotoFace ? (
           <g clipPath={`url(#${clipId})`}>
             <rect x="40" y="32" width="90" height="80" fill="#0f172a" />
@@ -82,35 +85,18 @@ function EarthAstronaut({ name, isOlivia, isWalking, isCheering, usePhotoFace, o
             <ellipse cx="85" cy="72" rx="41" ry="36" fill={visorTint} />
           </g>
         ) : (
-          <g id="earth-illustrated-face">
+          <g clipPath={`url(#${clipId})`}>
+            <rect x="40" y="32" width="90" height="80" fill="#0f172a" />
+            {/* New illustrated cartoon face from reference */}
+            <image
+              href={cartoonSrc}
+              x="42"
+              y="32"
+              width="86"
+              height="80"
+              preserveAspectRatio="xMidYMid slice"
+            />
             <ellipse cx="85" cy="72" rx="41" ry="36" fill={visorTint} />
-            {isOlivia ? (
-              <g id="olivia-fringe">
-                <path d="M58,54 Q72,42 85,50 Q98,42 112,54 Q105,48 85,46 Q65,48 58,54 Z" fill="#d97706" />
-                <circle cx="62" cy="58" r="8" fill="#f59e0b" />
-                <circle cx="76" cy="52" r="7" fill="#d97706" />
-                <circle cx="94" cy="52" r="7" fill="#d97706" />
-                <circle cx="108" cy="58" r="8" fill="#f59e0b" />
-              </g>
-            ) : (
-              <g id="anna-bangs">
-                <path d="M56,54 L56,66 Q70,70 85,67 Q100,70 114,66 L114,54 Z" fill="#fef08a" stroke="#eab308" strokeWidth="1.5" />
-              </g>
-            )}
-            <ellipse cx="71" cy="73" rx="5" ry="7" fill="#451a03" />
-            <ellipse cx="99" cy="73" rx="5" ry="7" fill="#451a03" />
-            <circle cx="73" cy="71" r="2.2" fill="#ffffff" />
-            <circle cx="101" cy="71" r="2.2" fill="#ffffff" />
-            {isOlivia ? (
-              <g>
-                <path d="M77,86 Q85,91 93,86" fill="none" stroke="#0f172a" strokeWidth="3.5" strokeLinecap="round" />
-                <path d="M81,87 C81,98 89,98 89,87 Z" fill="#f43f5e" stroke="#be123c" strokeWidth="1.5" />
-              </g>
-            ) : (
-              <path d="M78,87 Q85,94 92,87" fill="none" stroke="#0f172a" strokeWidth="3" strokeLinecap="round" />
-            )}
-            <circle cx="63" cy="82" r="6" fill="#f43f5e" opacity="0.6" />
-            <circle cx="107" cy="82" r="6" fill="#f43f5e" opacity="0.6" />
           </g>
         )}
 
@@ -301,22 +287,18 @@ function BoardingCinematic({ usePhotoFace, onComplete, onSkip }) {
               {/* Nosecone */}
               <path d="M80,24 C96,40 103,58 105,66 L55,66 C57,58 64,40 80,24 Z" fill="#1e293b" stroke="#0f172a" strokeWidth="3" />
 
-              {/* Olivia and Anna inside the porthole */}
+              {/* Olivia inside the porthole */}
               <circle cx="80" cy="102" r="30" fill="#ffffff" stroke="#94a3b8" strokeWidth="3.5" />
               <g clipPath="url(#launch-porthole-clip)">
                 <circle cx="80" cy="102" r="26" fill="#3b0764" />
-                {usePhotoFace ? (
-                  <image
-                    href="/assets/cartoons/characters/olivia_photo_face.png"
-                    x="54"
-                    y="76"
-                    width="52"
-                    height="52"
-                    preserveAspectRatio="xMidYMid slice"
-                  />
-                ) : (
-                  <circle cx="80" cy="100" r="14" fill="#fcd34d" />
-                )}
+                <image
+                  href={usePhotoFace ? "/assets/cartoons/characters/olivia_photo_face.png" : "/assets/cartoons/characters/olivia_cartoon_circle.png"}
+                  x="54"
+                  y="76"
+                  width="52"
+                  height="52"
+                  preserveAspectRatio="xMidYMid slice"
+                />
               </g>
 
               {/* Red Badge */}
@@ -334,9 +316,17 @@ function BoardingCinematic({ usePhotoFace, onComplete, onSkip }) {
 /**
  * Main Launchpad / Start Screen Component
  */
-export default function Launchpad({ onBlastOff }) {
+export default function Launchpad({ onBlastOff, usePhotoFace = false, onTogglePhotoFace }) {
   const { triggerSynth, speak } = useSpaceAudio();
-  const [usePhotoFace, setUsePhotoFace] = useState(true);
+  const [internalPhotoFace, setInternalPhotoFace] = useState(false);
+  const activePhotoFace = onTogglePhotoFace !== undefined ? usePhotoFace : internalPhotoFace;
+  const togglePhotoFace = () => {
+    if (onTogglePhotoFace) {
+      onTogglePhotoFace();
+    } else {
+      setInternalPhotoFace(p => !p);
+    }
+  };
   const [isCinematicActive, setIsCinematicActive] = useState(false);
 
   const handleTapOlivia = () => {
@@ -365,7 +355,7 @@ export default function Launchpad({ onBlastOff }) {
       {/* Cinematic Modal when Blast Off is clicked */}
       {isCinematicActive && (
         <BoardingCinematic
-          usePhotoFace={usePhotoFace}
+          usePhotoFace={activePhotoFace}
           onComplete={onBlastOff}
           onSkip={onBlastOff}
         />
@@ -382,14 +372,14 @@ export default function Launchpad({ onBlastOff }) {
         <button
           onClick={() => {
             triggerSynth('twinkle');
-            setUsePhotoFace((prev) => !prev);
-            speak(usePhotoFace ? "Cartoon art mode!" : "Olivia and Anna's photo mode!");
+            togglePhotoFace();
+            speak(activePhotoFace ? "Cartoon art mode!" : "Olivia and Anna's photo mode!");
           }}
           style={{ touchAction: 'manipulation' }}
           className="cockpit-btn px-3.5 py-1.5 bg-slate-900/85 hover:bg-slate-800 text-yellow-300 border-2 border-yellow-400/60 rounded-2xl flex items-center gap-1.5 text-xs font-black shadow-xl backdrop-blur-md"
         >
           <Camera className="w-4 h-4 text-cyan-300" />
-          <span>{usePhotoFace ? '📸 Real Photo Face' : '🎨 Cartoon Face'}</span>
+          <span>{activePhotoFace ? '📸 Real Photo Face' : '🎨 Cartoon Face'}</span>
         </button>
       </div>
 
@@ -408,7 +398,7 @@ export default function Launchpad({ onBlastOff }) {
           <EarthAstronaut
             name="Olivia"
             isOlivia={true}
-            usePhotoFace={usePhotoFace}
+            usePhotoFace={activePhotoFace}
             onClick={handleTapOlivia}
           />
 
@@ -481,7 +471,7 @@ export default function Launchpad({ onBlastOff }) {
           <EarthAstronaut
             name="Anna"
             isOlivia={false}
-            usePhotoFace={usePhotoFace}
+            usePhotoFace={activePhotoFace}
             onClick={handleTapAnna}
           />
 

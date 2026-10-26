@@ -12,7 +12,7 @@ function SpaceApp() {
   const [currentView, setCurrentView] = useState('launchpad'); // 'launchpad' | 'cockpit' | 'planet'
   const [isLaunching, setIsLaunching] = useState(false);
   const [cockpitViewMode, setCockpitViewMode] = useState('solarsystem'); // 'solarsystem' | 'earth'
-  const [usePhotoFace, setUsePhotoFace] = useState(true); // Default to personalized real photos!
+  const [usePhotoFace, setUsePhotoFace] = useState(false); // Default to new cartoon faces!
 
   const handleBlastOffFromEarth = () => {
     setCurrentView('cockpit');
@@ -186,7 +186,11 @@ function SpaceApp() {
 
         {/* View Routing */}
         {currentView === 'launchpad' && (
-          <Launchpad onBlastOff={handleBlastOffFromEarth} />
+          <Launchpad
+            onBlastOff={handleBlastOffFromEarth}
+            usePhotoFace={usePhotoFace}
+            onTogglePhotoFace={() => setUsePhotoFace((prev) => !prev)}
+          />
         )}
 
         {currentView === 'cockpit' && (
