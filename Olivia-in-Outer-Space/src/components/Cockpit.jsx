@@ -593,7 +593,7 @@ export default function Cockpit({ celestialBodies = [], onSelectDestination, onR
             </div>
 
             {/* Astronaut Characters at bottom of Earth view */}
-            <div className="w-full max-w-5xl px-6 md:px-12 flex justify-between items-end z-20 pointer-events-auto mb-2">
+            <div className="w-full max-w-5xl px-6 md:px-12 flex justify-between items-end z-20 pointer-events-auto mb-6">
               <CartoonAstronaut
                 name="Olivia"
                 role="Pilot 🚀"
@@ -601,6 +601,21 @@ export default function Cockpit({ celestialBodies = [], onSelectDestination, onR
                 isCheering={isBlasting}
                 usePhotoFace={usePhotoFace}
               />
+
+              {/* Jump to Solar System Button in Earth view */}
+              <button
+                onClick={() => {
+                  triggerSynth('beep');
+                  setCockpitViewMode('solarsystem');
+                  speak('Opening the Solar System Highway!');
+                }}
+                style={{ touchAction: 'manipulation' }}
+                className="cockpit-btn px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-500 text-slate-950 font-black text-sm uppercase tracking-wider shadow-2xl flex items-center gap-2 hover:scale-105 active:scale-95 transition-transform"
+              >
+                <span>🪐 Explore Solar System</span>
+                <Rocket className="w-5 h-5" />
+              </button>
+
               <CartoonAstronaut
                 name="Anna"
                 role="Navigator 🧭"
@@ -612,50 +627,6 @@ export default function Cockpit({ celestialBodies = [], onSelectDestination, onR
           </div>
         )}
       </div>
-
-      {/* Classic Bottom Dashboard Console (Only visible in Earth Orbit mode) */}
-      {cockpitViewMode === 'earth' && (
-        <div className="relative z-30 w-full bg-gradient-to-t from-slate-950 via-slate-900 to-slate-900/95 border-t-8 border-slate-700 shadow-[0_-15px_30px_rgba(0,0,0,0.8)] px-3 sm:px-6 pt-2 pb-4">
-          <div className="w-full max-w-6xl mx-auto mb-2.5 flex flex-wrap items-center justify-between gap-2 px-1">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-emerald-400 animate-ping" />
-              <span className="text-xs sm:text-sm font-black tracking-widest uppercase text-yellow-300">
-                ⚡ DESTINATION CONSOLE: CHOOSE WHERE TO FLY! ⚡
-              </span>
-            </div>
-          </div>
-
-          <div className="w-full max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 sm:gap-3.5 max-h-[220px] overflow-y-auto pr-1">
-            {celestialBodies.map((body) => (
-              <button
-                key={body.id}
-                onClick={() => handleDestinationTap(body)}
-                disabled={isBlasting}
-                style={{
-                  touchAction: 'manipulation',
-                  borderColor: body.color || '#38bdf8',
-                }}
-                className="cockpit-btn min-h-[96px] p-2.5 rounded-2xl border-2 flex flex-col items-center justify-center gap-1 bg-slate-900/90 text-white shadow-lg"
-              >
-                <div className="flex items-center gap-2">
-                  <img
-                    src={body.thumbnail_image_path}
-                    alt={body.name}
-                    className="w-10 h-10 rounded-full object-cover border border-white/80"
-                  />
-                  <div className="flex flex-col text-left">
-                    <span className="text-base font-black uppercase">{body.name}</span>
-                    <span className="text-[10px] text-cyan-300 font-extrabold">{body.body_type}</span>
-                  </div>
-                </div>
-                <span className="text-[11px] font-bold text-yellow-200 truncate max-w-full">
-                  {body.tagline}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* ======================================================== */}
       {/* 4. BLAST-OFF EVENT: Zooming Toy Rocket Transition        */}
