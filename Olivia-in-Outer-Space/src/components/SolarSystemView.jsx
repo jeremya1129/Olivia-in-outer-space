@@ -5,8 +5,8 @@ import { Rocket, Sparkles, ChevronLeft, ChevronRight, ArrowLeft, Orbit } from 'l
 
 /**
  * Left-to-Right Solar System Order & Specifications
- * Staggers across the top and bottom areas of the windshield,
- * condensing the horizontal width so the entire solar system fits comfortably.
+ * The Sun is vertically centered as the anchor.
+ * The other planets are gently staggered closer to the center line.
  */
 const SOLAR_SYSTEM_ORDER = [
   {
@@ -14,12 +14,12 @@ const SOLAR_SYSTEM_ORDER = [
     name: 'Sun',
     bodyType: 'Star',
     distanceOrder: 0,
-    cartoonSize: 64,
+    cartoonSize: 68,
     color: '#FFD700',
     tagline: 'Big, bright, and super warm!',
     emoji: '☀️',
     moonIds: [],
-    isTop: true,
+    verticalAlign: 'center', // Sun is centered!
   },
   {
     id: 'mercury',
@@ -31,7 +31,7 @@ const SOLAR_SYSTEM_ORDER = [
     tagline: 'Fastest runner near the sun!',
     emoji: '⚡',
     moonIds: [],
-    isTop: false,
+    verticalAlign: 'low',
   },
   {
     id: 'venus',
@@ -43,7 +43,7 @@ const SOLAR_SYSTEM_ORDER = [
     tagline: 'Warm and cloudy yellow!',
     emoji: '💛',
     moonIds: [],
-    isTop: true,
+    verticalAlign: 'high',
   },
   {
     id: 'earth',
@@ -55,7 +55,7 @@ const SOLAR_SYSTEM_ORDER = [
     tagline: 'Blue oceans & green land!',
     emoji: '🌍',
     moonIds: ['moon'],
-    isTop: false,
+    verticalAlign: 'low',
   },
   {
     id: 'mars',
@@ -67,7 +67,7 @@ const SOLAR_SYSTEM_ORDER = [
     tagline: 'Dusty red with big rocks!',
     emoji: '🔴',
     moonIds: ['phobos', 'deimos'],
-    isTop: true,
+    verticalAlign: 'high',
   },
   {
     id: 'ceres',
@@ -81,7 +81,7 @@ const SOLAR_SYSTEM_ORDER = [
     emoji: '🪨',
     isAsteroidBelt: true,
     moonIds: [],
-    isTop: false,
+    verticalAlign: 'low',
   },
   {
     id: 'jupiter',
@@ -93,20 +93,20 @@ const SOLAR_SYSTEM_ORDER = [
     tagline: 'Giant spinning storm world!',
     emoji: '🌀',
     moonIds: ['europa', 'ganymede', 'callisto'],
-    isTop: true,
+    verticalAlign: 'high',
   },
   {
     id: 'saturn',
     name: 'Saturn',
     bodyType: '6th Planet (Ringed Giant)',
     distanceOrder: 7,
-    cartoonSize: 58,
+    cartoonSize: 56,
     color: '#FDE047',
     tagline: 'Wearing giant hula hoops!',
     emoji: '🪐',
     hasRings: true,
     moonIds: ['titan', 'enceladus'],
-    isTop: false,
+    verticalAlign: 'low',
   },
   {
     id: 'uranus',
@@ -119,7 +119,7 @@ const SOLAR_SYSTEM_ORDER = [
     emoji: '❄️',
     hasRings: true,
     moonIds: [],
-    isTop: true,
+    verticalAlign: 'high',
   },
   {
     id: 'neptune',
@@ -131,7 +131,7 @@ const SOLAR_SYSTEM_ORDER = [
     tagline: 'Deep blue and windy ice world!',
     emoji: '🌊',
     moonIds: ['triton'],
-    isTop: false,
+    verticalAlign: 'low',
   },
   {
     id: 'pluto',
@@ -145,7 +145,7 @@ const SOLAR_SYSTEM_ORDER = [
     emoji: '🤍',
     isKuiperBelt: true,
     moonIds: [],
-    isTop: true,
+    verticalAlign: 'high',
   },
 ];
 
@@ -270,32 +270,39 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
             <ChevronRight className="w-5 h-5 text-yellow-300" />
           </button>
 
-          {/* Main Staggered Panoramic Highway Canvas */}
+          {/* Main Panoramic Highway Canvas (Centered Sun & Moderate Stagger) */}
           <div
             ref={scrollContainerRef}
-            className="relative flex-1 w-full h-full flex items-stretch overflow-x-auto overflow-y-hidden px-4 sm:px-8 gap-1.5 sm:gap-2.5 md:gap-3 pointer-events-auto scrollbar-none"
+            className="relative flex-1 w-full h-full flex items-center overflow-x-auto overflow-y-hidden px-6 sm:px-10 gap-2 sm:gap-3 md:gap-4 pointer-events-auto scrollbar-none"
             style={{ touchAction: 'pan-x' }}
           >
             {/* Ambient Cosmic Starry Glow */}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_left,_var(--tw-gradient-stops))] from-amber-950/20 via-slate-950 to-slate-950 pointer-events-none" />
 
-            {/* Glowing Sinusoidal Orbital Wave Track running through center */}
-            <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-0.5 bg-gradient-to-r from-yellow-400/30 via-cyan-400/25 to-indigo-500/30 pointer-events-none" />
+            {/* Glowing Distance Axis Line running horizontally right through the center */}
+            <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-0.5 bg-gradient-to-r from-yellow-400/35 via-cyan-400/25 to-indigo-500/30 pointer-events-none" />
 
-            {/* STAGGERED CELESTIAL BODIES FROM SUN TO PLUTO */}
+            {/* CELESTIAL BODIES FROM SUN TO PLUTO (MODERATE STAGGER & CENTERED SUN) */}
             {SOLAR_SYSTEM_ORDER.map((item) => {
               const body = bodyMap[item.id];
               if (!body) return null;
               const moonList = (item.moonIds || []).map((id) => bodyMap[id]).filter(Boolean);
-              const isTop = item.isTop;
+
+              // Moderate vertical displacement: Sun centered, others moderately above or below center
+              const staggerClass =
+                item.verticalAlign === 'center'
+                  ? 'translate-y-0'
+                  : item.verticalAlign === 'high'
+                  ? '-translate-y-7 sm:-translate-y-9 md:-translate-y-10'
+                  : 'translate-y-7 sm:translate-y-9 md:translate-y-10';
 
               return (
                 <React.Fragment key={`panoramic-item-${item.id}`}>
                   
                   {/* Asteroid Belt Divider (Between Mars & Jupiter) */}
                   {item.id === 'jupiter' && (
-                    <div className="shrink-0 flex flex-col items-center justify-center px-1 py-2 relative self-center">
-                      <div className="h-36 sm:h-44 w-7 border-x border-dashed border-slate-600/40 rounded-xl flex flex-col items-center justify-around py-1 bg-slate-900/25">
+                    <div className="shrink-0 flex flex-col items-center justify-center px-1.5 py-2 relative self-center">
+                      <div className="h-32 sm:h-40 w-7 border-x border-dashed border-slate-600/40 rounded-xl flex flex-col items-center justify-around py-1 bg-slate-900/25">
                         <span className="text-[10px] animate-pulse">🪨</span>
                         <span className="text-[8px]">✨</span>
                         <span className="text-[10px]">🪨</span>
@@ -308,16 +315,12 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
                     </div>
                   )}
 
-                  {/* Staggered Column (Occupies Full Height, Aligns to Top or Bottom) */}
+                  {/* Planet Column */}
                   <div
                     id={`planet-card-${item.id}`}
                     onClick={() => handleOpenPlanetarySystem(item)}
                     style={{ touchAction: 'manipulation' }}
-                    className={`relative shrink-0 flex flex-col items-center w-[84px] sm:w-[98px] md:w-[110px] cursor-pointer group transition-all duration-200 select-none ${
-                      isTop
-                        ? 'justify-start pt-1 sm:pt-3'
-                        : 'justify-end pb-3 sm:pb-5'
-                    }`}
+                    className={`relative shrink-0 flex flex-col items-center w-[84px] sm:w-[98px] md:w-[110px] cursor-pointer group transition-all duration-300 select-none ${staggerClass}`}
                   >
                     {/* Planet Interactive Visual Card */}
                     <div className="flex flex-col items-center text-center p-1.5 rounded-2xl bg-slate-900/40 group-hover:bg-slate-900/80 border border-transparent group-hover:border-yellow-300/60 transition-all duration-200 shadow-md group-hover:scale-105 active:scale-95 w-full">
