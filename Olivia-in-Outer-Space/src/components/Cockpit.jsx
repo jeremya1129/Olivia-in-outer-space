@@ -369,13 +369,17 @@ function FlyingToyRocket({ isBlasting, targetName, usePhotoFace = true }) {
   );
 }
 
-export default function Cockpit({ celestialBodies = [], onSelectDestination, onReturnToEarth }) {
+export default function Cockpit({
+  celestialBodies = [],
+  onSelectDestination,
+  onReturnToEarth,
+  cockpitViewMode = 'solarsystem',
+  usePhotoFace = true,
+}) {
   const { playTrackOrSfx, triggerSynth, speak } = useSpaceAudio();
   const [blastingTarget, setBlastingTarget] = useState(null);
   const [isBlasting, setIsBlasting] = useState(false);
-  const [usePhotoFace, setUsePhotoFace] = useState(true); // Default to personalized real photos!
   const [activeCategory, setActiveCategory] = useState('all'); // 'all' | 'planets' | 'moons' | 'sun_dwarf'
-  const [cockpitViewMode, setCockpitViewMode] = useState('solarsystem'); // 'solarsystem' | 'earth'
 
   // Big push-button click handler
   const handleDestinationTap = (body) => {
@@ -415,81 +419,6 @@ export default function Cockpit({ celestialBodies = [], onSelectDestination, onR
       {/* ======================================================== */}
       <div className="relative flex-1 w-full h-full flex flex-col justify-between overflow-hidden">
         
-        {/* Cockpit Canopy Top Arc / Metallic Hull Frame with Unified Header Controls */}
-        <div className="absolute top-0 inset-x-0 h-12 md:h-14 bg-gradient-to-b from-slate-900 via-slate-800 to-transparent border-b-2 border-slate-700/80 z-30 flex items-center justify-between px-3 sm:px-6 pointer-events-auto">
-          {/* Left: View Mode Switcher */}
-          <div className="flex items-center gap-1.5 bg-slate-950/90 p-1 rounded-2xl border border-cyan-500/40 shadow-lg">
-            <button
-              onClick={() => {
-                triggerSynth('beep');
-                setCockpitViewMode('solarsystem');
-                speak('Top-down Solar System Star Map!');
-              }}
-              style={{ touchAction: 'manipulation' }}
-              className={`cockpit-btn px-2.5 sm:px-3 py-1 rounded-xl text-xs font-black transition-all ${
-                cockpitViewMode === 'solarsystem'
-                  ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-950 shadow-md scale-105'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              🪐 Solar System
-            </button>
-            <button
-              onClick={() => {
-                triggerSynth('beep');
-                setCockpitViewMode('earth');
-                speak('Earth Orbit View!');
-              }}
-              style={{ touchAction: 'manipulation' }}
-              className={`cockpit-btn px-2.5 sm:px-3 py-1 rounded-xl text-xs font-black transition-all ${
-                cockpitViewMode === 'earth'
-                  ? 'bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-950 shadow-md scale-105'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              🌍 Earth Orbit
-            </button>
-          </div>
-
-          {/* Right: Consolidated Controls (Photo Mode, Radio, Return to Earth) */}
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <button
-              onClick={() => {
-                triggerSynth('twinkle');
-                setUsePhotoFace((prev) => !prev);
-                speak(usePhotoFace ? 'Cartoon art mode!' : "Olivia and Anna's photo mode!");
-              }}
-              style={{ touchAction: 'manipulation' }}
-              className="cockpit-btn px-2 sm:px-2.5 py-1 bg-slate-900/90 hover:bg-slate-800 text-yellow-300 border border-yellow-400/60 rounded-xl flex items-center gap-1 text-[11px] font-black shadow-lg"
-            >
-              <span>{usePhotoFace ? '📸 Photos' : '🎨 Cartoon'}</span>
-            </button>
-
-            <button
-              onClick={handleRadioCheck}
-              style={{ touchAction: 'manipulation' }}
-              className="cockpit-btn px-2 sm:px-2.5 py-1 bg-indigo-950/90 hover:bg-indigo-900 text-cyan-200 border border-indigo-400/60 rounded-xl flex items-center gap-1 text-[11px] font-black shadow-lg"
-            >
-              <Radio className="w-3.5 h-3.5 text-yellow-300 animate-pulse" />
-              <span className="hidden sm:inline">Radio</span>
-            </button>
-
-            {onReturnToEarth && (
-              <button
-                onClick={() => {
-                  triggerSynth('twinkle');
-                  speak('Returning to Earth Spaceport!');
-                  onReturnToEarth();
-                }}
-                style={{ touchAction: 'manipulation' }}
-                className="cockpit-btn px-2 sm:px-2.5 py-1 bg-emerald-950/90 hover:bg-emerald-900 text-emerald-200 border border-emerald-400/60 rounded-xl flex items-center gap-1 text-[11px] font-black shadow-lg"
-              >
-                <span>🌍 Earth Start</span>
-              </button>
-            )}
-          </div>
-        </div>
-
         {/* Angled Left & Right Windshield Frame Pillars */}
         <div className="absolute left-0 inset-y-0 w-3 sm:w-8 md:w-12 bg-gradient-to-r from-slate-900 via-slate-800 to-transparent border-r border-slate-700/60 z-20 pointer-events-none flex flex-col justify-around py-16 items-center">
           <div className="w-2.5 h-2.5 rounded-full bg-slate-600 border border-slate-400 shadow-inner" />
@@ -506,17 +435,17 @@ export default function Cockpit({ celestialBodies = [], onSelectDestination, onR
         <div className="absolute inset-0 bg-gradient-to-tr from-cyan-950/15 via-transparent to-indigo-950/20 pointer-events-none z-10" />
 
         {/* ======================================================== */}
-        {/* VIEW 1: TOP-DOWN SOLAR SYSTEM HOME SELECTION VIEW        */}
+        {/* VIEW 1: SOLAR SYSTEM HOME SELECTION VIEW                 */}
         {/* ======================================================== */}
         {cockpitViewMode === 'solarsystem' ? (
-          <div className="relative flex-1 w-full h-full flex flex-col justify-between overflow-hidden pt-12">
+          <div className="relative flex-1 w-full h-full flex flex-col justify-between overflow-hidden">
             <SolarSystemView
               celestialBodies={celestialBodies}
               onSelectDestination={handleDestinationTap}
             />
 
             {/* Co-Pilot Astronauts docked on lower flight deck sides */}
-            <div className="absolute bottom-36 left-4 z-20 hidden 2xl:flex flex-col items-center pointer-events-auto">
+            <div className="absolute bottom-12 left-4 z-20 hidden 2xl:flex flex-col items-center pointer-events-auto">
               <CartoonAstronaut
                 name="Olivia"
                 role="Pilot 🚀"
@@ -526,7 +455,7 @@ export default function Cockpit({ celestialBodies = [], onSelectDestination, onR
               />
             </div>
 
-            <div className="absolute bottom-36 right-4 z-20 hidden 2xl:flex flex-col items-center pointer-events-auto">
+            <div className="absolute bottom-12 right-4 z-20 hidden 2xl:flex flex-col items-center pointer-events-auto">
               <CartoonAstronaut
                 name="Anna"
                 role="Navigator 🧭"
