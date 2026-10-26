@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useSpaceAudio } from './AudioPlayer';
+import CartoonCelestialBody from './CartoonCelestialBody';
 import { ArrowLeft, Sparkles, Volume2, Music, Camera, Compass, Thermometer, Weight, Moon } from 'lucide-react';
 
 export default function PlanetView({ planet, onReturnToCockpit }) {
@@ -119,17 +120,9 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
                 }`}
               />
             ) : (
-              /* Cartoon / Illustrated Glow View */
-              <div className="w-full h-full flex flex-col items-center justify-center relative">
-                <div
-                  className="absolute inset-0 opacity-80"
-                  style={{
-                    background: `radial-gradient(circle at 35% 35%, #ffffff 0%, ${planet.color} 55%, #000000 100%)`,
-                  }}
-                />
-                <span className="z-10 text-6xl sm:text-7xl md:text-8xl filter drop-shadow-lg">
-                  {planet.emoji || '🪐'}
-                </span>
+              /* Cartoon Vector Illustration View */
+              <div className="w-full h-full flex flex-col items-center justify-center relative p-4">
+                <CartoonCelestialBody id={planet.id} size={180} />
               </div>
             )}
 
