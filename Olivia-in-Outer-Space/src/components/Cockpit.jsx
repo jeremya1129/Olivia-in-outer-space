@@ -444,25 +444,9 @@ export default function Cockpit({
               onSelectDestination={handleDestinationTap}
             />
 
-            {/* Co-Pilot Astronauts docked on lower flight deck sides */}
-            <div className="absolute bottom-12 left-4 z-20 hidden 2xl:flex flex-col items-center pointer-events-auto">
-              <CartoonAstronaut
-                name="Olivia"
-                role="Pilot 🚀"
-                isDriver={true}
-                isCheering={isBlasting}
-                usePhotoFace={usePhotoFace}
-              />
-            </div>
-
-            <div className="absolute bottom-12 right-4 z-20 hidden 2xl:flex flex-col items-center pointer-events-auto">
-              <CartoonAstronaut
-                name="Anna"
-                role="Navigator 🧭"
-                isDriver={false}
-                isCheering={isBlasting}
-                usePhotoFace={usePhotoFace}
-              />
+            {/* Flying Toy Rocket cruising through Space in Solar System Selection View */}
+            <div className="absolute top-2 right-4 sm:right-10 z-20 pointer-events-auto">
+              <FlyingToyRocket isBlasting={false} usePhotoFace={usePhotoFace} />
             </div>
           </div>
         ) : (
