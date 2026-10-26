@@ -10,13 +10,16 @@ import { Sparkles, Radio, Rocket, Orbit, Globe } from 'lucide-react';
  * 1. Real photo cutout face (personalized, 100% authentic)
  * 2. Hand-crafted illustrated cartoon face with matching hair and expressions
  */
-function CartoonAstronaut({ name, role, isDriver, isCheering, usePhotoFace = true }) {
+function CartoonAstronaut({ name, role, isDriver, isCheering, usePhotoFace = false }) {
   const isOlivia = name.toLowerCase().includes('olivia');
   const suitAccent = isOlivia ? '#38bdf8' : '#c084fc'; // Cyan for Olivia, Lilac/Purple for Anna
   const visorTint = isOlivia ? 'rgba(56, 189, 248, 0.2)' : 'rgba(216, 180, 254, 0.2)';
   const photoSrc = isOlivia
     ? '/assets/cartoons/characters/olivia_photo_face.png'
     : '/assets/cartoons/characters/anna_photo_face.png';
+  const cartoonSrc = isOlivia
+    ? '/assets/cartoons/characters/olivia_cartoon_circle.png'
+    : '/assets/cartoons/characters/anna_cartoon_circle.png';
 
   const clipId = `visor-clip-${name.toLowerCase()}`;
 
@@ -68,7 +71,7 @@ function CartoonAstronaut({ name, role, isDriver, isCheering, usePhotoFace = tru
         {/* Helmet Bubble Glass Visor Frame */}
         <ellipse cx="85" cy="72" rx="43" ry="38" fill="#0f172a" stroke="#475569" strokeWidth="3.5" />
 
-        {/* Visor Content: Real Photo Cutout or Stylized Cartoon */}
+        {/* Visor Content: Real Photo Cutout or New Cartoon Face */}
         {usePhotoFace ? (
           <g clipPath={`url(#${clipId})`}>
             {/* Background tint inside helmet */}
@@ -86,43 +89,21 @@ function CartoonAstronaut({ name, role, isDriver, isCheering, usePhotoFace = tru
             <ellipse cx="85" cy="72" rx="41" ry="36" fill={visorTint} />
           </g>
         ) : (
-          /* Hand-crafted Illustrated Face */
-          <g id="illustrated-face">
+          /* High-fidelity Illustrated Cartoon Face from references */
+          <g clipPath={`url(#${clipId})`}>
+            {/* Background tint inside helmet */}
+            <rect x="40" y="32" width="90" height="80" fill="#0f172a" />
+            {/* New cartoon face image */}
+            <image
+              href={cartoonSrc}
+              x="42"
+              y="32"
+              width="86"
+              height="80"
+              preserveAspectRatio="xMidYMid slice"
+            />
+            {/* Subtle blue space reflection overlay */}
             <ellipse cx="85" cy="72" rx="41" ry="36" fill={visorTint} />
-            {isOlivia ? (
-              <g id="olivia-curly-fringe">
-                <path d="M58,54 Q72,42 85,50 Q98,42 112,54 Q105,48 85,46 Q65,48 58,54 Z" fill="#d97706" />
-                <circle cx="62" cy="58" r="8" fill="#f59e0b" />
-                <circle cx="76" cy="52" r="7" fill="#d97706" />
-                <circle cx="94" cy="52" r="7" fill="#d97706" />
-                <circle cx="108" cy="58" r="8" fill="#f59e0b" />
-              </g>
-            ) : (
-              <g id="anna-straight-bangs">
-                <path d="M56,54 L56,66 Q70,70 85,67 Q100,70 114,66 L114,54 Z" fill="#fef08a" stroke="#eab308" strokeWidth="1.5" />
-              </g>
-            )}
-
-            {/* Eyes */}
-            <ellipse cx="71" cy="73" rx="5" ry="7" fill="#451a03" />
-            <ellipse cx="99" cy="73" rx="5" ry="7" fill="#451a03" />
-            <circle cx="73" cy="71" r="2.2" fill="#ffffff" />
-            <circle cx="101" cy="71" r="2.2" fill="#ffffff" />
-
-            {/* Nose & Mouth */}
-            <ellipse cx="85" cy="80" rx="2.5" ry="1.6" fill="#f43f5e" opacity="0.45" />
-            {isOlivia ? (
-              <g id="tongue-out">
-                <path d="M77,86 Q85,91 93,86" fill="none" stroke="#0f172a" strokeWidth="3.5" strokeLinecap="round" />
-                <path d="M81,87 C81,98 89,98 89,87 Z" fill="#f43f5e" stroke="#be123c" strokeWidth="1.5" />
-              </g>
-            ) : (
-              <path d="M78,87 Q85,94 92,87" fill="none" stroke="#0f172a" strokeWidth="3" strokeLinecap="round" />
-            )}
-
-            {/* Rosy Cheeks */}
-            <circle cx="63" cy="82" r="6" fill="#f43f5e" opacity="0.6" />
-            <circle cx="107" cy="82" r="6" fill="#f43f5e" opacity="0.6" />
           </g>
         )}
 
@@ -218,7 +199,11 @@ function CartoonAstronaut({ name, role, isDriver, isCheering, usePhotoFace = tru
  * - Olivia's authentic red crayon scribbles on hull!
  * - Scalloped charcoal launch booster base
  */
-function FlyingToyRocket({ isBlasting, targetName, usePhotoFace = true }) {
+function FlyingToyRocket({ isBlasting, targetName, usePhotoFace = false }) {
+  const rocketFaceSrc = usePhotoFace
+    ? '/assets/cartoons/characters/olivia_photo_face.png'
+    : '/assets/cartoons/characters/olivia_cartoon_circle.png';
+
   if (!isBlasting) {
     return (
       <div className="relative w-20 h-24 md:w-24 md:h-28 animate-float pointer-events-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.65)]">
@@ -247,22 +232,14 @@ function FlyingToyRocket({ isBlasting, targetName, usePhotoFace = true }) {
           <circle cx="80" cy="96" r="26" fill="#ffffff" stroke="#94a3b8" strokeWidth="3" />
           <g clipPath="url(#rocket-porthole-clip-idle)">
             <circle cx="80" cy="96" r="22" fill="#3b0764" />
-            {usePhotoFace ? (
-              <image
-                href="/assets/cartoons/characters/olivia_photo_face.png"
-                x="58"
-                y="74"
-                width="44"
-                height="44"
-                preserveAspectRatio="xMidYMid slice"
-              />
-            ) : (
-              <g>
-                <circle cx="73" cy="90" r="1.5" fill="#ffffff" />
-                <circle cx="88" cy="94" r="1.5" fill="#ffffff" />
-                <circle cx="82" cy="104" r="1.2" fill="#fde047" />
-              </g>
-            )}
+            <image
+              href={rocketFaceSrc}
+              x="58"
+              y="74"
+              width="44"
+              height="44"
+              preserveAspectRatio="xMidYMid slice"
+            />
           </g>
           <path d="M68,86 Q80,80 92,85" stroke="#ffffff" strokeWidth="2.5" fill="none" strokeLinecap="round" opacity="0.7" />
 
@@ -331,23 +308,14 @@ function FlyingToyRocket({ isBlasting, targetName, usePhotoFace = true }) {
           <circle cx="80" cy="102" r="30" fill="#ffffff" stroke="#94a3b8" strokeWidth="3.5" />
           <g clipPath="url(#rocket-porthole-clip-blasting)">
             <circle cx="80" cy="102" r="26" fill="#3b0764" />
-            {usePhotoFace ? (
-              <image
-                href="/assets/cartoons/characters/olivia_photo_face.png"
-                x="54"
-                y="76"
-                width="52"
-                height="52"
-                preserveAspectRatio="xMidYMid slice"
-              />
-            ) : (
-              <g>
-                <circle cx="80" cy="100" r="12" fill="#fcd34d" />
-                <circle cx="76" cy="98" r="2" fill="#0f172a" />
-                <circle cx="84" cy="98" r="2" fill="#0f172a" />
-                <path d="M78,103 Q80,107 82,103" fill="none" stroke="#0f172a" strokeWidth="1.5" />
-              </g>
-            )}
+            <image
+              href={rocketFaceSrc}
+              x="54"
+              y="76"
+              width="52"
+              height="52"
+              preserveAspectRatio="xMidYMid slice"
+            />
           </g>
 
           {/* Glass Bubble Glare */}
@@ -374,7 +342,7 @@ export default function Cockpit({
   onSelectDestination,
   onReturnToEarth,
   cockpitViewMode = 'solarsystem',
-  usePhotoFace = true,
+  usePhotoFace = false,
 }) {
   const { playTrackOrSfx, triggerSynth, speak } = useSpaceAudio();
   const [blastingTarget, setBlastingTarget] = useState(null);
@@ -391,7 +359,7 @@ export default function Cockpit({
     // 1. Rocket sound cue & audio announcement
     playTrackOrSfx(null, 'blastoff');
     triggerSynth('blastoff');
-    speak(`Blast off to ${body.name}! Hang on tight!`);
+    speak(`Blast off to ${body.name}! Here we go!`);
 
     // 2. Transition rocket toward that body after rumble effect (~1.8s)
     setTimeout(() => {
