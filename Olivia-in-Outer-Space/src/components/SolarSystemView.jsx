@@ -4,9 +4,9 @@ import CartoonCelestialBody from './CartoonCelestialBody';
 import { Rocket, Sparkles, ChevronLeft, ChevronRight, ArrowLeft, Orbit } from 'lucide-react';
 
 /**
- * Left-to-Right Solar System Order & Physical Specifications
- * Uses cute cartoon vector illustrations in selection views,
- * staggered vertically with reduced sizing to fit the screen.
+ * Left-to-Right Solar System Order & Specifications
+ * Staggers across the top and bottom areas of the windshield,
+ * condensing the horizontal width so the entire solar system fits comfortably.
  */
 const SOLAR_SYSTEM_ORDER = [
   {
@@ -14,55 +14,60 @@ const SOLAR_SYSTEM_ORDER = [
     name: 'Sun',
     bodyType: 'Star',
     distanceOrder: 0,
-    cartoonSize: 76,
+    cartoonSize: 64,
     color: '#FFD700',
     tagline: 'Big, bright, and super warm!',
     emoji: '☀️',
     moonIds: [],
+    isTop: true,
   },
   {
     id: 'mercury',
     name: 'Mercury',
     bodyType: '1st Planet',
     distanceOrder: 1,
-    cartoonSize: 36,
+    cartoonSize: 34,
     color: '#A0A0A0',
     tagline: 'Fastest runner near the sun!',
     emoji: '⚡',
     moonIds: [],
+    isTop: false,
   },
   {
     id: 'venus',
     name: 'Venus',
     bodyType: '2nd Planet',
     distanceOrder: 2,
-    cartoonSize: 48,
+    cartoonSize: 44,
     color: '#F59E0B',
     tagline: 'Warm and cloudy yellow!',
     emoji: '💛',
     moonIds: [],
+    isTop: true,
   },
   {
     id: 'earth',
     name: 'Earth',
     bodyType: '3rd Planet (Home)',
     distanceOrder: 3,
-    cartoonSize: 52,
+    cartoonSize: 48,
     color: '#38BDF8',
     tagline: 'Blue oceans & green land!',
     emoji: '🌍',
     moonIds: ['moon'],
+    isTop: false,
   },
   {
     id: 'mars',
     name: 'Mars',
     bodyType: '4th Planet',
     distanceOrder: 4,
-    cartoonSize: 42,
+    cartoonSize: 40,
     color: '#EF4444',
     tagline: 'Dusty red with big rocks!',
     emoji: '🔴',
     moonIds: ['phobos', 'deimos'],
+    isTop: true,
   },
   {
     id: 'ceres',
@@ -70,58 +75,63 @@ const SOLAR_SYSTEM_ORDER = [
     subTitle: 'Asteroid Belt',
     bodyType: 'Asteroid Belt',
     distanceOrder: 5,
-    cartoonSize: 34,
+    cartoonSize: 32,
     color: '#94A3B8',
     tagline: 'Rocky dwarf world in the belt!',
     emoji: '🪨',
     isAsteroidBelt: true,
     moonIds: [],
+    isTop: false,
   },
   {
     id: 'jupiter',
     name: 'Jupiter',
     bodyType: '5th Planet (Gas Giant)',
     distanceOrder: 6,
-    cartoonSize: 68,
+    cartoonSize: 62,
     color: '#FB923C',
     tagline: 'Giant spinning storm world!',
     emoji: '🌀',
     moonIds: ['europa', 'ganymede', 'callisto'],
+    isTop: true,
   },
   {
     id: 'saturn',
     name: 'Saturn',
     bodyType: '6th Planet (Ringed Giant)',
     distanceOrder: 7,
-    cartoonSize: 66,
+    cartoonSize: 58,
     color: '#FDE047',
     tagline: 'Wearing giant hula hoops!',
     emoji: '🪐',
     hasRings: true,
     moonIds: ['titan', 'enceladus'],
+    isTop: false,
   },
   {
     id: 'uranus',
     name: 'Uranus',
     bodyType: '7th Planet (Ice Giant)',
     distanceOrder: 8,
-    cartoonSize: 50,
+    cartoonSize: 46,
     color: '#22D3EE',
     tagline: 'Chilly blue ice ball rolling on its side!',
     emoji: '❄️',
     hasRings: true,
     moonIds: [],
+    isTop: true,
   },
   {
     id: 'neptune',
     name: 'Neptune',
     bodyType: '8th Planet (Windy Giant)',
     distanceOrder: 9,
-    cartoonSize: 50,
+    cartoonSize: 46,
     color: '#3B82F6',
     tagline: 'Deep blue and windy ice world!',
     emoji: '🌊',
     moonIds: ['triton'],
+    isTop: false,
   },
   {
     id: 'pluto',
@@ -129,12 +139,13 @@ const SOLAR_SYSTEM_ORDER = [
     subTitle: 'Kuiper Belt',
     bodyType: 'Kuiper Belt',
     distanceOrder: 10,
-    cartoonSize: 34,
+    cartoonSize: 32,
     color: '#FDBA74',
-    tagline: 'Tiny frozen world at the edge!',
+    tagline: 'Tiny frozen world with a heart!',
     emoji: '🤍',
     isKuiperBelt: true,
     moonIds: [],
+    isTop: true,
   },
 ];
 
@@ -164,7 +175,7 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
   // Scroll left/right along the panoramic solar highway
   const handleScroll = (direction) => {
     if (scrollContainerRef.current) {
-      const scrollAmount = direction === 'left' ? -350 : 350;
+      const scrollAmount = direction === 'left' ? -280 : 280;
       scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
       triggerSynth('whoosh');
     }
@@ -209,7 +220,7 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
   };
 
   return (
-    <div className="relative w-full h-full flex flex-col justify-between overflow-hidden select-none bg-slate-950 text-white">
+    <div className="relative w-full h-full flex flex-col justify-between overflow-hidden select-none bg-space-dark text-white">
       
       {/* ======================================================== */}
       {/* LEVEL 1: LEFT-TO-RIGHT SOLAR SYSTEM PANORAMIC VIEW       */}
@@ -234,135 +245,121 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
                   className="px-2 py-0.5 rounded-lg text-[10px] font-black uppercase whitespace-nowrap bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/80 shrink-0 transition-all flex items-center gap-1"
                 >
                   <span>{item.emoji}</span>
-                  <span className="hidden md:inline">{item.name}</span>
+                  <span className="hidden lg:inline">{item.name}</span>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Left / Right Panoramic Scroll Buttons */}
+          {/* Left / Right Scroll Buttons (Helpful on narrower screens) */}
           <button
             onClick={() => handleScroll('left')}
             style={{ touchAction: 'manipulation' }}
             aria-label="Scroll Sunward"
-            className="cockpit-btn absolute left-2 top-1/2 -translate-y-1/2 z-30 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-slate-900/90 hover:bg-slate-800 text-cyan-300 border border-cyan-400/60 shadow-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+            className="cockpit-btn absolute left-1.5 top-1/2 -translate-y-1/2 z-30 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-slate-900/90 hover:bg-slate-800 text-cyan-300 border border-cyan-400/60 shadow-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
           >
-            <ChevronLeft className="w-6 h-6 text-yellow-300" />
+            <ChevronLeft className="w-5 h-5 text-yellow-300" />
           </button>
 
           <button
             onClick={() => handleScroll('right')}
             style={{ touchAction: 'manipulation' }}
             aria-label="Scroll to Deep Space"
-            className="cockpit-btn absolute right-2 top-1/2 -translate-y-1/2 z-30 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-slate-900/90 hover:bg-slate-800 text-cyan-300 border border-cyan-400/60 shadow-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+            className="cockpit-btn absolute right-1.5 top-1/2 -translate-y-1/2 z-30 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-slate-900/90 hover:bg-slate-800 text-cyan-300 border border-cyan-400/60 shadow-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
           >
-            <ChevronRight className="w-6 h-6 text-yellow-300" />
+            <ChevronRight className="w-5 h-5 text-yellow-300" />
           </button>
 
-          {/* Main Horizontal Panoramic Highway Canvas (Staggered Layout) */}
+          {/* Main Staggered Panoramic Highway Canvas */}
           <div
             ref={scrollContainerRef}
-            className="relative flex-1 w-full h-full flex items-center overflow-x-auto overflow-y-hidden px-6 sm:px-12 gap-3 sm:gap-4 md:gap-5 pointer-events-auto scrollbar-none"
+            className="relative flex-1 w-full h-full flex items-stretch overflow-x-auto overflow-y-hidden px-4 sm:px-8 gap-1.5 sm:gap-2.5 md:gap-3 pointer-events-auto scrollbar-none"
             style={{ touchAction: 'pan-x' }}
           >
             {/* Ambient Cosmic Starry Glow */}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_left,_var(--tw-gradient-stops))] from-amber-950/20 via-slate-950 to-slate-950 pointer-events-none" />
 
-            {/* Glowing Sinusoidal Distance Track Line */}
-            <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-0.5 bg-gradient-to-r from-yellow-400/30 via-cyan-400/20 to-indigo-500/25 pointer-events-none" />
+            {/* Glowing Sinusoidal Orbital Wave Track running through center */}
+            <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-0.5 bg-gradient-to-r from-yellow-400/30 via-cyan-400/25 to-indigo-500/30 pointer-events-none" />
 
             {/* STAGGERED CELESTIAL BODIES FROM SUN TO PLUTO */}
-            {SOLAR_SYSTEM_ORDER.map((item, index) => {
+            {SOLAR_SYSTEM_ORDER.map((item) => {
               const body = bodyMap[item.id];
               if (!body) return null;
               const moonList = (item.moonIds || []).map((id) => bodyMap[id]).filter(Boolean);
-
-              // Vertical stagger: alternating higher and lower
-              const isStaggerHigh = index % 2 === 0;
+              const isTop = item.isTop;
 
               return (
                 <React.Fragment key={`panoramic-item-${item.id}`}>
                   
                   {/* Asteroid Belt Divider (Between Mars & Jupiter) */}
                   {item.id === 'jupiter' && (
-                    <div className="shrink-0 flex flex-col items-center justify-center px-2 py-4 relative">
-                      <div className="h-44 sm:h-52 w-8 border-x border-dashed border-slate-600/50 rounded-2xl flex flex-col items-center justify-around py-2 bg-slate-900/30">
-                        <span className="text-xs animate-pulse">🪨</span>
-                        <span className="text-[10px]">✨</span>
-                        <span className="text-xs">🪨</span>
-                        <span className="text-[10px]">✨</span>
-                        <span className="text-xs">🪨</span>
+                    <div className="shrink-0 flex flex-col items-center justify-center px-1 py-2 relative self-center">
+                      <div className="h-36 sm:h-44 w-7 border-x border-dashed border-slate-600/40 rounded-xl flex flex-col items-center justify-around py-1 bg-slate-900/25">
+                        <span className="text-[10px] animate-pulse">🪨</span>
+                        <span className="text-[8px]">✨</span>
+                        <span className="text-[10px]">🪨</span>
+                        <span className="text-[8px]">✨</span>
+                        <span className="text-[10px]">🪨</span>
                       </div>
-                      <span className="text-[8px] font-black tracking-widest text-slate-400 uppercase mt-1 whitespace-nowrap">
+                      <span className="text-[7px] font-black tracking-widest text-slate-400 uppercase mt-0.5 whitespace-nowrap">
                         Belt
                       </span>
                     </div>
                   )}
 
-                  {/* Staggered Planet Card */}
+                  {/* Staggered Column (Occupies Full Height, Aligns to Top or Bottom) */}
                   <div
                     id={`planet-card-${item.id}`}
-                    className={`relative shrink-0 flex flex-col items-center justify-center group min-w-[130px] sm:min-w-[145px] md:min-w-[160px] transition-transform duration-200 ${
-                      isStaggerHigh ? '-translate-y-4 sm:-translate-y-6' : 'translate-y-4 sm:translate-y-6'
+                    onClick={() => handleOpenPlanetarySystem(item)}
+                    style={{ touchAction: 'manipulation' }}
+                    className={`relative shrink-0 flex flex-col items-center w-[84px] sm:w-[98px] md:w-[110px] cursor-pointer group transition-all duration-200 select-none ${
+                      isTop
+                        ? 'justify-start pt-1 sm:pt-3'
+                        : 'justify-end pb-3 sm:pb-5'
                     }`}
                   >
-                    {/* Companion Moons Preview Badge */}
-                    {moonList.length > 0 && (
-                      <div className="mb-1.5 flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-900/90 border border-yellow-300/60 shadow-md">
-                        <span className="text-[10px]">🌙</span>
-                        <span className="text-[9px] font-black text-yellow-300">
-                          {moonList.length} {moonList.length === 1 ? 'Moon' : 'Moons'}
-                        </span>
+                    {/* Planet Interactive Visual Card */}
+                    <div className="flex flex-col items-center text-center p-1.5 rounded-2xl bg-slate-900/40 group-hover:bg-slate-900/80 border border-transparent group-hover:border-yellow-300/60 transition-all duration-200 shadow-md group-hover:scale-105 active:scale-95 w-full">
+                      
+                      {/* Companion Moons Preview Badge */}
+                      {moonList.length > 0 && (
+                        <div className="mb-1 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-slate-950 border border-yellow-300/70 shadow-sm">
+                          <span className="text-[9px]">🌙</span>
+                          <span className="text-[8px] font-black text-yellow-300">
+                            {moonList.length}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Cartoon Vector Illustration with Aura */}
+                      <div className="relative rounded-full p-1 flex items-center justify-center">
+                        <div
+                          className="absolute inset-0 rounded-full blur-sm opacity-30 group-hover:opacity-75 transition-opacity"
+                          style={{ backgroundColor: item.color }}
+                        />
+                        <div className="relative z-10 flex items-center justify-center drop-shadow-md">
+                          <CartoonCelestialBody id={item.id} size={item.cartoonSize} />
+                        </div>
                       </div>
-                    )}
 
-                    {/* Planet Interactive Sphere using Cartoon Celestial Body */}
-                    <div
-                      onClick={() => handleOpenPlanetarySystem(item)}
-                      style={{ touchAction: 'manipulation' }}
-                      className="cockpit-btn relative rounded-full p-1 cursor-pointer transition-transform duration-200 group-hover:scale-115 active:scale-95 flex items-center justify-center"
-                    >
-                      {/* Subtle Colored Aura */}
-                      <div
-                        className="absolute inset-0 rounded-full blur-sm opacity-40 group-hover:opacity-80 transition-opacity"
-                        style={{ backgroundColor: item.color }}
-                      />
-
-                      {/* Cartoon Vector Illustration */}
-                      <div className="relative z-10 flex items-center justify-center drop-shadow-lg">
-                        <CartoonCelestialBody id={item.id} size={item.cartoonSize} />
-                      </div>
-                    </div>
-
-                    {/* Planet Name & Tagline */}
-                    <div className="mt-1.5 flex flex-col items-center text-center max-w-[150px]">
-                      <div className="flex items-center gap-1">
-                        <span className="text-xs sm:text-sm font-black text-white uppercase tracking-wider">
+                      {/* Planet Name */}
+                      <div className="mt-1 flex items-center gap-1">
+                        <span className="text-[11px] sm:text-xs font-black text-white uppercase tracking-tight truncate">
                           {body.name}
                         </span>
-                        <span className="text-xs">{body.emoji}</span>
                       </div>
 
-                      <span className="text-[9px] text-cyan-300 font-extrabold uppercase">
+                      {/* Body Type Tag */}
+                      <span className="text-[8px] text-cyan-300 font-extrabold uppercase tracking-tight truncate max-w-full">
                         {item.bodyType}
                       </span>
 
-                      <span className="text-[10px] text-yellow-200/90 font-bold line-clamp-1 mt-0.5 px-1">
-                        {body.tagline}
-                      </span>
-
-                      {/* Direct Explore Button */}
-                      <button
-                        onClick={() => handleOpenPlanetarySystem(item)}
-                        style={{
-                          touchAction: 'manipulation',
-                          borderColor: item.color,
-                        }}
-                        className="cockpit-btn mt-1.5 py-1 px-2.5 rounded-xl bg-gradient-to-r from-slate-900 to-slate-800 text-white font-black text-[10px] uppercase tracking-wider border shadow-md hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-1 group-hover:border-yellow-300"
-                      >
+                      {/* Explore Button */}
+                      <div className="mt-1 px-2 py-0.5 rounded-lg bg-gradient-to-r from-slate-800 to-slate-700 group-hover:from-yellow-400 group-hover:to-amber-500 text-slate-300 group-hover:text-slate-950 font-black text-[9px] uppercase tracking-wider shadow-sm flex items-center gap-0.5 transition-all">
                         <span>Explore</span>
-                        <Rocket className="w-3 h-3 text-yellow-300" />
-                      </button>
+                        <Rocket className="w-2.5 h-2.5" />
+                      </div>
                     </div>
 
                   </div>
@@ -373,7 +370,7 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
           </div>
 
           {/* Gentle Footer Hint */}
-          <div className="relative z-20 w-full py-1 text-center text-[10px] font-bold text-slate-400 bg-gradient-to-t from-slate-950 to-transparent">
+          <div className="relative z-20 w-full py-0.5 text-center text-[10px] font-bold text-slate-400 bg-gradient-to-t from-slate-950 to-transparent">
             👉 Tap any cartoon world above to explore its planetary system!
           </div>
 
