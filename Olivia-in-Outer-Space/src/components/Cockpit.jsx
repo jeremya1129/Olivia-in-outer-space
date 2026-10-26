@@ -42,25 +42,6 @@ function CartoonAstronaut({ name, role, isDriver, isCheering, usePhotoFace = fal
           </clipPath>
         </defs>
 
-        {/* Hair Layer: Behind Helmet */}
-        {isOlivia ? (
-          /* Olivia's Bouncy Golden-Caramel Curls Cascading Behind Helmet */
-          <g id="olivia-curls-back">
-            <circle cx="50" cy="80" r="18" fill="#d97706" />
-            <circle cx="44" cy="100" r="16" fill="#b45309" />
-            <circle cx="48" cy="118" r="15" fill="#d97706" />
-            <circle cx="120" cy="80" r="18" fill="#d97706" />
-            <circle cx="126" cy="100" r="16" fill="#b45309" />
-            <circle cx="122" cy="118" r="15" fill="#d97706" />
-          </g>
-        ) : (
-          /* Anna's Straight Flaxen Blonde Bob Behind Helmet */
-          <g id="anna-bob-back">
-            <path d="M42,75 L40,122 Q54,132 64,118 L64,75 Z" fill="#fef08a" stroke="#ca8a04" strokeWidth="2" />
-            <path d="M128,75 L130,122 Q116,132 106,118 L106,75 Z" fill="#fef08a" stroke="#ca8a04" strokeWidth="2" />
-          </g>
-        )}
-
         {/* Helmet Outer Shell */}
         <circle cx="85" cy="72" r="52" fill="#f8fafc" stroke="#334155" strokeWidth="5" />
         <circle cx="85" cy="72" r="50" fill="#e2e8f0" />
@@ -107,16 +88,16 @@ function CartoonAstronaut({ name, role, isDriver, isCheering, usePhotoFace = fal
           </g>
         )}
 
-        {/* Visor Glare / Curved Glass Highlight (Overlays on top of photo) */}
+        {/* Visor Glare / Curved Glass Highlight (Overlays on top of face) */}
         <path
-          d="M54,58 Q80,44 112,52"
+          d="M58,50 Q85,38 112,46"
           fill="none"
           stroke="#ffffff"
-          strokeWidth="4.5"
+          strokeWidth="3.2"
           strokeLinecap="round"
-          opacity="0.8"
+          opacity="0.5"
         />
-        <circle cx="118" cy="60" r="2.5" fill="#ffffff" opacity="0.75" />
+        <circle cx="116" cy="48" r="2" fill="#ffffff" opacity="0.5" />
 
         {/* Shoulders & Spacesuit */}
         <path

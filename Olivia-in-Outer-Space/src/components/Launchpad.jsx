@@ -39,23 +39,6 @@ function EarthAstronaut({ name, isOlivia, isWalking, isCheering, usePhotoFace = 
           </clipPath>
         </defs>
 
-        {/* Back Hair */}
-        {isOlivia ? (
-          <g id="olivia-curls-back">
-            <circle cx="50" cy="80" r="18" fill="#d97706" />
-            <circle cx="44" cy="100" r="16" fill="#b45309" />
-            <circle cx="48" cy="118" r="15" fill="#d97706" />
-            <circle cx="120" cy="80" r="18" fill="#d97706" />
-            <circle cx="126" cy="100" r="16" fill="#b45309" />
-            <circle cx="122" cy="118" r="15" fill="#d97706" />
-          </g>
-        ) : (
-          <g id="anna-bob-back">
-            <path d="M42,75 L40,122 Q54,132 64,118 L64,75 Z" fill="#fef08a" stroke="#ca8a04" strokeWidth="2" />
-            <path d="M128,75 L130,122 Q116,132 106,118 L106,75 Z" fill="#fef08a" stroke="#ca8a04" strokeWidth="2" />
-          </g>
-        )}
-
         {/* Backpack Life Support */}
         <rect x="52" y="112" width="66" height="58" rx="14" fill="#cbd5e1" stroke="#334155" strokeWidth="4" />
         <rect x="62" y="122" width="46" height="10" rx="4" fill={suitAccent} />
@@ -100,8 +83,16 @@ function EarthAstronaut({ name, isOlivia, isWalking, isCheering, usePhotoFace = 
           </g>
         )}
 
-        {/* Visor Glare */}
-        <path d="M54,58 Q80,44 112,52" fill="none" stroke="#ffffff" strokeWidth="4.5" strokeLinecap="round" opacity="0.8" />
+        {/* Visor Glare / Curved Glass Highlight */}
+        <path
+          d="M58,50 Q85,38 112,46"
+          fill="none"
+          stroke="#ffffff"
+          strokeWidth="3.2"
+          strokeLinecap="round"
+          opacity="0.5"
+        />
+        <circle cx="116" cy="48" r="2" fill="#ffffff" opacity="0.5" />
 
         {/* Spacesuit Body & Arms */}
         <path d="M54,124 Q40,140 34,168 Q44,174 54,152 L54,180 L116,180 L116,152 Q126,174 136,168 Q130,140 116,124 Z" fill="#ffffff" stroke="#334155" strokeWidth="4" />
