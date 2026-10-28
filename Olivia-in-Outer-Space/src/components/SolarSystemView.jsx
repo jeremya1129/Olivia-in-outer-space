@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { useSpaceAudio } from './AudioPlayer';
 import CartoonCelestialBody from './CartoonCelestialBody';
-import { Rocket, Sparkles, ChevronLeft, ChevronRight, ArrowLeft, Orbit } from 'lucide-react';
+import FlyingToyRocket from './FlyingToyRocket';
+import { Rocket, Sparkles, ArrowLeft, Orbit } from 'lucide-react';
 
 /**
  * Left-to-Right Solar System Order & Specifications
@@ -149,7 +150,7 @@ const SOLAR_SYSTEM_ORDER = [
   },
 ];
 
-export default function SolarSystemView({ celestialBodies = [], onSelectDestination }) {
+export default function SolarSystemView({ celestialBodies = [], onSelectDestination, usePhotoFace = false }) {
   const { triggerSynth, speak } = useSpaceAudio();
 
   // View state: 'solarsystem' (Left-to-Right panoramic track) | 'planetary' (Specific planet + moons view)
@@ -171,15 +172,6 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
   const activePlanetConfig = SOLAR_SYSTEM_ORDER.find((p) => p.id === selectedPlanetId) || SOLAR_SYSTEM_ORDER[3];
   const activePlanetBody = bodyMap[activePlanetConfig.id] || bodyMap['earth'] || {};
   const companionMoons = (activePlanetConfig.moonIds || []).map((id) => bodyMap[id]).filter(Boolean);
-
-  // Scroll left/right along the panoramic solar highway
-  const handleScroll = (direction) => {
-    if (scrollContainerRef.current) {
-      const scrollAmount = direction === 'left' ? -280 : 280;
-      scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-      triggerSynth('whoosh');
-    }
-  };
 
   // Jump directly to a planet on the horizontal track
   const handleJumpToPlanet = (planetId) => {
@@ -251,29 +243,10 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
             </div>
           </div>
 
-          {/* Left / Right Scroll Buttons (Helpful on narrower screens) */}
-          <button
-            onClick={() => handleScroll('left')}
-            style={{ touchAction: 'manipulation' }}
-            aria-label="Scroll Sunward"
-            className="cockpit-btn absolute left-1.5 top-1/2 -translate-y-1/2 z-30 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-slate-900/90 hover:bg-slate-800 text-cyan-300 border border-cyan-400/60 shadow-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
-          >
-            <ChevronLeft className="w-5 h-5 text-yellow-300" />
-          </button>
-
-          <button
-            onClick={() => handleScroll('right')}
-            style={{ touchAction: 'manipulation' }}
-            aria-label="Scroll to Deep Space"
-            className="cockpit-btn absolute right-1.5 top-1/2 -translate-y-1/2 z-30 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-slate-900/90 hover:bg-slate-800 text-cyan-300 border border-cyan-400/60 shadow-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
-          >
-            <ChevronRight className="w-5 h-5 text-yellow-300" />
-          </button>
-
           {/* Main Panoramic Highway Canvas (Centered Sun & Moderate Stagger) */}
           <div
             ref={scrollContainerRef}
-            className="relative flex-1 w-full h-full flex items-center overflow-x-auto overflow-y-hidden px-6 sm:px-10 gap-2 sm:gap-3 md:gap-4 pointer-events-auto scrollbar-none"
+            className="relative flex-1 w-full h-full flex items-center overflow-x-auto overflow-y-hidden pl-16 sm:pl-24 md:pl-28 lg:pl-32 pr-10 sm:pr-14 md:pr-16 gap-3 sm:gap-4 md:gap-5 pointer-events-auto scrollbar-none"
             style={{ touchAction: 'pan-x' }}
           >
             {/* Ambient Cosmic Starry Glow */}
@@ -322,6 +295,12 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
                     style={{ touchAction: 'manipulation' }}
                     className={`relative shrink-0 flex flex-col items-center w-[84px] sm:w-[98px] md:w-[110px] cursor-pointer group transition-all duration-300 select-none ${staggerClass}`}
                   >
+                    {/* Adventure Rocket Floating Directly Centered Above Earth */}
+                    {item.id === 'earth' && (
+                      <div className="absolute -top-24 sm:-top-28 md:-top-32 left-1/2 -translate-x-1/2 z-30 pointer-events-none flex flex-col items-center">
+                        <FlyingToyRocket isBlasting={false} usePhotoFace={usePhotoFace} />
+                      </div>
+                    )}
                     {/* Planet Interactive Visual Card */}
                     <div className="flex flex-col items-center text-center p-1.5 rounded-2xl bg-slate-900/40 group-hover:bg-slate-900/80 border border-transparent group-hover:border-yellow-300/60 transition-all duration-200 shadow-md group-hover:scale-105 active:scale-95 w-full">
                       
