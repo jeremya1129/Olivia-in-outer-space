@@ -528,25 +528,25 @@ export default function AudioPlayer() {
         </div>
       )}
 
-      {/* Voice Mode Toggle Button (Child 👧 vs Robot 🤖) */}
+      {/* Voice Mode Toggle Button (Action if pressed) */}
       <button
         onClick={toggleVoiceMode}
-        aria-label={`Voice mode is ${voiceMode === 'robot' ? 'Robot Voice' : 'Child Voice'}. Click to switch.`}
-        title={`Switch voice mode (Currently ${voiceMode === 'robot' ? 'Robot Voice' : 'Child Voice'})`}
+        aria-label={`Switch to ${voiceMode === 'robot' ? 'Child Voice' : 'Robot Voice'}`}
+        title={`Switch to ${voiceMode === 'robot' ? 'Child Voice' : 'Robot Voice'}`}
         style={{ touchAction: 'manipulation' }}
         className={`cockpit-btn px-2 sm:px-2.5 py-1 rounded-xl flex items-center gap-1.5 border shadow-md transition-all text-xs font-black ${
           voiceMode === 'robot'
-            ? 'bg-purple-950/90 hover:bg-purple-900 text-purple-200 border-purple-400/60'
-            : 'bg-amber-950/90 hover:bg-amber-900 text-amber-200 border-amber-400/60'
+            ? 'bg-amber-950/90 hover:bg-amber-900 text-amber-200 border-amber-400/60'
+            : 'bg-purple-950/90 hover:bg-purple-900 text-purple-200 border-purple-400/60'
         }`}
       >
-        <span className="text-sm">{voiceMode === 'robot' ? '🤖' : '👧'}</span>
+        <span className="text-sm">{voiceMode === 'robot' ? '👧' : '🤖'}</span>
         <span className="hidden sm:inline">
-          {voiceMode === 'robot' ? 'Robot' : 'Child'}
+          {voiceMode === 'robot' ? 'Child' : 'Robot'}
         </span>
       </button>
 
-      {/* Master Mute / Unmute Button */}
+      {/* Master Mute / Unmute Button (Action if pressed) */}
       <button
         onClick={() => {
           toggleMute();
@@ -557,9 +557,9 @@ export default function AudioPlayer() {
         style={{ touchAction: 'manipulation' }}
         className="cockpit-btn px-2 sm:px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-yellow-300 border border-slate-600 rounded-xl flex items-center gap-1.5 shadow-md text-xs font-bold"
       >
-        {isMuted ? <VolumeX className="w-4 h-4 text-red-400" /> : <Volume2 className="w-4 h-4 text-emerald-400" />}
+        {isMuted ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-400" />}
         <span className="text-[11px] font-black uppercase tracking-wider hidden md:inline">
-          {isMuted ? 'Muted' : 'Audio On'}
+          {isMuted ? 'Unmute' : 'Mute'}
         </span>
       </button>
     </div>

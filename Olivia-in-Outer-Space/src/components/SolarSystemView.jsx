@@ -383,7 +383,7 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
               <span>Solar System</span>
             </button>
 
-            {/* View Mode Toggle: Real Spacecraft Photo vs Cartoon */}
+            {/* View Mode Toggle: Real Spacecraft Photo vs Cartoon (Action if pressed) */}
             <div className="flex items-center gap-2">
               <button
                 onClick={() => {
@@ -392,10 +392,11 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
                   speak(showRealPhoto ? 'Cartoon art mode' : 'NASA Spacecraft Photo');
                 }}
                 style={{ touchAction: 'manipulation' }}
+                title={showRealPhoto ? "Switch to Cartoon Art" : "Switch to NASA Spacecraft Photo"}
                 className="cockpit-btn px-3 py-1 rounded-full bg-slate-900/90 border border-slate-600 text-xs font-bold text-yellow-300 flex items-center gap-1.5 shadow-md hover:border-yellow-300/80 transition-all"
               >
                 <Camera className="w-3.5 h-3.5 text-cyan-300" />
-                <span>{showRealPhoto ? '📸 Real Photo' : '🎨 Cartoon Art'}</span>
+                <span>{showRealPhoto ? '🎨 Cartoon Art' : '📸 Real Photo'}</span>
               </button>
             </div>
           </div>
