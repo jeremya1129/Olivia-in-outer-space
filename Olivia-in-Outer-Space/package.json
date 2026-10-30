@@ -6,7 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "build:gh-pages": "vite build --base=/Olivia-in-outer-space/",
+    "preview": "vite preview",
+    "test:flow": "node scripts/test_user_flow.mjs",
+    "docker:build": "docker build -t olivia-in-outer-space .",
+    "docker:run": "docker run -p 8080:80 olivia-in-outer-space"
   },
   "dependencies": {
     "react": "^18.3.1",
