@@ -377,6 +377,85 @@ export const AudioProvider = ({ children }) => {
     [isMuted, voiceMode, getVoiceForMode]
   );
 
+  const stopSpeaking = useCallback(() => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    }
+  }, []);
+
+  const speakWord = useCallback(
+    (word) => {
+      if (isMuted || !('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(word);
+      const selectedVoice = getVoiceForMode(voiceMode);
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+      }
+      utterance.pitch = voiceMode === 'robot' ? 0.7 : 1.5;
+      utterance.rate = 0.9;
+      window.speechSynthesis.speak(utterance);
+    },
+    [isMuted, voiceMode, getVoiceForMode]
+  );
+
+  const readStory = useCallback(
+    (text, { onBoundary, onEnd, onStart, onError } = {}) => {
+      if (isMuted || !('speechSynthesis' in window)) return null;
+      window.speechSynthesis.cancel();
+
+      if (voiceMode === 'robot') {
+        synth.playRobotBeep();
+      } else {
+        synth.playChildChime();
+      }
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      const selectedVoice = getVoiceForMode(voiceMode);
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+      }
+
+      if (voiceMode === 'robot') {
+        const isNoveltyRobot = selectedVoice && /(robot|zarvox|trinoids|fred)/i.test(selectedVoice.name);
+        utterance.pitch = isNoveltyRobot ? 1.0 : 0.65;
+        utterance.rate = 0.88; // Measured reading pace for early readers
+      } else {
+        const isNativeChild = selectedVoice && /(ana|child|kid|junior)/i.test(selectedVoice.name);
+        utterance.pitch = isNativeChild ? 1.15 : 1.48;
+        utterance.rate = 0.94; // Clear, joyful storybook tempo
+      }
+
+      if (onBoundary) {
+        utterance.onboundary = (e) => {
+          if (e.name === 'word' || typeof e.charIndex === 'number') {
+            onBoundary(e.charIndex, e.charLength);
+          }
+        };
+      }
+
+      utterance.onstart = () => {
+        setIsSpeaking(true);
+        if (onStart) onStart();
+      };
+
+      utterance.onend = () => {
+        setIsSpeaking(false);
+        if (onEnd) onEnd();
+      };
+
+      utterance.onerror = (err) => {
+        setIsSpeaking(false);
+        if (onError) onError(err);
+      };
+
+      window.speechSynthesis.speak(utterance);
+      return utterance;
+    },
+    [isMuted, voiceMode, getVoiceForMode]
+  );
+
   const toggleVoiceMode = useCallback(() => {
     setVoiceMode((prev) => {
       const next = prev === 'child' ? 'robot' : 'child';
@@ -422,6 +501,9 @@ export const AudioProvider = ({ children }) => {
         playTrackOrSfx,
         triggerSynth,
         speak,
+        readStory,
+        stopSpeaking,
+        speakWord,
         isSpeaking,
         voiceMode,
         setVoiceMode,
