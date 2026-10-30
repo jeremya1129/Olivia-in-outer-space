@@ -402,79 +402,84 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
           </div>
 
           {/* Main Stage: Planet Centered as Much as Possible */}
-          <div className="relative flex-1 w-full max-w-5xl mx-auto flex flex-col items-center justify-start py-2 px-2 overflow-y-auto">
+          <div className="relative flex-1 w-full max-w-6xl mx-auto flex flex-col items-center justify-start py-2 px-2 overflow-y-auto">
             
-            {/* 1. MAIN PLANET SPOTLIGHT (Centered and Sized Large Like Final Screen) */}
-            <div className="flex flex-col items-center text-center z-10 w-full mt-1 mb-2">
+            {/* 1 & 2: OBJECT SPOTLIGHT + READ-ALONG STORY COMBINATION (Side-by-Side, Centered Horizontally) */}
+            <div className="w-full max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-center gap-4 sm:gap-6 md:gap-8 my-1 sm:my-2 px-2 z-20">
               
-              {/* Planetary Orb */}
-              <div className="relative flex items-center justify-center my-1 sm:my-2">
-                <div
-                  onClick={() => {
-                    setSelectedSubBodyId(null);
-                    triggerSynth('twinkle');
-                  }}
-                  className={`cockpit-btn relative ${
-                    companionMoons.length > 0
-                      ? 'w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48'
-                      : 'w-44 h-44 sm:w-56 sm:h-56 md:w-64 md:h-64'
-                  } rounded-full flex items-center justify-center transition-transform hover:scale-105 active:scale-95 duration-200 overflow-hidden cursor-pointer shadow-2xl ${
-                    activeFocusBody.id === activePlanetBody.id ? 'ring-4 ring-yellow-400' : 'ring-2 ring-white/20'
-                  }`}
-                  style={{
-                    backgroundColor: activePlanetBody.color || '#38bdf8',
-                    boxShadow: `0 0 60px ${activePlanetBody.color || '#38bdf8'}99, inset 0 0 30px rgba(0,0,0,0.5)`,
-                  }}
-                >
-                  {showRealPhoto && activePlanetBody.real_image_path && !imageErrorMap[activePlanetBody.id] ? (
-                    <img
-                      src={activePlanetBody.real_image_path}
-                      alt={activePlanetBody.name}
-                      onError={() => setImageErrorMap((prev) => ({ ...prev, [activePlanetBody.id]: true }))}
-                      className="w-full h-full object-cover transition-opacity duration-300"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center p-3">
-                      <CartoonCelestialBody
-                        id={activePlanetConfig.id}
-                        size={companionMoons.length > 0 ? 120 : 160}
+              {/* Left: Main Object Spotlight */}
+              <div className="flex flex-col items-center text-center shrink-0 w-full md:w-64 lg:w-72">
+                
+                {/* Planetary Orb */}
+                <div className="relative flex items-center justify-center my-1 sm:my-2">
+                  <div
+                    onClick={() => {
+                      setSelectedSubBodyId(null);
+                      triggerSynth('twinkle');
+                    }}
+                    className={`cockpit-btn relative ${
+                      companionMoons.length > 0
+                        ? 'w-32 h-32 sm:w-40 sm:h-40 md:w-44 md:h-44'
+                        : 'w-44 h-44 sm:w-52 sm:h-52 md:w-56 md:h-56'
+                    } rounded-full flex items-center justify-center transition-transform hover:scale-105 active:scale-95 duration-200 overflow-hidden cursor-pointer shadow-2xl ${
+                      activeFocusBody.id === activePlanetBody.id ? 'ring-4 ring-yellow-400' : 'ring-2 ring-white/20'
+                    }`}
+                    style={{
+                      backgroundColor: activePlanetBody.color || '#38bdf8',
+                      boxShadow: `0 0 60px ${activePlanetBody.color || '#38bdf8'}99, inset 0 0 30px rgba(0,0,0,0.5)`,
+                    }}
+                  >
+                    {showRealPhoto && activePlanetBody.real_image_path && !imageErrorMap[activePlanetBody.id] ? (
+                      <img
+                        src={activePlanetBody.real_image_path}
+                        alt={activePlanetBody.name}
+                        onError={() => setImageErrorMap((prev) => ({ ...prev, [activePlanetBody.id]: true }))}
+                        className="w-full h-full object-cover transition-opacity duration-300"
                       />
-                    </div>
-                  )}
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center p-3">
+                        <CartoonCelestialBody
+                          id={activePlanetConfig.id}
+                          size={companionMoons.length > 0 ? 120 : 150}
+                        />
+                      </div>
+                    )}
 
-                  {/* Inner Atmospheric Rim Glow */}
-                  <div className="absolute inset-0 rounded-full border-4 border-white/20 pointer-events-none" />
+                    {/* Inner Atmospheric Rim Glow */}
+                    <div className="absolute inset-0 rounded-full border-4 border-white/20 pointer-events-none" />
+                  </div>
                 </div>
+
+                {/* Title & Tagline */}
+                <div className="flex items-center gap-1.5 mt-1">
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-white uppercase tracking-wider">
+                    {activePlanetBody.name}
+                  </h2>
+                  <span className="text-xl">{activePlanetBody.emoji}</span>
+                </div>
+                <span className="text-[10px] sm:text-xs text-cyan-300 font-extrabold uppercase tracking-widest">
+                  {activePlanetBody.body_type}
+                </span>
+                <p className="text-xs sm:text-sm text-yellow-200 font-bold mt-0.5 max-w-xs px-2 line-clamp-2">
+                  "{activePlanetBody.tagline}"
+                </p>
+
+                {/* Blast Off Button to Main Planet */}
+                <button
+                  onClick={() => handleBlastOff(activePlanetBody)}
+                  style={{ touchAction: 'manipulation' }}
+                  className="cockpit-btn mt-2 px-5 py-2 sm:py-2.5 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 hover:from-emerald-300 hover:to-cyan-400 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wider shadow-xl flex items-center gap-2 transition-transform hover:scale-105 active:scale-95"
+                >
+                  <Rocket className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span>Fly to {activePlanetBody.name}!</span>
+                </button>
               </div>
 
-              {/* Title & Tagline */}
-              <div className="flex items-center gap-1.5 mt-1">
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-white uppercase tracking-wider">
-                  {activePlanetBody.name}
-                </h2>
-                <span className="text-xl">{activePlanetBody.emoji}</span>
+              {/* Right: Toddler Read-Along Storybook (To the right of the object, centered horizontally together) */}
+              <div className="w-full md:flex-1 max-w-xl flex items-center justify-center">
+                <ReadAlongStory body={activeFocusBody} className="w-full" />
               </div>
-              <span className="text-[10px] sm:text-xs text-cyan-300 font-extrabold uppercase tracking-widest">
-                {activePlanetBody.body_type}
-              </span>
-              <p className="text-xs sm:text-sm text-yellow-200 font-bold mt-0.5 max-w-md px-2">
-                "{activePlanetBody.tagline}"
-              </p>
 
-              {/* Blast Off Button to Main Planet */}
-              <button
-                onClick={() => handleBlastOff(activePlanetBody)}
-                style={{ touchAction: 'manipulation' }}
-                className="cockpit-btn mt-2 px-6 py-2 sm:py-2.5 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 hover:from-emerald-300 hover:to-cyan-400 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wider shadow-xl flex items-center gap-2 transition-transform hover:scale-105 active:scale-95"
-              >
-                <Rocket className="w-4 h-4 sm:w-5 sm:h-5" />
-                <span>Fly to {activePlanetBody.name}!</span>
-              </button>
-            </div>
-
-            {/* 2. TODDLER READ-ALONG STORYBOOK (Word-by-Word Highlighting) */}
-            <div className="w-full max-w-2xl z-20 my-2 px-1">
-              <ReadAlongStory body={activeFocusBody} />
             </div>
 
             {/* 3. COMPANION MOONS HIGHWAY (Modeled Like Solar System View) */}
