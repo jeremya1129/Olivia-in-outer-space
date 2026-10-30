@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useSpaceAudio } from './AudioPlayer';
 import CartoonCelestialBody from './CartoonCelestialBody';
-import { ArrowLeft, Sparkles, Volume2, Music, Camera, Compass, Thermometer, Weight, Moon } from 'lucide-react';
+import { ArrowLeft, Sparkles, Volume2, Music, Camera, Compass, Thermometer, Weight, Moon, X, RotateCcw, Rocket } from 'lucide-react';
 
 export default function PlanetView({ planet, onReturnToCockpit }) {
   const { playTrackOrSfx, triggerSynth, speak } = useSpaceAudio();
   const [activeActionCheer, setActiveActionCheer] = useState(null);
-  const [showRealPhoto, setShowRealPhoto] = useState(true);
+  const [showRealPhoto, setShowRealPhoto] = useState(false);
+  const [showActionGifModal, setShowActionGifModal] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
 
   // Sensory action info from enriched dataset with safe defaults
@@ -51,6 +52,7 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
   const handleDoAction = () => {
     triggerSynth(planet.sfx || 'twinkle');
     setActiveActionCheer(actionCheer);
+    setShowActionGifModal(true);
     speak(actionCheer);
   };
 
@@ -79,8 +81,9 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
           <button
             onClick={() => {
               triggerSynth('beep');
-              setShowRealPhoto((prev) => !prev);
-              speak(showRealPhoto ? 'Switching to artistic illustration' : 'NASA Spacecraft Photograph');
+              const nextMode = !showRealPhoto;
+              setShowRealPhoto(nextMode);
+              speak(nextMode ? 'NASA Spacecraft Photograph' : 'Cartoon Art illustration');
             }}
             style={{ touchAction: 'manipulation' }}
             className="cockpit-btn px-3 py-1.5 rounded-full bg-slate-900/90 border border-slate-600 text-xs font-bold text-yellow-300 flex items-center gap-1.5 shadow-md"
@@ -94,11 +97,11 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
       {/* Main Celestial Landing Stage */}
       <div className="relative flex-1 w-full max-w-4xl mx-auto flex flex-col items-center justify-center text-center z-10 py-2">
         
-        {/* Planet Visual Presentation (NASA Photo / Orb) */}
+        {/* Planet Visual Presentation (NASA Photo / Cartoon Illustration) */}
         <div className="relative my-2 sm:my-4 flex items-center justify-center">
           
-          {/* Saturn Ring Arc */}
-          {planet.id === 'saturn' && (
+          {/* Saturn Ring Arc for Real Photo */}
+          {planet.id === 'saturn' && showRealPhoto && (
             <div className="absolute w-72 h-20 sm:w-96 sm:h-28 border-[14px] sm:border-[18px] border-amber-200/60 rounded-[100%] rotate-[22deg] shadow-[0_0_55px_rgba(228,197,104,0.45)] pointer-events-none z-10" />
           )}
 
@@ -122,7 +125,7 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
             ) : (
               /* Cartoon Vector Illustration View */
               <div className="w-full h-full flex flex-col items-center justify-center relative p-4">
-                <CartoonCelestialBody id={planet.id} size={180} />
+                <CartoonCelestialBody id={planet.id} size={200} />
               </div>
             )}
 
@@ -153,12 +156,6 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
             <span>{actionPrompt}</span>
           </div>
 
-          {activeActionCheer && (
-            <div className="px-4 py-2 rounded-2xl bg-fuchsia-950/90 border-2 border-fuchsia-400 text-fuchsia-200 text-sm sm:text-base font-black animate-bounce shadow-lg">
-              {activeActionCheer}
-            </div>
-          )}
-
           {/* Action Push-Button */}
           <button
             onClick={handleDoAction}
@@ -168,6 +165,40 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
             <span className="text-2xl">{actionEmoji}</span>
             <span>{actionTitle}</span>
           </button>
+
+          {/* If Action was triggered: Show interactive cartoon GIF & cheer */}
+          {activeActionCheer && (
+            <div className="flex flex-col items-center gap-2 w-full pt-1 animate-in fade-in duration-300">
+              <div
+                onClick={() => {
+                  triggerSynth('twinkle');
+                  setShowActionGifModal(true);
+                }}
+                className="cursor-pointer group relative w-48 h-48 sm:w-56 sm:h-56 rounded-2xl overflow-hidden border-2 border-yellow-300 shadow-[0_0_25px_rgba(250,204,21,0.35)] transition-transform hover:scale-105 active:scale-95 bg-slate-950"
+              >
+                <img
+                  src={`/assets/cartoons/interactions/${planet.id}.gif`}
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = '/assets/cartoons/interactions/default.gif';
+                  }}
+                  alt={`${planet.name} interaction with Olivia and Anna`}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-slate-900/80 border border-yellow-300 text-[10px] font-black text-yellow-300 flex items-center gap-1 shadow">
+                  <Sparkles className="w-3 h-3 text-yellow-300" />
+                  <span>Olivia & Anna</span>
+                </div>
+                <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-lg bg-black/75 text-[10px] font-bold text-white flex items-center gap-1 border border-white/20">
+                  <span>Tap to expand 🔍</span>
+                </div>
+              </div>
+
+              <div className="px-4 py-2 rounded-2xl bg-fuchsia-950/90 border-2 border-fuchsia-400 text-fuchsia-200 text-sm sm:text-base font-black shadow-lg text-center">
+                {activeActionCheer}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Toddler-Friendly Science Metric Cards */}
@@ -230,6 +261,81 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
         </div>
 
       </div>
+
+      {/* Cartoon Action Celebration Modal */}
+      {showActionGifModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200"
+          onClick={() => setShowActionGifModal(false)}
+        >
+          <div
+            className="relative w-full max-w-md bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border-4 border-yellow-300 rounded-3xl p-5 shadow-[0_0_60px_rgba(250,204,21,0.45)] flex flex-col items-center text-center select-none"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => setShowActionGifModal(false)}
+              className="cockpit-btn absolute top-3 right-3 w-10 h-10 rounded-full bg-slate-800 border-2 border-slate-600 text-slate-300 hover:text-white flex items-center justify-center shadow-lg transition"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5 text-yellow-300" />
+            </button>
+
+            {/* Action Title & Emoji */}
+            <div className="flex items-center gap-2 mb-2 pr-8">
+              <span className="text-3xl sm:text-4xl">{actionEmoji}</span>
+              <h2 className="text-xl sm:text-2xl font-black text-yellow-300 tracking-wide">
+                {actionTitle}
+              </h2>
+            </div>
+
+            {/* Animated Cartoon GIF */}
+            <div className="relative w-64 h-64 sm:w-72 sm:h-72 rounded-2xl overflow-hidden border-4 border-cyan-400 shadow-[0_0_35px_rgba(56,189,248,0.4)] bg-slate-950 flex items-center justify-center my-2">
+              <img
+                src={`/assets/cartoons/interactions/${planet.id}.gif`}
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = '/assets/cartoons/interactions/default.gif';
+                }}
+                alt={`${planet.name} with Olivia and Anna`}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute top-2 left-2 px-2.5 py-1 rounded-full bg-yellow-400 text-slate-950 font-black text-xs flex items-center gap-1 shadow-md">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Olivia & Anna Adventure</span>
+              </div>
+            </div>
+
+            {/* Cheer Announcement */}
+            <p className="text-base sm:text-lg font-extrabold text-white mt-2 px-2 leading-snug">
+              {actionCheer}
+            </p>
+
+            {/* Toddler Controls */}
+            <div className="flex items-center gap-3 w-full mt-4">
+              <button
+                onClick={() => {
+                  triggerSynth(planet.sfx || 'twinkle');
+                  speak(actionCheer);
+                }}
+                style={{ touchAction: 'manipulation' }}
+                className="cockpit-btn flex-1 py-3 px-4 rounded-2xl bg-gradient-to-r from-fuchsia-600 via-pink-600 to-rose-600 text-white font-black text-sm sm:text-base border-2 border-yellow-300 shadow-xl flex items-center justify-center gap-2"
+              >
+                <RotateCcw className="w-4 h-4 text-yellow-300" />
+                <span>Play Again 🔄</span>
+              </button>
+              <button
+                onClick={() => setShowActionGifModal(false)}
+                style={{ touchAction: 'manipulation' }}
+                className="cockpit-btn flex-1 py-3 px-4 rounded-2xl bg-slate-800 hover:bg-slate-700 text-cyan-300 font-black text-sm sm:text-base border-2 border-cyan-500/60 shadow-xl flex items-center justify-center gap-2"
+              >
+                <Rocket className="w-4 h-4 text-yellow-300" />
+                <span>Yay! Done 🚀</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
