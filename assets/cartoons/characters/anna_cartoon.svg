@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="200" height="220">
+  <!-- Hair: Straight blonde bob behind helmet -->
+  <path d="M52,70 L50,125 Q65,135 75,120 L75,70 Z" fill="#fef08a" stroke="#ca8a04" stroke-width="2"/>
+  <path d="M148,70 L150,125 Q135,135 125,120 L125,70 Z" fill="#fef08a" stroke="#ca8a04" stroke-width="2"/>
+  <!-- Helmet Outer -->
+  <circle cx="100" cy="85" r="54" fill="#f8fafc" stroke="#334155" stroke-width="5"/>
+  <ellipse cx="100" cy="132" rx="40" ry="10" fill="#c084fc" stroke="#7e22ce" stroke-width="3"/>
+  <!-- Helmet Bubble Visor -->
+  <ellipse cx="100" cy="85" rx="42" ry="38" fill="#0f172a" stroke="#475569" stroke-width="3.5"/>
+  <ellipse cx="100" cy="85" rx="40" ry="36" fill="#c084fc" opacity="0.3"/>
+  <!-- Face -->
+  <g id="face">
+    <!-- Straight blonde fringe bangs across forehead -->
+    <path d="M68,64 L68,76 Q84,80 100,76 Q116,80 132,76 L132,64 Z" fill="#fef08a" stroke="#eab308" stroke-width="2"/>
+    <!-- Sweet Big Eyes -->
+    <ellipse cx="85" cy="83" rx="5" ry="6.5" fill="#451a03"/>
+    <ellipse cx="115" cy="83" rx="5" ry="6.5" fill="#451a03"/>
+    <circle cx="87" cy="81" r="2" fill="#ffffff"/>
+    <circle cx="117" cy="81" r="2" fill="#ffffff"/>
+    <!-- Cute nose -->
+    <ellipse cx="100" cy="90" rx="2" ry="1.5" fill="#f43f5e" opacity="0.4"/>
+    <!-- Sweet Gentle Smile -->
+    <path d="M92,97 Q100,105 108,97" stroke="#0f172a" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <!-- Rosy Chubby Cheeks -->
+    <circle cx="76" cy="92" r="6" fill="#f43f5e" opacity="0.55"/>
+    <circle cx="124" cy="92" r="6" fill="#f43f5e" opacity="0.55"/>
+  </g>
+  <!-- Visor Reflection -->
+  <path d="M68,70 Q95,58 126,66" stroke="#ffffff" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.8"/>
+  <!-- Space Suit Body -->
+  <path d="M50,140 Q100,165 150,140 L160,195 Q100,215 40,195 Z" fill="#f1f5f9" stroke="#334155" stroke-width="4"/>
+  <!-- Ladybug Mission Patch -->
+  <g id="ladybug-patch" transform="translate(75, 155)">
+    <rect x="0" y="0" width="50" height="24" rx="6" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>
+    <circle cx="14" cy="12" r="7" fill="#ef4444"/>
+    <circle cx="14" cy="8" r="3" fill="#0f172a"/>
+    <circle cx="12" cy="11" r="1.5" fill="#0f172a"/>
+    <circle cx="16" cy="11" r="1.5" fill="#0f172a"/>
+    <circle cx="14" cy="15" r="1.5" fill="#0f172a"/>
+    <text x="36" y="16" font-family="sans-serif" font-size="8" font-weight="900" fill="#9333ea" text-anchor="middle">NAV</text>
+  </g>
+  <text x="100" y="200" font-family="sans-serif" font-size="12" font-weight="900" fill="#9333ea" text-anchor="middle">ANNA</text>
+</svg>

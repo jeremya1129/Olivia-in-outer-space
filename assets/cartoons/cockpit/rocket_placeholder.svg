@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Rocket Body -->
+  <path d="M100,20 C130,60 135,130 135,145 L65,145 C65,130 70,60 100,20 Z" fill="#f8fafc" stroke="#dc2626" stroke-width="5"/>
+  <!-- Rocket Nosecone -->
+  <path d="M100,20 C118,45 126,70 128,80 L72,80 C74,70 82,45 100,20 Z" fill="#ef4444"/>
+  <!-- Cockpit Window -->
+  <circle cx="100" cy="98" r="20" fill="#38bdf8" stroke="#1e293b" stroke-width="4"/>
+  <circle cx="94" cy="92" r="6" fill="#ffffff" opacity="0.8"/>
+  <!-- Fins -->
+  <path d="M65,120 L40,155 L65,150 Z" fill="#ef4444"/>
+  <path d="M135,120 L160,155 L135,150 Z" fill="#ef4444"/>
+  <!-- Thruster flame -->
+  <path d="M80,145 Q100,190 120,145 Q100,165 80,145 Z" fill="#f59e0b"/>
+  <path d="M88,145 Q100,175 112,145 Z" fill="#fef08a"/>
+</svg>
