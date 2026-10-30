@@ -35,6 +35,8 @@ function SpaceApp() {
   };
 
   const handleReturnToEarth = () => {
+    triggerSynth('beep');
+    speak('Returning to the Launchpad!');
     setCurrentView('launchpad');
   };
 
@@ -61,7 +63,7 @@ function SpaceApp() {
               Olivia in Outer Space
             </h1>
             <div className="text-[9px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
-              <span className="hidden sm:inline">ANNA &amp; OLIVIA ASTRO-LAB •</span>
+              <span>ASTRO-LAB •</span>
               <span className="text-cyan-300 font-extrabold">
                 {currentView === 'launchpad' && 'EARTH SPACEPORT'}
                 {currentView === 'cockpit' && 'FLIGHT DECK'}
@@ -71,43 +73,7 @@ function SpaceApp() {
           </div>
         </div>
 
-        {/* Center: In Cockpit Mode -> View Switcher Toggle */}
-        {currentView === 'cockpit' && (
-          <div className="flex items-center gap-1 bg-slate-950/90 p-1 rounded-2xl border border-cyan-500/40 shadow-inner">
-            <button
-              onClick={() => {
-                triggerSynth('beep');
-                setCockpitViewMode('solarsystem');
-                speak('Solar System Highway!');
-              }}
-              style={{ touchAction: 'manipulation' }}
-              className={`cockpit-btn px-2.5 sm:px-3 py-1 rounded-xl text-xs font-black transition-all ${
-                cockpitViewMode === 'solarsystem'
-                  ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-950 shadow-md scale-105'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              🪐 Solar System
-            </button>
-            <button
-              onClick={() => {
-                triggerSynth('beep');
-                setCockpitViewMode('earth');
-                speak('Earth Orbit View!');
-              }}
-              style={{ touchAction: 'manipulation' }}
-              className={`cockpit-btn px-2.5 sm:px-3 py-1 rounded-xl text-xs font-black transition-all ${
-                cockpitViewMode === 'earth'
-                  ? 'bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-950 shadow-md scale-105'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              🌍 Earth Orbit
-            </button>
-          </div>
-        )}
-
-        {/* Right: Unified Controls (Photos, Radio, Back/Earth Start, Audio) */}
+        {/* Right: Unified Controls (Photos, Radio, Launchpad, Audio) */}
         <div className="flex items-center gap-1.5 sm:gap-2">
           {currentView === 'cockpit' && (
             <>
@@ -150,16 +116,16 @@ function SpaceApp() {
             </button>
           )}
 
-          {/* Return to Earth Launchpad Start (Present only once!) */}
+          {/* Return to Launchpad */}
           {currentView !== 'launchpad' && (
             <button
               onClick={handleReturnToEarth}
               style={{ touchAction: 'manipulation' }}
-              title="Return to Earth launchpad start screen"
-              className="cockpit-btn px-2 sm:px-2.5 py-1 bg-emerald-950 hover:bg-emerald-900 text-emerald-200 text-xs font-black rounded-xl border border-emerald-400/50 flex items-center gap-1 shadow-md"
+              title="Return to Launchpad"
+              className="cockpit-btn px-2.5 sm:px-3 py-1 bg-emerald-950 hover:bg-emerald-900 text-emerald-200 text-xs font-black rounded-xl border border-emerald-400/50 flex items-center gap-1.5 shadow-md"
             >
-              <span>🌍</span>
-              <span className="hidden sm:inline">Earth Start</span>
+              <Rocket className="w-3.5 h-3.5 text-emerald-300" />
+              <span>Launchpad</span>
             </button>
           )}
 
