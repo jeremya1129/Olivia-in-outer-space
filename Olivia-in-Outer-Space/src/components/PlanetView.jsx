@@ -76,7 +76,7 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
           <span>Cockpit</span>
         </button>
 
-        {/* View Mode Toggle: Spacecraft Photo vs Cartoon */}
+        {/* View Mode Toggle: Spacecraft Photo vs Cartoon (Action if pressed) */}
         <div className="flex items-center gap-2">
           <button
             onClick={() => {
@@ -86,10 +86,11 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
               speak(nextMode ? 'NASA Spacecraft Photograph' : 'Cartoon Art illustration');
             }}
             style={{ touchAction: 'manipulation' }}
+            title={showRealPhoto ? "Switch to Cartoon Art" : "Switch to NASA Spacecraft Photo"}
             className="cockpit-btn px-3 py-1.5 rounded-full bg-slate-900/90 border border-slate-600 text-xs font-bold text-yellow-300 flex items-center gap-1.5 shadow-md"
           >
             <Camera className="w-4 h-4 text-cyan-300" />
-            <span>{showRealPhoto ? '📸 NASA Photo' : '🎨 Cartoon Art'}</span>
+            <span>{showRealPhoto ? '🎨 Cartoon Art' : '📸 NASA Photo'}</span>
           </button>
         </div>
       </div>
