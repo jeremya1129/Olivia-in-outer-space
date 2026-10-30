@@ -121,9 +121,23 @@ export default function ReadAlongStory({ body, className = '' }) {
         triggerSynth(story.actionSound || 'twinkle');
       },
       onError: () => {
-        if (fallbackTimerRef.current) clearInterval(fallbackTimerRef.current);
-        setActiveWordIndex(-1);
-        setIsPlaying(false);
+        // In environments without speech synthesis audio hardware (or if synthesis fails),
+        // fallback to visual pacing so the child can still follow word highlights
+        if (!fallbackTimerRef.current) {
+          let currentIdx = 0;
+          const totalWords = words.length;
+          const baseIntervalMs = 280;
+          fallbackTimerRef.current = setInterval(() => {
+            currentIdx += 1;
+            if (currentIdx < totalWords) {
+              setActiveWordIndex(currentIdx);
+            } else {
+              clearInterval(fallbackTimerRef.current);
+              setIsPlaying(false);
+              setIsFinished(true);
+            }
+          }, baseIntervalMs);
+        }
       },
     });
   };
