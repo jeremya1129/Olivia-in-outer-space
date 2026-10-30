@@ -77,7 +77,7 @@ function SpaceApp() {
         <div className="flex items-center gap-1.5 sm:gap-2">
           {currentView === 'cockpit' && (
             <>
-              {/* Personalized Real Photo vs Cartoon Pilot Face Toggle */}
+              {/* Personalized Real Photo vs Cartoon Pilot Face Toggle (Action if pressed) */}
               <button
                 onClick={() => {
                   triggerSynth('twinkle');
@@ -85,10 +85,10 @@ function SpaceApp() {
                   speak(usePhotoFace ? 'Cartoon faces!' : "Olivia and Anna's photo faces!");
                 }}
                 style={{ touchAction: 'manipulation' }}
-                title="Toggle astronaut photos vs cartoon faces"
+                title={usePhotoFace ? "Switch to Cartoon faces" : "Switch to Photo faces"}
                 className="cockpit-btn px-2 sm:px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-yellow-300 border border-yellow-400/50 rounded-xl flex items-center gap-1 text-[11px] font-black shadow-md"
               >
-                <span>{usePhotoFace ? '📸 Photos' : '🎨 Cartoon'}</span>
+                <span>{usePhotoFace ? '🎨 Cartoon' : '📸 Photos'}</span>
               </button>
 
               {/* Crew Radio Check */}

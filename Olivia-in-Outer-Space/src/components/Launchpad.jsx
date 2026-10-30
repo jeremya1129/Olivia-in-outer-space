@@ -359,7 +359,7 @@ export default function Launchpad({ onBlastOff, usePhotoFace = false, onTogglePh
           <span>Earth Spaceport Launchpad</span>
         </div>
 
-        {/* Toggle Photo Face */}
+        {/* Toggle Photo Face (Action if pressed) */}
         <button
           onClick={() => {
             triggerSynth('twinkle');
@@ -367,10 +367,11 @@ export default function Launchpad({ onBlastOff, usePhotoFace = false, onTogglePh
             speak(activePhotoFace ? "Cartoon art mode!" : "Olivia and Anna's photo mode!");
           }}
           style={{ touchAction: 'manipulation' }}
+          title={activePhotoFace ? "Switch to Cartoon Face" : "Switch to Real Photo Face"}
           className="cockpit-btn px-3.5 py-1.5 bg-slate-900/85 hover:bg-slate-800 text-yellow-300 border-2 border-yellow-400/60 rounded-2xl flex items-center gap-1.5 text-xs font-black shadow-xl backdrop-blur-md"
         >
           <Camera className="w-4 h-4 text-cyan-300" />
-          <span>{activePhotoFace ? '📸 Real Photo Face' : '🎨 Cartoon Face'}</span>
+          <span>{activePhotoFace ? '🎨 Cartoon Face' : '📸 Real Photo Face'}</span>
         </button>
       </div>
 
