@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSpaceAudio } from './AudioPlayer';
 import { Sparkles, Camera, Play, Volume2, Compass, ArrowRight } from 'lucide-react';
+import { getAssetUrl } from '../utils/assets';
 
 /**
  * Cartoon Astronaut Avatar for the Launchpad
@@ -8,12 +9,16 @@ import { Sparkles, Camera, Play, Volume2, Compass, ArrowRight } from 'lucide-rea
 function EarthAstronaut({ name, isOlivia, isWalking, isCheering, usePhotoFace = false, onClick }) {
   const suitAccent = isOlivia ? '#38bdf8' : '#c084fc';
   const visorTint = isOlivia ? 'rgba(56, 189, 248, 0.25)' : 'rgba(216, 180, 254, 0.25)';
-  const photoSrc = isOlivia
-    ? '/assets/cartoons/characters/olivia_photo_face.png'
-    : '/assets/cartoons/characters/anna_photo_face.png';
-  const cartoonSrc = isOlivia
-    ? '/assets/cartoons/characters/olivia_cartoon_circle.png'
-    : '/assets/cartoons/characters/anna_cartoon_circle.png';
+  const photoSrc = getAssetUrl(
+    isOlivia
+      ? '/assets/cartoons/characters/olivia_photo_face.png'
+      : '/assets/cartoons/characters/anna_photo_face.png'
+  );
+  const cartoonSrc = getAssetUrl(
+    isOlivia
+      ? '/assets/cartoons/characters/olivia_cartoon_circle.png'
+      : '/assets/cartoons/characters/anna_cartoon_circle.png'
+  );
 
   const clipId = `earth-visor-${name.toLowerCase()}`;
 
@@ -283,7 +288,7 @@ function BoardingCinematic({ usePhotoFace, onComplete, onSkip }) {
               <g clipPath="url(#launch-porthole-clip)">
                 <circle cx="80" cy="102" r="26" fill="#3b0764" />
                 <image
-                  href={usePhotoFace ? "/assets/cartoons/characters/olivia_photo_face.png" : "/assets/cartoons/characters/olivia_cartoon_circle.png"}
+                  href={getAssetUrl(usePhotoFace ? "/assets/cartoons/characters/olivia_photo_face.png" : "/assets/cartoons/characters/olivia_cartoon_circle.png")}
                   x="54"
                   y="76"
                   width="52"

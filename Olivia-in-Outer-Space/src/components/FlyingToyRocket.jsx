@@ -1,4 +1,5 @@
 import React from 'react';
+import { getAssetUrl } from '../utils/assets';
 
 /**
  * Olivia's Animated Flying Toy Rocket
@@ -12,9 +13,11 @@ import React from 'react';
  * - Scalloped charcoal launch booster base
  */
 export default function FlyingToyRocket({ isBlasting, targetName, usePhotoFace = false }) {
-  const rocketFaceSrc = usePhotoFace
-    ? '/assets/cartoons/characters/olivia_photo_face.png'
-    : '/assets/cartoons/characters/olivia_cartoon_circle.png';
+  const rocketFaceSrc = getAssetUrl(
+    usePhotoFace
+      ? '/assets/cartoons/characters/olivia_photo_face.png'
+      : '/assets/cartoons/characters/olivia_cartoon_circle.png'
+  );
 
   if (!isBlasting) {
     return (

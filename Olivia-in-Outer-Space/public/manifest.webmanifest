@@ -1,0 +1,20 @@
+{
+  "name": "Olivia in Outer Space",
+  "short_name": "Olivia Space",
+  "description": "Interactive toddler space adventure with Captain Olivia and Navigator Anna!",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#030712",
+  "theme_color": "#030712",
+  "categories": ["education", "kids", "games"],
+  "icons": [
+    {
+      "src": "assets/cartoons/characters/olivia_cartoon_circle.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

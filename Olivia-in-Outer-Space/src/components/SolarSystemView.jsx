@@ -4,6 +4,7 @@ import CartoonCelestialBody from './CartoonCelestialBody';
 import FlyingToyRocket from './FlyingToyRocket';
 import ReadAlongStory from './ReadAlongStory';
 import { Rocket, Sparkles, ArrowLeft, Orbit, Camera } from 'lucide-react';
+import { getAssetUrl } from '../utils/assets';
 
 /**
  * Left-to-Right Solar System Order & Specifications
@@ -431,7 +432,7 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
                   >
                     {showRealPhoto && activePlanetBody.real_image_path && !imageErrorMap[activePlanetBody.id] ? (
                       <img
-                        src={activePlanetBody.real_image_path}
+                        src={getAssetUrl(activePlanetBody.real_image_path)}
                         alt={activePlanetBody.name}
                         onError={() => setImageErrorMap((prev) => ({ ...prev, [activePlanetBody.id]: true }))}
                         className="w-full h-full object-cover transition-opacity duration-300"
@@ -529,7 +530,7 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
                         >
                           {showRealPhoto && moon.real_image_path && !imageErrorMap[moon.id] ? (
                             <img
-                              src={moon.real_image_path}
+                              src={getAssetUrl(moon.real_image_path)}
                               alt={moon.name}
                               onError={() => setImageErrorMap((prev) => ({ ...prev, [moon.id]: true }))}
                               className="w-full h-full object-cover"

@@ -3,6 +3,7 @@ import { useSpaceAudio } from './AudioPlayer';
 import SolarSystemView from './SolarSystemView';
 import FlyingToyRocket from './FlyingToyRocket';
 import { Sparkles, Radio, Rocket, Orbit, Globe } from 'lucide-react';
+import { getAssetUrl } from '../utils/assets';
 
 /**
  * Cartoon Astronaut Character Component (Olivia or Anna)
@@ -15,12 +16,16 @@ function CartoonAstronaut({ name, role, isDriver, isCheering, usePhotoFace = fal
   const isOlivia = name.toLowerCase().includes('olivia');
   const suitAccent = isOlivia ? '#38bdf8' : '#c084fc'; // Cyan for Olivia, Lilac/Purple for Anna
   const visorTint = isOlivia ? 'rgba(56, 189, 248, 0.2)' : 'rgba(216, 180, 254, 0.2)';
-  const photoSrc = isOlivia
-    ? '/assets/cartoons/characters/olivia_photo_face.png'
-    : '/assets/cartoons/characters/anna_photo_face.png';
-  const cartoonSrc = isOlivia
-    ? '/assets/cartoons/characters/olivia_cartoon_circle.png'
-    : '/assets/cartoons/characters/anna_cartoon_circle.png';
+  const photoSrc = getAssetUrl(
+    isOlivia
+      ? '/assets/cartoons/characters/olivia_photo_face.png'
+      : '/assets/cartoons/characters/anna_photo_face.png'
+  );
+  const cartoonSrc = getAssetUrl(
+    isOlivia
+      ? '/assets/cartoons/characters/olivia_cartoon_circle.png'
+      : '/assets/cartoons/characters/anna_cartoon_circle.png'
+  );
 
   const clipId = `visor-clip-${name.toLowerCase()}`;
 
