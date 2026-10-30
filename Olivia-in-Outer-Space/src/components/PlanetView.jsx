@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useSpaceAudio } from './AudioPlayer';
 import CartoonCelestialBody from './CartoonCelestialBody';
 import { ArrowLeft, Sparkles, Volume2, Music, Camera, Compass, Thermometer, Weight, Moon, X, RotateCcw, Rocket } from 'lucide-react';
+import { getAssetUrl } from '../utils/assets';
 
 export default function PlanetView({ planet, onReturnToCockpit }) {
   const { playTrackOrSfx, triggerSynth, speak } = useSpaceAudio();
@@ -116,7 +117,7 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
           >
             {showRealPhoto && planet.real_image_path ? (
               <img
-                src={planet.real_image_path}
+                src={getAssetUrl(planet.real_image_path)}
                 alt={planet.name}
                 onLoad={() => setImageLoaded(true)}
                 className={`w-full h-full object-cover transition-opacity duration-300 ${
@@ -178,10 +179,10 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
                 className="cursor-pointer group relative w-48 h-48 sm:w-56 sm:h-56 rounded-2xl overflow-hidden border-2 border-yellow-300 shadow-[0_0_25px_rgba(250,204,21,0.35)] transition-transform hover:scale-105 active:scale-95 bg-slate-950"
               >
                 <img
-                  src={`/assets/cartoons/interactions/${planet.id}.gif`}
+                  src={getAssetUrl(`/assets/cartoons/interactions/${planet.id}.gif`)}
                   onError={(e) => {
                     e.currentTarget.onerror = null;
-                    e.currentTarget.src = '/assets/cartoons/interactions/default.gif';
+                    e.currentTarget.src = getAssetUrl('/assets/cartoons/interactions/default.gif');
                   }}
                   alt={`${planet.name} interaction with Olivia and Anna`}
                   className="w-full h-full object-cover"
@@ -293,10 +294,10 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
             {/* Animated Cartoon GIF */}
             <div className="relative w-64 h-64 sm:w-72 sm:h-72 rounded-2xl overflow-hidden border-4 border-cyan-400 shadow-[0_0_35px_rgba(56,189,248,0.4)] bg-slate-950 flex items-center justify-center my-2">
               <img
-                src={`/assets/cartoons/interactions/${planet.id}.gif`}
+                src={getAssetUrl(`/assets/cartoons/interactions/${planet.id}.gif`)}
                 onError={(e) => {
                   e.currentTarget.onerror = null;
-                  e.currentTarget.src = '/assets/cartoons/interactions/default.gif';
+                  e.currentTarget.src = getAssetUrl('/assets/cartoons/interactions/default.gif');
                 }}
                 alt={`${planet.name} with Olivia and Anna`}
                 className="w-full h-full object-cover"
