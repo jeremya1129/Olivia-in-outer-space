@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import { getAssetUrl } from '../utils/assets';
 
 /**
@@ -13,10 +13,14 @@ import { getAssetUrl } from '../utils/assets';
  * - Scalloped charcoal launch booster base
  */
 export default function FlyingToyRocket({ isBlasting, targetName, usePhotoFace = false }) {
+  const uid = useId().replace(/:/g, '');
+  const idleClipId = `rocket-porthole-clip-idle-${uid}`;
+  const blastClipId = `rocket-porthole-clip-blasting-${uid}`;
+
   const rocketFaceSrc = getAssetUrl(
     usePhotoFace
       ? '/assets/cartoons/characters/olivia_photo_face.png'
-      : '/assets/cartoons/characters/olivia_cartoon_circle.png'
+      : '/assets/cartoons/characters/olivia_cartoon_circle.webp'
   );
 
   if (!isBlasting) {
@@ -24,7 +28,7 @@ export default function FlyingToyRocket({ isBlasting, targetName, usePhotoFace =
       <div className="relative w-20 h-24 md:w-24 md:h-28 animate-float pointer-events-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.65)]">
         <svg viewBox="0 0 160 190" className="w-full h-full rotate-12">
           <defs>
-            <clipPath id="rocket-porthole-clip-idle">
+            <clipPath id={idleClipId}>
               <circle cx="80" cy="96" r="22" />
             </clipPath>
           </defs>
@@ -45,7 +49,7 @@ export default function FlyingToyRocket({ isBlasting, targetName, usePhotoFace =
 
           {/* Purple Starry Bubble Porthole with Olivia Looking Out */}
           <circle cx="80" cy="96" r="26" fill="#ffffff" stroke="#94a3b8" strokeWidth="3" />
-          <g clipPath="url(#rocket-porthole-clip-idle)">
+          <g clipPath={`url(#${idleClipId})`}>
             <circle cx="80" cy="96" r="22" fill="#3b0764" />
             <image
               href={rocketFaceSrc}
@@ -85,7 +89,7 @@ export default function FlyingToyRocket({ isBlasting, targetName, usePhotoFace =
         </div>
         <svg viewBox="0 0 160 220" className="w-44 h-56 md:w-56 md:h-72 drop-shadow-[0_0_60px_rgba(250,204,21,0.95)]">
           <defs>
-            <clipPath id="rocket-porthole-clip-blasting">
+            <clipPath id={blastClipId}>
               <circle cx="80" cy="102" r="26" />
             </clipPath>
           </defs>
@@ -121,7 +125,7 @@ export default function FlyingToyRocket({ isBlasting, targetName, usePhotoFace =
 
           {/* Purple Starry Bubble Porthole with Olivia's Face inside */}
           <circle cx="80" cy="102" r="30" fill="#ffffff" stroke="#94a3b8" strokeWidth="3.5" />
-          <g clipPath="url(#rocket-porthole-clip-blasting)">
+          <g clipPath={`url(#${blastClipId})`}>
             <circle cx="80" cy="102" r="26" fill="#3b0764" />
             <image
               href={rocketFaceSrc}

@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useId, useRef } from 'react';
 import { useSpaceAudio } from './AudioPlayer';
-import { Sparkles, Camera, Play, Volume2, Compass, ArrowRight } from 'lucide-react';
+import { Sparkles, Camera, ArrowRight } from 'lucide-react';
 import { getAssetUrl } from '../utils/assets';
 
 /**
  * Cartoon Astronaut Avatar for the Launchpad
  */
 function EarthAstronaut({ name, isOlivia, isWalking, isCheering, usePhotoFace = false, onClick }) {
+  const uid = useId();
   const suitAccent = isOlivia ? '#38bdf8' : '#c084fc';
   const visorTint = isOlivia ? 'rgba(56, 189, 248, 0.25)' : 'rgba(216, 180, 254, 0.25)';
   const photoSrc = getAssetUrl(
@@ -16,18 +17,22 @@ function EarthAstronaut({ name, isOlivia, isWalking, isCheering, usePhotoFace = 
   );
   const cartoonSrc = getAssetUrl(
     isOlivia
-      ? '/assets/cartoons/characters/olivia_cartoon_circle.png'
-      : '/assets/cartoons/characters/anna_cartoon_circle.png'
+      ? '/assets/cartoons/characters/olivia_cartoon_circle.webp'
+      : '/assets/cartoons/characters/anna_cartoon_circle.webp'
   );
 
-  const clipId = `earth-visor-${name.toLowerCase()}`;
+  const clipId = `earth-visor-${name.toLowerCase()}-${uid}`;
+  const Wrapper = onClick ? 'button' : 'div';
 
   return (
-    <div
+    <Wrapper
+      type={onClick ? 'button' : undefined}
       onClick={onClick}
       style={{ touchAction: 'manipulation' }}
-      className={`relative flex flex-col items-center cursor-pointer select-none transition-all duration-300 ${
-        isWalking ? 'animate-bounce' : isCheering ? 'scale-110 -translate-y-4' : 'hover:scale-105'
+      className={`relative flex flex-col items-center select-none transition-all duration-300 ${
+        onClick ? 'cursor-pointer bg-transparent border-0 p-0 ' : ''
+      }${
+        isWalking ? 'animate-bounce' : isCheering ? 'scale-110 -translate-y-4' : onClick ? 'hover:scale-105' : ''
       }`}
     >
       {/* Speech Bubble Prompt */}
@@ -110,7 +115,7 @@ function EarthAstronaut({ name, isOlivia, isWalking, isCheering, usePhotoFace = 
         <rect x="54" y="180" width="26" height="24" rx="8" fill={suitAccent} stroke="#1e293b" strokeWidth="3" />
         <rect x="90" y="180" width="26" height="24" rx="8" fill={suitAccent} stroke="#1e293b" strokeWidth="3" />
       </svg>
-    </div>
+    </Wrapper>
   );
 }
 
@@ -118,9 +123,13 @@ function EarthAstronaut({ name, isOlivia, isWalking, isCheering, usePhotoFace = 
  * Animated Boarding & Blast-off Cinematic Sequence
  */
 function BoardingCinematic({ usePhotoFace, onComplete, onSkip }) {
-  const { triggerSynth, playTrackOrSfx, speak } = useSpaceAudio();
+  const uid = useId();
+  const launchClipId = `launch-porthole-clip-${uid}`;
+  const { triggerSynth, speak, stopSpeaking } = useSpaceAudio();
   const [phase, setPhase] = useState('boarding'); // 'boarding' | 'countdown' | 'liftoff'
   const [count, setCount] = useState(3);
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
 
   useEffect(() => {
     // 1. Boarding Phase
@@ -133,8 +142,11 @@ function BoardingCinematic({ usePhotoFace, onComplete, onSkip }) {
       triggerSynth('beep');
     }, 2800);
 
-    return () => clearTimeout(countdownTimer);
-  }, []);
+    return () => {
+      clearTimeout(countdownTimer);
+      stopSpeaking();
+    };
+  }, [speak, triggerSynth, stopSpeaking]);
 
   useEffect(() => {
     if (phase !== 'countdown') return;
@@ -160,27 +172,32 @@ function BoardingCinematic({ usePhotoFace, onComplete, onSkip }) {
         setPhase('liftoff');
         speak("BLAST OFF! Into Outer Space!");
         triggerSynth('blastoff');
-        playTrackOrSfx(null, 'blastoff');
       }, 1000);
       return () => clearTimeout(t);
     }
-  }, [phase, count]);
+  }, [phase, count, speak, triggerSynth]);
 
   useEffect(() => {
     if (phase === 'liftoff') {
       const finishTimer = setTimeout(() => {
-        onComplete();
+        onCompleteRef.current();
       }, 3200);
       return () => clearTimeout(finishTimer);
     }
   }, [phase]);
+
+  const handleSkip = () => {
+    stopSpeaking();
+    onSkip();
+  };
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950 flex flex-col items-center justify-center overflow-hidden">
       
       {/* Skip Button */}
       <button
-        onClick={onSkip}
+        type="button"
+        onClick={handleSkip}
         style={{ touchAction: 'manipulation' }}
         className="absolute top-6 right-6 z-50 px-4 py-2 bg-slate-800/90 text-yellow-300 font-black rounded-2xl border-2 border-yellow-400 flex items-center gap-1.5 shadow-2xl"
       >
@@ -264,7 +281,7 @@ function BoardingCinematic({ usePhotoFace, onComplete, onSkip }) {
             {/* Giant Rocket SVG */}
             <svg viewBox="0 0 160 260" className="w-56 h-80 sm:w-72 sm:h-96 drop-shadow-[0_0_70px_rgba(250,204,21,0.9)]">
               <defs>
-                <clipPath id="launch-porthole-clip">
+                <clipPath id={launchClipId}>
                   <circle cx="80" cy="102" r="26" />
                 </clipPath>
               </defs>
@@ -285,10 +302,10 @@ function BoardingCinematic({ usePhotoFace, onComplete, onSkip }) {
 
               {/* Olivia inside the porthole */}
               <circle cx="80" cy="102" r="30" fill="#ffffff" stroke="#94a3b8" strokeWidth="3.5" />
-              <g clipPath="url(#launch-porthole-clip)">
+              <g clipPath={`url(#${launchClipId})`}>
                 <circle cx="80" cy="102" r="26" fill="#3b0764" />
                 <image
-                  href={getAssetUrl(usePhotoFace ? "/assets/cartoons/characters/olivia_photo_face.png" : "/assets/cartoons/characters/olivia_cartoon_circle.png")}
+                  href={getAssetUrl(usePhotoFace ? "/assets/cartoons/characters/olivia_photo_face.png" : "/assets/cartoons/characters/olivia_cartoon_circle.webp")}
                   x="54"
                   y="76"
                   width="52"
@@ -313,6 +330,8 @@ function BoardingCinematic({ usePhotoFace, onComplete, onSkip }) {
  * Main Launchpad / Start Screen Component
  */
 export default function Launchpad({ onBlastOff, usePhotoFace = false, onTogglePhotoFace }) {
+  const uid = useId();
+  const rocketClipId = `earth-rocket-porthole-${uid}`;
   const { triggerSynth, speak } = useSpaceAudio();
   const [internalPhotoFace, setInternalPhotoFace] = useState(false);
   const activePhotoFace = onTogglePhotoFace !== undefined ? usePhotoFace : internalPhotoFace;
@@ -366,10 +385,12 @@ export default function Launchpad({ onBlastOff, usePhotoFace = false, onTogglePh
 
         {/* Toggle Photo Face (Action if pressed) */}
         <button
+          type="button"
           onClick={() => {
             triggerSynth('twinkle');
+            const next = !activePhotoFace;
             togglePhotoFace();
-            speak(activePhotoFace ? "Cartoon art mode!" : "Olivia and Anna's photo mode!");
+            speak(next ? "Olivia and Anna's photo mode!" : "Cartoon art mode!");
           }}
           style={{ touchAction: 'manipulation' }}
           title={activePhotoFace ? "Switch to Cartoon Face" : "Switch to Real Photo Face"}
@@ -400,10 +421,12 @@ export default function Launchpad({ onBlastOff, usePhotoFace = false, onTogglePh
           />
 
           {/* Little Tikes Adventure Rocket Standing on Launchpad */}
-          <div
+          <button
+            type="button"
             onClick={handleTapRocket}
+            aria-label="Tap Adventure Rocket"
             style={{ touchAction: 'manipulation' }}
-            className="cockpit-btn relative flex flex-col items-center cursor-pointer transition-transform hover:scale-105 active:scale-95 duration-200"
+            className="relative flex flex-col items-center cursor-pointer transition-transform hover:scale-105 active:scale-95 duration-200 bg-transparent border-0 p-0 focus:outline-none focus-visible:ring-4 focus-visible:ring-yellow-300 rounded-3xl"
           >
             {/* Launch Gantry / Boarding Stairs */}
             <div className="absolute -left-8 sm:-left-12 bottom-6 w-10 sm:w-14 h-24 border-r-4 border-slate-600 bg-slate-700/60 flex flex-col justify-between py-2 -z-10">
@@ -415,7 +438,7 @@ export default function Launchpad({ onBlastOff, usePhotoFace = false, onTogglePh
             {/* Standing Rocket SVG */}
             <svg viewBox="0 0 160 240" className="w-36 h-56 sm:w-48 sm:h-72 drop-shadow-2xl">
               <defs>
-                <clipPath id="earth-rocket-porthole">
+                <clipPath id={rocketClipId}>
                   <circle cx="80" cy="100" r="26" />
                 </clipPath>
               </defs>
@@ -439,7 +462,7 @@ export default function Launchpad({ onBlastOff, usePhotoFace = false, onTogglePh
 
               {/* Purple Bubble Porthole */}
               <circle cx="80" cy="100" r="28" fill="#ffffff" stroke="#94a3b8" strokeWidth="3" />
-              <g clipPath="url(#earth-rocket-porthole)">
+              <g clipPath={`url(#${rocketClipId})`}>
                 <circle cx="80" cy="100" r="24" fill="#3b0764" />
                 <circle cx="73" cy="94" r="2" fill="#ffffff" />
                 <circle cx="88" cy="98" r="1.5" fill="#ffffff" />
@@ -462,7 +485,7 @@ export default function Launchpad({ onBlastOff, usePhotoFace = false, onTogglePh
               </span>
               <div className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
             </div>
-          </div>
+          </button>
 
           {/* Navigator Anna (Standing Right) */}
           <EarthAstronaut
@@ -481,6 +504,7 @@ export default function Launchpad({ onBlastOff, usePhotoFace = false, onTogglePh
         
         {/* Giant Tactile Blast Off Push-Button */}
         <button
+          type="button"
           onClick={handleStartBlastOff}
           style={{ touchAction: 'manipulation' }}
           className="cockpit-btn min-h-[96px] w-full max-w-lg px-8 py-4 rounded-3xl bg-gradient-to-r from-red-600 via-orange-500 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white font-black text-2xl sm:text-3xl tracking-widest uppercase border-4 border-yellow-300 shadow-[0_0_40px_rgba(245,158,11,0.7)] flex items-center justify-center gap-4 transition-transform hover:scale-[1.03] active:scale-95 group"

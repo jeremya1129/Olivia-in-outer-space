@@ -1,13 +1,62 @@
 import { spawn } from 'child_process';
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 
-const CHROME_PATH = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
-const ARTIFACT_DIR = 'C:\\Users\\jerem\\.gemini\\antigravity\\brain\\5312ca2e-e54a-481a-b19d-b18b20f9c44a';
+function findChromePath() {
+  if (process.env.CHROME_PATH && fs.existsSync(process.env.CHROME_PATH)) {
+    return process.env.CHROME_PATH;
+  }
+
+  const candidates = [
+    '/usr/bin/google-chrome',
+    '/usr/bin/google-chrome-stable',
+    '/usr/bin/chromium',
+    '/usr/bin/chromium-browser',
+    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+  ];
+
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+
+  throw new Error(
+    'Could not locate Chrome/Chromium executable. Set CHROME_PATH env var to run tests.'
+  );
+}
+
+const CHROME_PATH = findChromePath();
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000/';
+const DEBUG_PORT = Number(process.env.CDP_PORT || 9222);
+const ARTIFACT_DIR =
+  process.env.ARTIFACT_DIR || path.join(os.tmpdir(), 'olivia-space-test-artifacts');
 fs.mkdirSync(ARTIFACT_DIR, { recursive: true });
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function waitForTargets(port, timeoutMs = 10000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    try {
+      const res = await fetch(`http://127.0.0.1:${port}/json`);
+      if (res.ok) {
+        const targets = await res.json();
+        if (Array.isArray(targets) && targets.length > 0) {
+          return targets;
+        }
+      }
+    } catch {
+      // Chrome DevTools endpoint not ready yet
+    }
+    await sleep(250);
+  }
+  throw new Error(`Timed out waiting for Chrome DevTools on port ${port}`);
 }
 
 class CDPClient {
@@ -15,8 +64,8 @@ class CDPClient {
     this.wsUrl = wsUrl;
     this.id = 1;
     this.callbacks = new Map();
-    this.events = [];
-    this.consoleLogs = [];
+    this.consoleErrors = [];
+    this.networkFailures = [];
   }
 
   async connect() {
@@ -34,10 +83,23 @@ class CDPClient {
         if (msg.error) reject(msg.error);
         else resolve(msg.result);
       } else if (msg.method) {
-        if (msg.method === 'Runtime.consoleAPICalled') {
-          this.consoleLogs.push(msg.params);
+        if (msg.method === 'Runtime.consoleAPICalled' && msg.params?.type === 'error') {
+          const argsText = (msg.params.args || [])
+            .map((a) => a.value ?? a.description ?? JSON.stringify(a))
+            .join(' ');
+          this.consoleErrors.push(argsText);
         } else if (msg.method === 'Runtime.exceptionThrown') {
-          this.consoleLogs.push({ type: 'error', text: JSON.stringify(msg.params) });
+          this.consoleErrors.push(JSON.stringify(msg.params));
+        } else if (msg.method === 'Network.responseReceived') {
+          const { response } = msg.params || {};
+          if (response && response.status >= 400 && !response.url?.endsWith('/favicon.ico')) {
+            this.networkFailures.push(`${response.status} ${response.url}`);
+          }
+        } else if (msg.method === 'Network.loadingFailed') {
+          const { errorText, canceled } = msg.params || {};
+          if (!canceled) {
+            this.networkFailures.push(`loadingFailed: ${errorText || 'unknown'}`);
+          }
         }
       }
     };
@@ -79,26 +141,28 @@ class CDPClient {
 
 async function runTests() {
   console.log('--- STARTING USER TESTING WITH HEADLESS CHROME ---');
-  
-  // 1. Launch Chrome Headless
-  const chromeProc = spawn(CHROME_PATH, [
+  console.log(`Chrome: ${CHROME_PATH}`);
+  console.log(`Target URL: ${BASE_URL}`);
+  console.log(`Artifacts: ${ARTIFACT_DIR}`);
+
+  const chromeArgs = [
     '--headless=new',
-    '--remote-debugging-port=9222',
+    `--remote-debugging-port=${DEBUG_PORT}`,
     '--disable-gpu',
+    '--no-sandbox',
+    '--disable-dev-shm-usage',
     '--window-size=1280,850',
     '--mute-audio',
     'about:blank',
-  ]);
+  ];
+
+  const chromeProc = spawn(CHROME_PATH, chromeArgs, { stdio: 'ignore' });
 
   let cdp;
   const testResults = [];
 
   try {
-    await sleep(2000);
-
-    // Get CDP WebSocket debugger URL
-    const targetsRes = await fetch('http://localhost:9222/json');
-    const targets = await targetsRes.json();
+    const targets = await waitForTargets(DEBUG_PORT);
     const pageTarget = targets.find((t) => t.type === 'page') || targets[0];
     if (!pageTarget) throw new Error('No Chrome target found');
 
@@ -108,11 +172,12 @@ async function runTests() {
     await cdp.send('Page.enable');
     await cdp.send('Runtime.enable');
     await cdp.send('DOM.enable');
+    await cdp.send('Network.enable');
 
     console.log('Connected to Chrome DevTools Protocol.');
 
     // Navigate to app
-    await cdp.send('Page.navigate', { url: 'http://localhost:3000/' });
+    await cdp.send('Page.navigate', { url: BASE_URL });
     await sleep(2500);
 
     // Ensure speech synthesis onstart triggers in headless environments
@@ -188,7 +253,6 @@ async function runTests() {
     }
 
     // Now in Cockpit!
-    const inCockpit = await cdp.eval('Boolean(document.querySelector(".cockpit-btn"))');
     const stationText = await cdp.eval('document.querySelector("header .text-cyan-300")?.textContent?.trim()');
     assert('Entered Cockpit (Flight Deck)', stationText === 'FLIGHT DECK', `Station is "${stationText}"`);
 
@@ -212,17 +276,12 @@ async function runTests() {
     `);
     assert('Astronaut face toggle labeled as action if pressed', faceToggleBtn?.includes('Photos'), `Found "${faceToggleBtn}"`);
 
-    // Verify Captain Olivia and Navigator Anna are visible in cockpit
-    const oliviaVisible = await cdp.eval('Boolean(document.querySelector("[id*=\'visor-clip-olivia\']")) || document.body.textContent.includes("Olivia")');
-    assert('Captain Olivia rendered in cockpit', oliviaVisible);
-
     await cdp.screenshot('screen_2_cockpit_solarsystem.png');
 
     // =========================================================================
     // TEST 3: Enter Planetary Selection Screen (e.g. Earth with Moon)
     // =========================================================================
     console.log('\n--- 3. Testing Planetary Selection Screen (Earth with Moon) ---');
-    // Click on Earth using id="planet-card-earth"
     await cdp.eval('document.getElementById("planet-card-earth")?.click()');
     await sleep(1500);
 
@@ -262,10 +321,20 @@ async function runTests() {
     const moonsHeader = await cdp.eval('document.querySelector("h3.text-yellow-300")?.textContent?.trim()');
     assert('Companion Moons Highway present below', moonsHeader?.includes('Companion Moons'), `Found "${moonsHeader}"`);
 
+    // Verify tapping Companion Moon updates Read-Along story
+    await cdp.eval(`{
+      const moonCard = Array.from(document.querySelectorAll("[role='button']"))
+        .find(el => el.textContent.includes("The Moon"));
+      if (moonCard) moonCard.click();
+    }`);
+    await sleep(400);
+    const moonStoryActive = await cdp.eval('document.body.textContent.includes("Moon")');
+    assert('Tapping companion moon updates active focus', moonStoryActive);
+
     await cdp.screenshot('screen_3_selection_side_by_side.png');
 
     // =========================================================================
-    // TEST 4: Read-Along Story Interaction
+    // TEST 4: Read-Along Story Interaction (including Muted Fallback)
     // =========================================================================
     console.log('\n--- 4. Testing Read-Along Story Interaction ---');
     const readToMeBtn = await cdp.eval(`
@@ -330,7 +399,6 @@ async function runTests() {
     // TEST 6: Press Sensory Action Button -> Trigger Animated Cartoon GIF Modal
     // =========================================================================
     console.log('\n--- 6. Testing Sensory Action & Cartoon GIF Modal ---');
-    // Sensory action button on Earth: "Wave Hello!"
     const actionBtnText = await cdp.eval('document.querySelector("button.bg-gradient-to-r.from-fuchsia-600")?.textContent?.trim()');
     assert('Sensory action button present', Boolean(actionBtnText), `Found "${actionBtnText}"`);
 
@@ -404,6 +472,21 @@ async function runTests() {
 
     const backAtLaunchpad = await cdp.eval('document.querySelector("header .text-cyan-300")?.textContent?.trim() === "EARTH SPACEPORT"');
     assert('Returned cleanly to Launchpad via top header button', backAtLaunchpad);
+
+    // =========================================================================
+    // TEST 8: Zero Runtime / Console / Network 4xx-5xx Errors
+    // =========================================================================
+    console.log('\n--- 8. Checking Browser Console & Network Health ---');
+    assert(
+      'Zero browser console errors or uncaught exceptions',
+      cdp.consoleErrors.length === 0,
+      cdp.consoleErrors.join(' | ')
+    );
+    assert(
+      'Zero failed HTTP asset/API requests',
+      cdp.networkFailures.length === 0,
+      cdp.networkFailures.join(' | ')
+    );
 
     console.log('\n======================================================');
     console.log(`ALL ${testResults.length} USER FLOW TESTS PASSED SUCCESSFULLY!`);

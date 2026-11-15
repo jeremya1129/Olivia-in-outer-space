@@ -33,23 +33,33 @@ export default function ReadAlongStory({ body, className = '' }) {
   const [tappedWordId, setTappedWordId] = useState(null);
 
   const fallbackTimerRef = useRef(null);
+  const tapTimeoutRef = useRef(null);
   const hasNativeBoundaries = useRef(false);
+  const isStoryActiveRef = useRef(false);
+  const stopSpeakingRef = useRef(stopSpeaking);
+  stopSpeakingRef.current = stopSpeaking;
 
-  // Stop reading when unmounted or when the selected celestial body changes
+  // Clear timers and stop reading only if this component initiated playback
   useEffect(() => {
-    return () => {
-      stopSpeaking();
-      if (fallbackTimerRef.current) clearInterval(fallbackTimerRef.current);
-    };
-  }, [body?.id, stopSpeaking]);
-
-  // Reset playback state when celestial body changes
-  useEffect(() => {
-    stopSpeaking();
     if (fallbackTimerRef.current) clearInterval(fallbackTimerRef.current);
+    if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
+    if (isStoryActiveRef.current) {
+      stopSpeakingRef.current();
+      isStoryActiveRef.current = false;
+    }
     setActiveWordIndex(-1);
+    setTappedWordId(null);
     setIsPlaying(false);
     setIsFinished(false);
+
+    return () => {
+      if (fallbackTimerRef.current) clearInterval(fallbackTimerRef.current);
+      if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
+      if (isStoryActiveRef.current) {
+        stopSpeakingRef.current();
+        isStoryActiveRef.current = false;
+      }
+    };
   }, [body?.id]);
 
   // Find corresponding word index given character offset from speech synthesis
@@ -66,6 +76,41 @@ export default function ReadAlongStory({ body, className = '' }) {
     return words.length - 1;
   };
 
+  const startVisualPacing = (completeAtEnd) => {
+    if (fallbackTimerRef.current) clearInterval(fallbackTimerRef.current);
+    const totalWords = words.length;
+    if (totalWords === 0) {
+      isStoryActiveRef.current = false;
+      setIsPlaying(false);
+      setIsFinished(true);
+      setActiveWordIndex(-1);
+      return;
+    }
+
+    let currentIdx = 0;
+    const baseIntervalMs = voiceMode === 'robot' ? 440 : 380;
+
+    fallbackTimerRef.current = setInterval(() => {
+      if (!completeAtEnd && hasNativeBoundaries.current) {
+        clearInterval(fallbackTimerRef.current);
+        return;
+      }
+      currentIdx += 1;
+      if (currentIdx < totalWords) {
+        setActiveWordIndex(currentIdx);
+      } else {
+        clearInterval(fallbackTimerRef.current);
+        if (completeAtEnd) {
+          isStoryActiveRef.current = false;
+          setActiveWordIndex(-1);
+          setIsPlaying(false);
+          setIsFinished(true);
+          triggerSynth(story.actionSound || 'twinkle');
+        }
+      }
+    }, baseIntervalMs);
+  };
+
   // Start reading the story with synchronized word-by-word highlighting
   const handlePlayStory = () => {
     if (isPlaying) {
@@ -74,6 +119,8 @@ export default function ReadAlongStory({ body, className = '' }) {
     }
 
     if (fallbackTimerRef.current) clearInterval(fallbackTimerRef.current);
+    if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
+    setTappedWordId(null);
     hasNativeBoundaries.current = false;
     setActiveWordIndex(0);
     setIsPlaying(true);
@@ -81,27 +128,18 @@ export default function ReadAlongStory({ body, className = '' }) {
 
     triggerSynth(story.actionSound || 'twinkle');
 
-    // Read full story text
-    readStory(story.text, {
+    // If muted or speechSynthesis unavailable, run visual pacing to completion
+    if (isMuted || typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      isStoryActiveRef.current = false;
+      startVisualPacing(true);
+      return;
+    }
+
+    isStoryActiveRef.current = true;
+    const utterance = readStory(story.text, {
       onStart: () => {
         setIsPlaying(true);
-        // Start a fallback pacing timer in case the browser does not fire native onboundary
-        let currentIdx = 0;
-        const totalWords = words.length;
-        const baseIntervalMs = voiceMode === 'robot' ? 440 : 380;
-
-        fallbackTimerRef.current = setInterval(() => {
-          if (hasNativeBoundaries.current) {
-            clearInterval(fallbackTimerRef.current);
-            return;
-          }
-          currentIdx++;
-          if (currentIdx < totalWords) {
-            setActiveWordIndex(currentIdx);
-          } else {
-            clearInterval(fallbackTimerRef.current);
-          }
-        }, baseIntervalMs);
+        startVisualPacing(false);
       },
       onBoundary: (charIndex) => {
         hasNativeBoundaries.current = true;
@@ -114,6 +152,7 @@ export default function ReadAlongStory({ body, className = '' }) {
         }
       },
       onEnd: () => {
+        isStoryActiveRef.current = false;
         if (fallbackTimerRef.current) clearInterval(fallbackTimerRef.current);
         setActiveWordIndex(-1);
         setIsPlaying(false);
@@ -121,35 +160,30 @@ export default function ReadAlongStory({ body, className = '' }) {
         triggerSynth(story.actionSound || 'twinkle');
       },
       onError: () => {
-        // In environments without speech synthesis audio hardware (or if synthesis fails),
-        // fallback to visual pacing so the child can still follow word highlights
+        // Fallback to visual pacing so the child can still follow word highlights
         if (!fallbackTimerRef.current) {
-          let currentIdx = 0;
-          const totalWords = words.length;
-          const baseIntervalMs = 280;
-          fallbackTimerRef.current = setInterval(() => {
-            currentIdx += 1;
-            if (currentIdx < totalWords) {
-              setActiveWordIndex(currentIdx);
-            } else {
-              clearInterval(fallbackTimerRef.current);
-              setIsPlaying(false);
-              setIsFinished(true);
-            }
-          }, baseIntervalMs);
+          startVisualPacing(true);
         }
       },
     });
+
+    if (!utterance) {
+      isStoryActiveRef.current = false;
+      startVisualPacing(true);
+    }
   };
 
   const handlePauseStory = () => {
-    stopSpeaking();
+    if (isStoryActiveRef.current) {
+      stopSpeaking();
+      isStoryActiveRef.current = false;
+    }
     if (fallbackTimerRef.current) clearInterval(fallbackTimerRef.current);
     setIsPlaying(false);
   };
 
   const handleReplayStory = () => {
-    stopSpeaking();
+    handlePauseStory();
     handlePlayStory();
   };
 
@@ -158,14 +192,16 @@ export default function ReadAlongStory({ body, className = '' }) {
     if (isPlaying) {
       handlePauseStory();
     }
+    if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
     setTappedWordId(token.id);
     setActiveWordIndex(index);
     triggerSynth('beep');
 
+    isStoryActiveRef.current = true;
     speakWord(token.cleanWord || token.word);
 
-    // Keep highlight for 600ms then gently fade
-    setTimeout(() => {
+    // Keep highlight for 700ms then gently fade
+    tapTimeoutRef.current = setTimeout(() => {
       setTappedWordId((prev) => (prev === token.id ? null : prev));
       setActiveWordIndex((prev) => (prev === index ? -1 : prev));
     }, 700);
@@ -209,6 +245,7 @@ export default function ReadAlongStory({ body, className = '' }) {
         {/* Read to Me / Pause / Replay Buttons */}
         <div className="flex items-center gap-1.5 shrink-0">
           <button
+            type="button"
             onClick={handlePlayStory}
             style={{ touchAction: 'manipulation' }}
             aria-label={isPlaying ? 'Pause reading story' : 'Read story aloud'}
@@ -233,6 +270,7 @@ export default function ReadAlongStory({ body, className = '' }) {
 
           {isFinished && (
             <button
+              type="button"
               onClick={handleReplayStory}
               style={{ touchAction: 'manipulation' }}
               title="Read again"
@@ -252,12 +290,13 @@ export default function ReadAlongStory({ body, className = '' }) {
             const isTapped = tappedWordId === token.id;
 
             return (
-              <span
+              <button
+                type="button"
                 key={token.id}
                 onClick={() => handleTapWord(token, index)}
                 style={{ touchAction: 'manipulation' }}
                 title={`Tap to hear: "${token.cleanWord}"`}
-                className={`inline-block mr-1.5 my-0.5 px-1.5 py-0.5 rounded-xl cursor-pointer transition-all duration-150 select-none ${
+                className={`inline-block mr-1.5 my-0.5 px-1.5 py-0.5 rounded-xl cursor-pointer transition-all duration-150 select-none border-0 bg-transparent font-inherit leading-inherit ${
                   isActive
                     ? 'bg-gradient-to-r from-yellow-300 to-amber-400 text-slate-950 font-black shadow-xl scale-110 ring-4 ring-yellow-200/90 z-20 -translate-y-0.5'
                     : isTapped
@@ -266,20 +305,20 @@ export default function ReadAlongStory({ body, className = '' }) {
                 }`}
               >
                 {token.word}
-              </span>
+              </button>
             );
           })}
         </p>
       </div>
 
       {/* Bottom Educational Toolbar: Reading Progress & Sight Word Practice */}
-      <div className="mt-2.5 pt-2 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
+      <div className="mt-2.5 pt-2 border-t border-slate-800 flex flex-col gap-2 text-xs">
         {/* Progress Bar */}
-        <div className="w-full sm:w-auto flex-1 flex items-center gap-2">
+        <div className="w-full min-w-0 flex items-center gap-2">
           <span className="text-[10px] uppercase font-black tracking-wider text-slate-400 shrink-0">
             {isPlaying ? 'Reading...' : isFinished ? 'Great Job!' : 'Tap Words to Explore'}
           </span>
-          <div className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden border border-slate-700/80">
+          <div className="flex-1 min-w-[60px] h-2 bg-slate-800 rounded-full overflow-hidden border border-slate-700/80">
             <div
               className="h-full bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full transition-all duration-300"
               style={{ width: `${progressPercent}%` }}
@@ -296,6 +335,7 @@ export default function ReadAlongStory({ body, className = '' }) {
             </span>
             {story.sightWords.map((word) => (
               <button
+                type="button"
                 key={`sight-${word}`}
                 onClick={() => {
                   triggerSynth('beep');

@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback, createContext, useContext } from 'react';
-import { Volume2, VolumeX, Sparkles, Bot, Smile } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useRef, createContext, useContext } from 'react';
+import { Volume2, VolumeX, Sparkles } from 'lucide-react';
+import { getAssetUrl } from '../utils/assets';
 
 const AudioContextState = createContext(null);
 
@@ -215,6 +216,20 @@ export const AudioProvider = ({ children }) => {
   });
   const [voices, setVoices] = useState([]);
 
+  const voiceToggleTimeoutRef = useRef(null);
+
+  // Clean up any pending timers or speech on unmount
+  useEffect(() => {
+    return () => {
+      if (voiceToggleTimeoutRef.current) {
+        clearTimeout(voiceToggleTimeoutRef.current);
+      }
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
   // Load available system/browser voices dynamically
   useEffect(() => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
@@ -301,22 +316,6 @@ export const AudioProvider = ({ children }) => {
     [voices]
   );
 
-  // Plays an audio file with procedural synth fallback
-  const playTrackOrSfx = useCallback((audioPath, fallbackKey) => {
-    if (isMuted) return;
-
-    if (audioPath) {
-      const audio = new Audio(audioPath);
-      audio.play().catch(() => {
-        // Fall back to synth sound if file is not found
-        triggerSynth(fallbackKey || audioPath);
-      });
-      return;
-    }
-
-    triggerSynth(fallbackKey);
-  }, [isMuted]);
-
   const triggerSynth = useCallback((key) => {
     if (isMuted) return;
     const lower = (key || '').toLowerCase();
@@ -339,9 +338,26 @@ export const AudioProvider = ({ children }) => {
     }
   }, [isMuted]);
 
+  // Plays an audio file with procedural synth fallback
+  const playTrackOrSfx = useCallback((audioPath, fallbackKey) => {
+    if (isMuted) return;
+
+    const isAudioFile = typeof audioPath === 'string' && /\.(mp3|wav|ogg|webm|m4a)(\?.*)?$/i.test(audioPath);
+    if (isAudioFile) {
+      const audio = new Audio(getAssetUrl(audioPath));
+      audio.play().catch(() => {
+        // Fall back to synth sound if file is not found
+        triggerSynth(fallbackKey || audioPath);
+      });
+      return;
+    }
+
+    triggerSynth(fallbackKey || audioPath);
+  }, [isMuted, triggerSynth]);
+
   const speak = useCallback(
     (text, overrideMode) => {
-      if (isMuted || !('speechSynthesis' in window)) return;
+      if (isMuted || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
       window.speechSynthesis.cancel();
 
       const activeMode = overrideMode || voiceMode;
@@ -386,7 +402,7 @@ export const AudioProvider = ({ children }) => {
 
   const speakWord = useCallback(
     (word) => {
-      if (isMuted || !('speechSynthesis' in window)) return;
+      if (isMuted || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(word);
       const selectedVoice = getVoiceForMode(voiceMode);
@@ -402,7 +418,7 @@ export const AudioProvider = ({ children }) => {
 
   const readStory = useCallback(
     (text, { onBoundary, onEnd, onStart, onError } = {}) => {
-      if (isMuted || !('speechSynthesis' in window)) return null;
+      if (isMuted || typeof window === 'undefined' || !('speechSynthesis' in window)) return null;
       window.speechSynthesis.cancel();
 
       if (voiceMode === 'robot') {
@@ -457,41 +473,49 @@ export const AudioProvider = ({ children }) => {
   );
 
   const toggleVoiceMode = useCallback(() => {
-    setVoiceMode((prev) => {
-      const next = prev === 'child' ? 'robot' : 'child';
-      try {
-        localStorage.setItem('olivia_voice_mode', next);
-      } catch (e) {
-        // ignore storage errors
+    const next = voiceMode === 'child' ? 'robot' : 'child';
+    setVoiceMode(next);
+
+    try {
+      localStorage.setItem('olivia_voice_mode', next);
+    } catch {
+      // ignore storage errors
+    }
+
+    if (voiceToggleTimeoutRef.current) {
+      clearTimeout(voiceToggleTimeoutRef.current);
+      voiceToggleTimeoutRef.current = null;
+    }
+
+    if (!isMuted) {
+      if (next === 'robot') {
+        synth.playRobotBeep();
+        voiceToggleTimeoutRef.current = setTimeout(() => {
+          speak('Robot voice activated! Beep boop!', 'robot');
+        }, 80);
+      } else {
+        synth.playChildChime();
+        voiceToggleTimeoutRef.current = setTimeout(() => {
+          speak('Child voice activated! Captain Olivia and Navigator Anna ready for space!', 'child');
+        }, 80);
       }
+    }
+  }, [voiceMode, isMuted, speak]);
 
-      if (!isMuted) {
-        if (next === 'robot') {
-          synth.playRobotBeep();
-          setTimeout(() => {
-            speak('Robot voice activated! Beep boop!', 'robot');
-          }, 80);
-        } else {
-          synth.playChildChime();
-          setTimeout(() => {
-            speak('Child voice activated! Captain Olivia and Navigator Anna ready for space!', 'child');
-          }, 80);
-        }
+  const toggleMute = useCallback(() => {
+    const next = !isMuted;
+    setIsMuted(next);
+    if (next) {
+      if (voiceToggleTimeoutRef.current) {
+        clearTimeout(voiceToggleTimeoutRef.current);
+        voiceToggleTimeoutRef.current = null;
       }
-
-      return next;
-    });
-  }, [isMuted, speak]);
-
-  const toggleMute = () => {
-    setIsMuted((prev) => {
-      const next = !prev;
-      if (next && 'speechSynthesis' in window) {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel();
       }
-      return next;
-    });
-  };
+      setIsSpeaking(false);
+    }
+  }, [isMuted]);
 
   return (
     <AudioContextState.Provider

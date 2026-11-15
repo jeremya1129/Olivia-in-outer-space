@@ -215,10 +215,11 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
   };
 
   // Blast off to any destination (planet or companion moon)
+  // Cockpit handles the blastoff sound, narration, and rocket animation transition.
   const handleBlastOff = (destinationBody) => {
-    triggerSynth('blastoff');
-    speak(`Plotting course for ${destinationBody.name}! 3, 2, 1, Blast off!`);
-    onSelectDestination(destinationBody);
+    if (onSelectDestination) {
+      onSelectDestination(destinationBody);
+    }
   };
 
   return (
@@ -242,6 +243,7 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
               {SOLAR_SYSTEM_ORDER.map((item) => (
                 <button
                   key={`chip-${item.id}`}
+                  type="button"
                   onClick={() => handleJumpToPlanet(item.id)}
                   style={{ touchAction: 'manipulation' }}
                   className="px-2 py-0.5 rounded-lg text-[10px] font-black uppercase whitespace-nowrap bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/80 shrink-0 transition-all flex items-center gap-1"
@@ -301,7 +303,15 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
                   {/* Planet Column */}
                   <div
                     id={`planet-card-${item.id}`}
+                    role="button"
+                    tabIndex={0}
                     onClick={() => handleOpenPlanetarySystem(item)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleOpenPlanetarySystem(item);
+                      }
+                    }}
                     style={{ touchAction: 'manipulation' }}
                     className={`relative shrink-0 flex flex-col items-center w-[84px] sm:w-[98px] md:w-[110px] cursor-pointer group transition-all duration-300 select-none ${staggerClass}`}
                   >
@@ -328,7 +338,7 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
                       <div className="relative rounded-full p-1 flex items-center justify-center">
                         <div
                           className="absolute inset-0 rounded-full blur-sm opacity-30 group-hover:opacity-75 transition-opacity"
-                          style={{ backgroundColor: item.color }}
+                          style={{ backgroundColor: body.color || item.color }}
                         />
                         <div className="relative z-10 flex items-center justify-center drop-shadow-md">
                           <CartoonCelestialBody id={item.id} size={item.cartoonSize} />
@@ -376,6 +386,7 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
           {/* Top Breadcrumbs & Mode Controls */}
           <div className="relative z-20 w-full max-w-5xl mx-auto flex items-center justify-between pb-2 border-b border-slate-800 shrink-0">
             <button
+              type="button"
               onClick={handleBackToSolarSystem}
               style={{ touchAction: 'manipulation' }}
               className="cockpit-btn px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg flex items-center gap-1.5 transition-transform hover:scale-105 active:scale-95"
@@ -387,10 +398,12 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
             {/* View Mode Toggle: Real Spacecraft Photo vs Cartoon (Action if pressed) */}
             <div className="flex items-center gap-2">
               <button
+                type="button"
                 onClick={() => {
                   triggerSynth('beep');
-                  setShowRealPhoto((prev) => !prev);
-                  speak(showRealPhoto ? 'Cartoon art mode' : 'NASA Spacecraft Photo');
+                  const nextMode = !showRealPhoto;
+                  setShowRealPhoto(nextMode);
+                  speak(nextMode ? 'NASA Spacecraft Photo' : 'Cartoon art mode');
                 }}
                 style={{ touchAction: 'manipulation' }}
                 title={showRealPhoto ? "Switch to Cartoon Art" : "Switch to NASA Spacecraft Photo"}
@@ -413,16 +426,18 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
                 
                 {/* Planetary Orb */}
                 <div className="relative flex items-center justify-center my-1 sm:my-2">
-                  <div
+                  <button
+                    type="button"
                     onClick={() => {
                       setSelectedSubBodyId(null);
                       triggerSynth('twinkle');
                     }}
+                    aria-label={`Focus on ${activePlanetBody.name} story`}
                     className={`cockpit-btn relative ${
                       companionMoons.length > 0
                         ? 'w-32 h-32 sm:w-40 sm:h-40 md:w-44 md:h-44'
                         : 'w-44 h-44 sm:w-52 sm:h-52 md:w-56 md:h-56'
-                    } rounded-full flex items-center justify-center transition-transform hover:scale-105 active:scale-95 duration-200 overflow-hidden cursor-pointer shadow-2xl ${
+                    } rounded-full flex items-center justify-center transition-transform hover:scale-105 active:scale-95 duration-200 overflow-hidden cursor-pointer shadow-2xl border-0 p-0 ${
                       activeFocusBody.id === activePlanetBody.id ? 'ring-4 ring-yellow-400' : 'ring-2 ring-white/20'
                     }`}
                     style={{
@@ -448,7 +463,7 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
 
                     {/* Inner Atmospheric Rim Glow */}
                     <div className="absolute inset-0 rounded-full border-4 border-white/20 pointer-events-none" />
-                  </div>
+                  </button>
                 </div>
 
                 {/* Title & Tagline */}
@@ -467,6 +482,7 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
 
                 {/* Blast Off Button to Main Planet */}
                 <button
+                  type="button"
                   onClick={() => handleBlastOff(activePlanetBody)}
                   style={{ touchAction: 'manipulation' }}
                   className="cockpit-btn mt-2 px-5 py-2 sm:py-2.5 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 hover:from-emerald-300 hover:to-cyan-400 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wider shadow-xl flex items-center gap-2 transition-transform hover:scale-105 active:scale-95"
@@ -498,78 +514,90 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
                   </span>
                 </div>
 
-                {/* Moons Orbital Track Canvas - modeled just like Solar System View */}
-                <div className="relative w-full flex items-center justify-center overflow-x-auto py-2 px-4 gap-3 sm:gap-5 md:gap-6 scrollbar-none">
-                  {/* Glowing Orbital Axis Line running horizontally across the track */}
-                  <div className="absolute left-6 right-6 top-1/2 -translate-y-1/2 h-0.5 bg-gradient-to-r from-yellow-400/20 via-cyan-400/40 to-indigo-500/20 pointer-events-none" />
+                {/* Moons Orbital Track Canvas - safe overflow centering */}
+                <div className="relative w-full overflow-x-auto py-2 px-4 scrollbar-none">
+                  <div className="relative flex items-center justify-center min-w-full w-max mx-auto gap-3 sm:gap-5 md:gap-6">
+                    {/* Glowing Orbital Axis Line running horizontally across the track */}
+                    <div className="absolute left-6 right-6 top-1/2 -translate-y-1/2 h-0.5 bg-gradient-to-r from-yellow-400/20 via-cyan-400/40 to-indigo-500/20 pointer-events-none" />
 
-                  {companionMoons.map((moon) => {
-                    const isMoonFocused = activeFocusBody.id === moon.id;
+                    {companionMoons.map((moon) => {
+                      const isMoonFocused = activeFocusBody.id === moon.id;
+                      const thumbPath = moon.thumbnail_image_path || moon.real_image_path;
 
-                    return (
-                      <div
-                        key={`planetary-moon-${moon.id}`}
-                        onClick={() => {
-                          setSelectedSubBodyId(moon.id);
-                          triggerSynth('twinkle');
-                        }}
-                        style={{ touchAction: 'manipulation' }}
-                        className={`relative z-10 flex flex-col items-center w-[124px] sm:w-[144px] md:w-[160px] p-2 sm:p-2.5 rounded-2xl transition-all duration-200 shadow-xl hover:scale-105 active:scale-95 cursor-pointer group shrink-0 select-none text-center ${
-                          isMoonFocused
-                            ? 'bg-slate-900 border-2 border-yellow-400 ring-4 ring-yellow-400/40 scale-105'
-                            : 'bg-slate-900/80 hover:bg-slate-900 border border-slate-700/80 hover:border-yellow-300'
-                        }`}
-                      >
-                        {/* Moon Circular Visual Orb (Real Photo / Cartoon) */}
+                      return (
                         <div
-                          className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-2 border-white/20 shadow-md flex items-center justify-center mb-1.5 transition-transform group-hover:rotate-6"
-                          style={{
-                            backgroundColor: moon.color || '#e0e0e0',
-                            boxShadow: `0 0 24px ${moon.color || '#e0e0e0'}77`,
+                          key={`planetary-moon-${moon.id}`}
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => {
+                            setSelectedSubBodyId(moon.id);
+                            triggerSynth('twinkle');
                           }}
-                        >
-                          {showRealPhoto && moon.real_image_path && !imageErrorMap[moon.id] ? (
-                            <img
-                              src={getAssetUrl(moon.real_image_path)}
-                              alt={moon.name}
-                              onError={() => setImageErrorMap((prev) => ({ ...prev, [moon.id]: true }))}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center p-1">
-                              <CartoonCelestialBody id={moon.id} size={54} />
-                            </div>
-                          )}
-                          <div className="absolute inset-0 rounded-full border border-white/25 pointer-events-none" />
-                        </div>
-
-                        {/* Moon Name */}
-                        <span className="text-xs sm:text-sm font-black text-white uppercase tracking-tight truncate w-full">
-                          {moon.name}
-                        </span>
-
-                        {/* Moon Tagline */}
-                        <span className="text-[9px] sm:text-[10px] text-yellow-300/90 font-bold line-clamp-1 w-full my-0.5">
-                          {moon.tagline}
-                        </span>
-
-                        {/* Visit Button */}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleBlastOff(moon);
+                          onKeyDown={(e) => {
+                            if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
+                              e.preventDefault();
+                              setSelectedSubBodyId(moon.id);
+                              triggerSynth('twinkle');
+                            }
                           }}
                           style={{ touchAction: 'manipulation' }}
-                          className="mt-1 px-3 py-1 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-black text-[10px] sm:text-xs uppercase tracking-wider shadow-md flex items-center gap-1 transition-all"
+                          className={`relative z-10 flex flex-col items-center w-[124px] sm:w-[144px] md:w-[160px] p-2 sm:p-2.5 rounded-2xl transition-all duration-200 shadow-xl hover:scale-105 active:scale-95 cursor-pointer group shrink-0 select-none text-center ${
+                            isMoonFocused
+                              ? 'bg-slate-900 border-2 border-yellow-400 ring-4 ring-yellow-400/40 scale-105'
+                              : 'bg-slate-900/80 hover:bg-slate-900 border border-slate-700/80 hover:border-yellow-300'
+                          }`}
                         >
-                          <span>Visit</span>
-                          <Rocket className="w-3 h-3" />
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
+                          {/* Moon Circular Visual Orb (Real Photo / Cartoon) */}
+                          <div
+                            className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-2 border-white/20 shadow-md flex items-center justify-center mb-1.5 transition-transform group-hover:rotate-6"
+                            style={{
+                              backgroundColor: moon.color || '#e0e0e0',
+                              boxShadow: `0 0 24px ${moon.color || '#e0e0e0'}77`,
+                            }}
+                          >
+                            {showRealPhoto && thumbPath && !imageErrorMap[moon.id] ? (
+                              <img
+                                src={getAssetUrl(thumbPath)}
+                                alt={moon.name}
+                                onError={() => setImageErrorMap((prev) => ({ ...prev, [moon.id]: true }))}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center p-1">
+                                <CartoonCelestialBody id={moon.id} size={54} />
+                              </div>
+                            )}
+                            <div className="absolute inset-0 rounded-full border border-white/25 pointer-events-none" />
+                          </div>
 
+                          {/* Moon Name */}
+                          <span className="text-xs sm:text-sm font-black text-white uppercase tracking-tight truncate w-full">
+                            {moon.name}
+                          </span>
+
+                          {/* Moon Tagline */}
+                          <span className="text-[9px] sm:text-[10px] text-yellow-300/90 font-bold line-clamp-1 w-full my-0.5">
+                            {moon.tagline}
+                          </span>
+
+                          {/* Visit Button */}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleBlastOff(moon);
+                            }}
+                            style={{ touchAction: 'manipulation' }}
+                            className="mt-1 px-3 py-1 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-black text-[10px] sm:text-xs uppercase tracking-wider shadow-md flex items-center gap-1 transition-all"
+                          >
+                            <span>Visit</span>
+                            <Rocket className="w-3 h-3" />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             ) : (
               /* Solo World Info Card (Centered when no companion moons exist) */

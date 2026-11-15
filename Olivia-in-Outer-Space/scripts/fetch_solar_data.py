@@ -655,8 +655,8 @@ def normalize_solar_body(api_data: dict, target: dict) -> dict:
         "discovered_by": str(discovered_by),
         "toddler_hook": target["toddler_hook"],
         "primary_color_hex": target["primary_color_hex"],
-        "real_image_path": f"assets/images/real/{slug}.jpg",
-        "thumbnail_image_path": f"assets/images/thumbnails/{slug}_thumb.jpg",
+        "real_image_path": f"assets/real_imagery/{slug}/display.webp",
+        "thumbnail_image_path": f"assets/real_imagery/{slug}/thumb.webp",
         "nasa_asset_id": target["nasa_asset_id"]
     }
 
@@ -682,8 +682,8 @@ def get_baseline_record(target: dict) -> dict:
         "discovered_by": str(base["discovered_by"]),
         "toddler_hook": target["toddler_hook"],
         "primary_color_hex": target["primary_color_hex"],
-        "real_image_path": f"assets/images/real/{slug}.jpg",
-        "thumbnail_image_path": f"assets/images/thumbnails/{slug}_thumb.jpg",
+        "real_image_path": f"assets/real_imagery/{slug}/display.webp",
+        "thumbnail_image_path": f"assets/real_imagery/{slug}/thumb.webp",
         "nasa_asset_id": target["nasa_asset_id"]
     }
 

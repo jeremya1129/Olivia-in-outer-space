@@ -28,8 +28,8 @@ Built with React 18, Vite, and Tailwind CSS, featuring oversized tactile flight 
 ## 🛰️ Planetary Data Engineering & NASA Imagery Pipelines
 
 ### 1. Solar System Database (`data/schema.sql` & `scripts/fetch_solar_data.py`)
-- **SQLite Database**: [`data/solar_system.db`](file:///G:/My%20Drive/Antigravity/Olivia-in-Outer-Space/data/solar_system.db)
-- **Normalized JSON**: [`data/solar_system.json`](file:///G:/My%20Drive/Antigravity/Olivia-in-Outer-Space/data/solar_system.json)
+- **SQLite Database**: [`Olivia-in-Outer-Space/data/solar_system.db`](Olivia-in-Outer-Space/data/solar_system.db)
+- **Normalized JSON**: [`Olivia-in-Outer-Space/data/solar_system.json`](Olivia-in-Outer-Space/data/solar_system.json)
 - Ingests **20 primary celestial bodies**:
   - **Star**: Sun (`soleil`)
   - **Terrestrial Planets**: Mercury (`mercure`), Venus (`venus`), Earth (`terre`), Mars (`mars`)

@@ -1,15 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSpaceAudio } from './AudioPlayer';
 import CartoonCelestialBody from './CartoonCelestialBody';
-import { ArrowLeft, Sparkles, Volume2, Music, Camera, Compass, Thermometer, Weight, Moon, X, RotateCcw, Rocket } from 'lucide-react';
+import { ArrowLeft, Sparkles, Volume2, Music, Camera, Thermometer, Weight, Moon, X, RotateCcw, Rocket } from 'lucide-react';
 import { getAssetUrl } from '../utils/assets';
 
 export default function PlanetView({ planet, onReturnToCockpit }) {
-  const { playTrackOrSfx, triggerSynth, speak } = useSpaceAudio();
+  const { triggerSynth, speak } = useSpaceAudio();
   const [activeActionCheer, setActiveActionCheer] = useState(null);
   const [showRealPhoto, setShowRealPhoto] = useState(false);
   const [showActionGifModal, setShowActionGifModal] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+
+  useEffect(() => {
+    setImageLoaded(false);
+  }, [planet?.id, showRealPhoto]);
+
+  useEffect(() => {
+    if (!showActionGifModal) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setShowActionGifModal(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showActionGifModal]);
 
   // Sensory action info from enriched dataset with safe defaults
   const actionEmoji = planet.action_emoji || '✨';
@@ -18,11 +33,29 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
   const actionCheer = planet.action_cheer || `Yay! Captain Olivia and Navigator Anna landed safely on ${planet.name}!`;
 
   // Toddler-friendly physical interpretation
-  const getGravityText = (g) => {
-    if (g < 1.0) return '🎈 Feather light gravity! One tiny hop and you float into the sky!';
-    if (g < 4.5) return '🦘 Super bouncy! You can jump way higher than on Earth!';
-    if (g <= 12.0) return '🏃 Regular bounce! Perfect for running and skipping!';
-    return '🐻 Giant heavy gravity! Feels like a big, cozy space bear hug!';
+  const getGravityInfo = (g) => {
+    if (g < 1.0) {
+      return {
+        emoji: '🎈',
+        text: 'Feather light gravity! One tiny hop and you float into the sky!',
+      };
+    }
+    if (g < 4.5) {
+      return {
+        emoji: '🦘',
+        text: 'Super bouncy! You can jump way higher than on Earth!',
+      };
+    }
+    if (g <= 12.0) {
+      return {
+        emoji: '🏃',
+        text: 'Regular bounce! Perfect for running and skipping!',
+      };
+    }
+    return {
+      emoji: '🐻',
+      text: 'Giant heavy gravity! Feels like a big, cozy space bear hug!',
+    };
   };
 
   const getTempText = (t) => {
@@ -39,15 +72,15 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
     return `Has ${m} dancing moons dancing in circles around it!`;
   };
 
+  const gravityInfo = getGravityInfo(planet.gravity_m_s2);
+
   const handlePlayVoice = () => {
     triggerSynth('chime');
-    playTrackOrSfx(planet.factAudio, 'chime');
-    speak(`${planet.name}! ${planet.tagline}. Gravity: ${getGravityText(planet.gravity_m_s2)}`);
+    speak(`${planet.name}! ${planet.tagline}. Gravity: ${gravityInfo.text}`);
   };
 
   const handlePlaySfx = () => {
     triggerSynth(planet.sfx || 'twinkle');
-    playTrackOrSfx(planet.sfx, planet.sfx);
   };
 
   const handleDoAction = () => {
@@ -69,6 +102,7 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
       {/* Top Navigation & Status Bar */}
       <div className="w-full max-w-5xl mx-auto flex items-center justify-between z-20 pb-2">
         <button
+          type="button"
           onClick={handleBack}
           style={{ touchAction: 'manipulation' }}
           className="cockpit-btn px-4 py-2.5 bg-slate-800/90 hover:bg-slate-700 text-cyan-300 font-black rounded-2xl border-2 border-cyan-500/50 flex items-center gap-2 text-sm md:text-base shadow-xl"
@@ -80,6 +114,7 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
         {/* View Mode Toggle: Spacecraft Photo vs Cartoon (Action if pressed) */}
         <div className="flex items-center gap-2">
           <button
+            type="button"
             onClick={() => {
               triggerSynth('beep');
               const nextMode = !showRealPhoto;
@@ -107,9 +142,11 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
             <div className="absolute w-72 h-20 sm:w-96 sm:h-28 border-[14px] sm:border-[18px] border-amber-200/60 rounded-[100%] rotate-[22deg] shadow-[0_0_55px_rgba(228,197,104,0.45)] pointer-events-none z-10" />
           )}
 
-          <div
+          <button
+            type="button"
             onClick={handlePlayVoice}
-            className="cockpit-btn relative w-48 h-48 sm:w-60 sm:h-60 md:w-72 md:h-72 rounded-full flex items-center justify-center transition-transform hover:scale-105 active:scale-95 duration-200 overflow-hidden cursor-pointer"
+            aria-label={`Hear facts about ${planet.name}`}
+            className="cockpit-btn relative w-48 h-48 sm:w-60 sm:h-60 md:w-72 md:h-72 rounded-full flex items-center justify-center transition-transform hover:scale-105 active:scale-95 duration-200 overflow-hidden cursor-pointer border-0 p-0"
             style={{
               backgroundColor: planet.color || '#38bdf8',
               boxShadow: `0 0 75px ${planet.color}aa, inset 0 0 30px rgba(0,0,0,0.4)`,
@@ -133,7 +170,7 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
 
             {/* Inner Atmospheric Rim Glow */}
             <div className="absolute inset-0 rounded-full border-4 border-white/25 pointer-events-none" />
-          </div>
+          </button>
         </div>
 
         {/* NASA Image Mission Credit Pill */}
@@ -160,6 +197,7 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
 
           {/* Action Push-Button */}
           <button
+            type="button"
             onClick={handleDoAction}
             style={{ touchAction: 'manipulation' }}
             className="cockpit-btn min-h-[64px] w-full px-6 py-3 bg-gradient-to-r from-fuchsia-600 via-pink-600 to-rose-600 hover:from-fuchsia-500 hover:to-rose-500 text-white font-black text-base sm:text-lg rounded-2xl border-2 border-yellow-300 shadow-xl flex items-center justify-center gap-3"
@@ -170,13 +208,15 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
 
           {/* If Action was triggered: Show interactive cartoon GIF & cheer */}
           {activeActionCheer && (
-            <div className="flex flex-col items-center gap-2 w-full pt-1 animate-in fade-in duration-300">
-              <div
+            <div className="flex flex-col items-center gap-2 w-full pt-1 animate-fadeIn">
+              <button
+                type="button"
                 onClick={() => {
                   triggerSynth('twinkle');
                   setShowActionGifModal(true);
                 }}
-                className="cursor-pointer group relative w-48 h-48 sm:w-56 sm:h-56 rounded-2xl overflow-hidden border-2 border-yellow-300 shadow-[0_0_25px_rgba(250,204,21,0.35)] transition-transform hover:scale-105 active:scale-95 bg-slate-950"
+                aria-label={`Expand ${planet.name} adventure animation`}
+                className="cursor-pointer group relative w-48 h-48 sm:w-56 sm:h-56 rounded-2xl overflow-hidden border-2 border-yellow-300 shadow-[0_0_25px_rgba(250,204,21,0.35)] transition-transform hover:scale-105 active:scale-95 bg-slate-950 p-0"
               >
                 <img
                   src={getAssetUrl(`/assets/cartoons/interactions/${planet.id}.gif`)}
@@ -194,7 +234,7 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
                 <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-lg bg-black/75 text-[10px] font-bold text-white flex items-center gap-1 border border-white/20">
                   <span>Tap to expand 🔍</span>
                 </div>
-              </div>
+              </button>
 
               <div className="px-4 py-2 rounded-2xl bg-fuchsia-950/90 border-2 border-fuchsia-400 text-fuchsia-200 text-sm sm:text-base font-black shadow-lg text-center">
                 {activeActionCheer}
@@ -212,7 +252,7 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
               <span>Gravity Bounciness</span>
             </div>
             <div className="text-xs sm:text-sm font-bold text-white mt-1">
-              {getGravityText(planet.gravity_m_s2)}
+              {gravityInfo.emoji} {gravityInfo.text}
             </div>
           </div>
 
@@ -243,6 +283,7 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
         <div className="mt-3 sm:mt-4 flex flex-wrap items-center justify-center gap-3 w-full max-w-xl">
           {/* Hear Story Button */}
           <button
+            type="button"
             onClick={handlePlayVoice}
             style={{ touchAction: 'manipulation' }}
             className="cockpit-btn min-h-[56px] flex-1 min-w-[150px] px-4 py-3 bg-cyan-700 hover:bg-cyan-600 text-white font-extrabold text-sm sm:text-base rounded-2xl border-2 border-cyan-400/60 flex items-center justify-center gap-2 shadow-lg"
@@ -253,6 +294,7 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
 
           {/* Play Sound Button */}
           <button
+            type="button"
             onClick={handlePlaySfx}
             style={{ touchAction: 'manipulation' }}
             className="cockpit-btn min-h-[56px] flex-1 min-w-[150px] px-4 py-3 bg-amber-600 hover:bg-amber-500 text-white font-extrabold text-sm sm:text-base rounded-2xl border-2 border-amber-300/60 flex items-center justify-center gap-2 shadow-lg"
@@ -267,7 +309,10 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
       {/* Cartoon Action Celebration Modal */}
       {showActionGifModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200"
+          role="dialog"
+          aria-modal="true"
+          aria-label={actionTitle}
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn"
           onClick={() => setShowActionGifModal(false)}
         >
           <div
@@ -276,6 +321,7 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
           >
             {/* Close Button */}
             <button
+              type="button"
               onClick={() => setShowActionGifModal(false)}
               className="cockpit-btn absolute top-3 right-3 w-10 h-10 rounded-full bg-slate-800 border-2 border-slate-600 text-slate-300 hover:text-white flex items-center justify-center shadow-lg transition"
               aria-label="Close"
@@ -316,6 +362,7 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
             {/* Toddler Controls */}
             <div className="flex items-center gap-3 w-full mt-4">
               <button
+                type="button"
                 onClick={() => {
                   triggerSynth(planet.sfx || 'twinkle');
                   speak(actionCheer);
@@ -327,6 +374,7 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
                 <span>Play Again 🔄</span>
               </button>
               <button
+                type="button"
                 onClick={() => setShowActionGifModal(false)}
                 style={{ touchAction: 'manipulation' }}
                 className="cockpit-btn flex-1 py-3 px-4 rounded-2xl bg-slate-800 hover:bg-slate-700 text-cyan-300 font-black text-sm sm:text-base border-2 border-cyan-500/60 shadow-xl flex items-center justify-center gap-2"

@@ -4,13 +4,46 @@ import Launchpad from './components/Launchpad';
 import Cockpit from './components/Cockpit';
 import PlanetView from './components/PlanetView';
 import AudioPlayer, { AudioProvider, useSpaceAudio } from './components/AudioPlayer';
-import { Rocket, Sparkles, Radio, ArrowLeft } from 'lucide-react';
+import { Rocket, Radio, ArrowLeft, RotateCcw } from 'lucide-react';
+
+class AppErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="w-full h-full flex flex-col items-center justify-center bg-space-dark text-white p-6 text-center select-none">
+          <div className="text-6xl mb-4">🛸</div>
+          <h1 className="text-2xl font-black text-yellow-300 mb-2">Oops! Cosmic Hiccup!</h1>
+          <p className="text-sm text-cyan-200 font-bold mb-6 max-w-sm">
+            Captain Olivia and Navigator Anna need to restart the Adventure Rocket!
+          </p>
+          <button
+            type="button"
+            onClick={() => this.setState({ hasError: false })}
+            className="cockpit-btn px-6 py-3 bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 font-black rounded-2xl border-2 border-yellow-200 flex items-center gap-2 shadow-xl"
+          >
+            <RotateCcw className="w-5 h-5" />
+            <span>Restart Rocket</span>
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 function SpaceApp() {
   const { triggerSynth, speak } = useSpaceAudio();
   const [selectedPlanet, setSelectedPlanet] = useState(null);
   const [currentView, setCurrentView] = useState('launchpad'); // 'launchpad' | 'cockpit' | 'planet'
-  const [isLaunching, setIsLaunching] = useState(false);
   const [cockpitViewMode, setCockpitViewMode] = useState('solarsystem'); // 'solarsystem' | 'earth'
   const [usePhotoFace, setUsePhotoFace] = useState(false); // Default to new cartoon faces!
 
@@ -21,13 +54,6 @@ function SpaceApp() {
   const handleSelectDestination = (planet) => {
     setSelectedPlanet(planet);
     setCurrentView('planet');
-  };
-
-  const handleGenericLaunch = () => {
-    const nextPlanet = selectedPlanet 
-      ? celestialData[(celestialData.findIndex(p => p.id === selectedPlanet.id) + 1) % celestialData.length]
-      : celestialData[1]; // default to Moon
-    handleSelectDestination(nextPlanet);
   };
 
   const handleReturnToCockpit = () => {
@@ -79,10 +105,12 @@ function SpaceApp() {
             <>
               {/* Personalized Real Photo vs Cartoon Pilot Face Toggle (Action if pressed) */}
               <button
+                type="button"
                 onClick={() => {
                   triggerSynth('twinkle');
-                  setUsePhotoFace((prev) => !prev);
-                  speak(usePhotoFace ? 'Cartoon faces!' : "Olivia and Anna's photo faces!");
+                  const next = !usePhotoFace;
+                  setUsePhotoFace(next);
+                  speak(next ? "Olivia and Anna's photo faces!" : 'Cartoon faces!');
                 }}
                 style={{ touchAction: 'manipulation' }}
                 title={usePhotoFace ? "Switch to Cartoon faces" : "Switch to Photo faces"}
@@ -93,6 +121,7 @@ function SpaceApp() {
 
               {/* Crew Radio Check */}
               <button
+                type="button"
                 onClick={handleRadioCheck}
                 style={{ touchAction: 'manipulation' }}
                 title="Radio check with Astro-Lab Mission Control"
@@ -107,6 +136,7 @@ function SpaceApp() {
           {/* Destination View: Return to Cockpit Shortcut */}
           {currentView === 'planet' && (
             <button
+              type="button"
               onClick={handleReturnToCockpit}
               style={{ touchAction: 'manipulation' }}
               className="cockpit-btn px-2.5 sm:px-3 py-1 bg-slate-800 hover:bg-slate-700 text-cyan-300 text-xs font-black rounded-xl border border-cyan-400/50 flex items-center gap-1 shadow-md"
@@ -119,6 +149,7 @@ function SpaceApp() {
           {/* Return to Launchpad */}
           {currentView !== 'launchpad' && (
             <button
+              type="button"
               onClick={handleReturnToEarth}
               style={{ touchAction: 'manipulation' }}
               title="Return to Launchpad"
@@ -136,20 +167,6 @@ function SpaceApp() {
 
       {/* Main View Area (Fills remaining height) */}
       <main className="relative flex-1 w-full h-[calc(100%-56px)] overflow-hidden">
-        {/* Full-screen Hyper-Drive Blast Off Transition */}
-        {isLaunching && (
-          <div className="absolute inset-0 z-50 bg-slate-950/95 flex flex-col items-center justify-center animate-pulse">
-            <div className="text-7xl md:text-8xl animate-bounce mb-4">🚀</div>
-            <div className="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-rose-400 to-cyan-300 tracking-widest uppercase">
-              WARP SPEED!
-            </div>
-            <div className="text-base md:text-lg text-cyan-200 mt-2 font-bold flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-yellow-300 animate-spin" />
-              <span>Traveling to {selectedPlanet?.name || 'deep space'}...</span>
-            </div>
-          </div>
-        )}
-
         {/* View Routing */}
         {currentView === 'launchpad' && (
           <Launchpad
@@ -163,9 +180,8 @@ function SpaceApp() {
           <Cockpit
             celestialBodies={celestialData}
             onSelectDestination={handleSelectDestination}
-            onLaunchSequence={handleGenericLaunch}
-            onReturnToEarth={handleReturnToEarth}
             cockpitViewMode={cockpitViewMode}
+            setCockpitViewMode={setCockpitViewMode}
             usePhotoFace={usePhotoFace}
           />
         )}
@@ -183,8 +199,10 @@ function SpaceApp() {
 
 export default function App() {
   return (
-    <AudioProvider>
-      <SpaceApp />
-    </AudioProvider>
+    <AppErrorBoundary>
+      <AudioProvider>
+        <SpaceApp />
+      </AudioProvider>
+    </AppErrorBoundary>
   );
 }
