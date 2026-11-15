@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useId, useRef, useEffect } from 'react';
 import { useSpaceAudio } from './AudioPlayer';
 import SolarSystemView from './SolarSystemView';
 import FlyingToyRocket from './FlyingToyRocket';
-import { Sparkles, Radio, Rocket, Orbit, Globe } from 'lucide-react';
+import { Rocket } from 'lucide-react';
 import { getAssetUrl } from '../utils/assets';
 
 /**
@@ -13,6 +13,7 @@ import { getAssetUrl } from '../utils/assets';
  * 2. Hand-crafted illustrated cartoon face with matching hair and expressions
  */
 function CartoonAstronaut({ name, role, isDriver, isCheering, usePhotoFace = false }) {
+  const uid = useId();
   const isOlivia = name.toLowerCase().includes('olivia');
   const suitAccent = isOlivia ? '#38bdf8' : '#c084fc'; // Cyan for Olivia, Lilac/Purple for Anna
   const visorTint = isOlivia ? 'rgba(56, 189, 248, 0.2)' : 'rgba(216, 180, 254, 0.2)';
@@ -23,11 +24,11 @@ function CartoonAstronaut({ name, role, isDriver, isCheering, usePhotoFace = fal
   );
   const cartoonSrc = getAssetUrl(
     isOlivia
-      ? '/assets/cartoons/characters/olivia_cartoon_circle.png'
-      : '/assets/cartoons/characters/anna_cartoon_circle.png'
+      ? '/assets/cartoons/characters/olivia_cartoon_circle.webp'
+      : '/assets/cartoons/characters/anna_cartoon_circle.webp'
   );
 
-  const clipId = `visor-clip-${name.toLowerCase()}`;
+  const clipId = `visor-clip-${name.toLowerCase()}-${uid}`;
 
   return (
     <div className={`relative flex flex-col items-center select-none transition-transform duration-300 ${isCheering ? 'scale-110 -translate-y-3' : 'animate-float'}`}>
@@ -178,14 +179,22 @@ function CartoonAstronaut({ name, role, isDriver, isCheering, usePhotoFace = fal
 export default function Cockpit({
   celestialBodies = [],
   onSelectDestination,
-  onReturnToEarth,
   cockpitViewMode = 'solarsystem',
+  setCockpitViewMode,
   usePhotoFace = false,
 }) {
-  const { playTrackOrSfx, triggerSynth, speak } = useSpaceAudio();
+  const { triggerSynth, speak } = useSpaceAudio();
   const [blastingTarget, setBlastingTarget] = useState(null);
   const [isBlasting, setIsBlasting] = useState(false);
-  const [activeCategory, setActiveCategory] = useState('all'); // 'all' | 'planets' | 'moons' | 'sun_dwarf'
+  const blastTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (blastTimeoutRef.current) {
+        clearTimeout(blastTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Big push-button click handler
   const handleDestinationTap = (body) => {
@@ -195,22 +204,19 @@ export default function Cockpit({
     setIsBlasting(true);
 
     // 1. Rocket sound cue & audio announcement
-    playTrackOrSfx(null, 'blastoff');
     triggerSynth('blastoff');
     speak(`Blast off to ${body.name}! Here we go!`);
 
     // 2. Transition rocket toward that body after rumble effect (~1.8s)
-    setTimeout(() => {
+    if (blastTimeoutRef.current) {
+      clearTimeout(blastTimeoutRef.current);
+    }
+    blastTimeoutRef.current = setTimeout(() => {
       setIsBlasting(false);
       if (onSelectDestination) {
         onSelectDestination(body);
       }
     }, 1800);
-  };
-
-  const handleRadioCheck = () => {
-    triggerSynth('twinkle');
-    speak('Mission Control to Captain Olivia and Navigator Anna: All systems are GO for blast off!');
   };
 
   return (
@@ -319,9 +325,10 @@ export default function Cockpit({
 
               {/* Jump to Solar System Button in Earth view */}
               <button
+                type="button"
                 onClick={() => {
                   triggerSynth('beep');
-                  setCockpitViewMode('solarsystem');
+                  if (setCockpitViewMode) setCockpitViewMode('solarsystem');
                   speak('Opening the Solar System Highway!');
                 }}
                 style={{ touchAction: 'manipulation' }}

@@ -6,7 +6,7 @@ This application is packaged and prepared for zero-friction deployment to any ho
 
 ## 🌟 Option 1: GitHub Pages (Recommended — 100% Free & Automated)
 
-The repository already includes an automated GitHub Actions deployment workflow at [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml).
+The repository already includes an automated GitHub Actions deployment workflow at [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml).
 
 ### Quick 1-Time Activation:
 1. Go to your GitHub repository: [github.com/jeremya1129/Olivia-in-outer-space](https://github.com/jeremya1129/Olivia-in-outer-space).
@@ -28,7 +28,7 @@ A dedicated [`vercel.json`](vercel.json) configuration is already included with 
 1. Log in to [vercel.com](https://vercel.com).
 2. Click **Add New...** $\rightarrow$ **Project**.
 3. Select your GitHub repository: `jeremya1129/Olivia-in-outer-space`.
-4. Keep the default settings (Framework Preset: Vite, Root Directory: `./`).
+4. Set **Root Directory** to `Olivia-in-Outer-Space` (Framework Preset: **Vite**).
 5. Click **Deploy**. Vercel will build and assign an instant live URL with automatic SSL.
 
 ---
@@ -40,13 +40,13 @@ Both [`netlify.toml`](netlify.toml) and [`public/_redirects`](public/_redirects)
 ### Netlify:
 1. Log in to [netlify.com](https://netlify.com) $\rightarrow$ **Add new site** $\rightarrow$ **Import an existing project**.
 2. Connect your GitHub repository.
-3. Build command: `npm run build` | Publish directory: `dist`.
+3. Base directory: `Olivia-in-Outer-Space` | Build command: `npm run build` | Publish directory: `dist`.
 4. Click **Deploy Olivia in Outer Space**.
 
 ### Cloudflare Pages:
 1. In Cloudflare Dashboard, go to **Workers & Pages** $\rightarrow$ **Create Application** $\rightarrow$ **Pages** $\rightarrow$ **Connect to Git**.
 2. Select `jeremya1129/Olivia-in-outer-space`.
-3. Framework preset: **Vite** | Build command: `npm run build` | Output directory: `dist`.
+3. Root directory: `Olivia-in-Outer-Space` | Framework preset: **Vite** | Build command: `npm run build` | Output directory: `dist`.
 
 ---
 

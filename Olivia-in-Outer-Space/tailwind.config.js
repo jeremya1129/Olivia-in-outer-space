@@ -1,3 +1,5 @@
+import defaultTheme from 'tailwindcss/defaultTheme';
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
@@ -5,6 +7,10 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
+    screens: {
+      xs: '420px',
+      ...defaultTheme.screens,
+    },
     extend: {
       colors: {
         space: {
@@ -22,6 +28,7 @@ export default {
         'pulse-subtle': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'float': 'float 4s ease-in-out infinite',
         'twinkle': 'twinkle 2s ease-in-out infinite alternate',
+        'fadeIn': 'fadeIn 0.25s ease-out forwards',
       },
       keyframes: {
         float: {
@@ -31,6 +38,14 @@ export default {
         twinkle: {
           '0%': { opacity: 0.3, transform: 'scale(0.8)' },
           '100%': { opacity: 1, transform: 'scale(1.2)' },
+        },
+        fadeIn: {
+          '0%': { opacity: 0, transform: 'scale(0.98)' },
+          '100%': { opacity: 1, transform: 'scale(1)' },
+        },
+        slideRight: {
+          '0%': { transform: 'translateX(-40px)', opacity: 0.7 },
+          '100%': { transform: 'translateX(45px)', opacity: 1 },
         },
       },
     },
