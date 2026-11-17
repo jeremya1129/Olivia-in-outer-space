@@ -162,7 +162,7 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
   const [showRealPhoto, setShowRealPhoto] = useState(true);
   const [imageErrorMap, setImageErrorMap] = useState({});
 
-  const scrollContainerRef = useRef(null);
+  const planetCardRefs = useRef(new Map());
 
   // Map bodies by ID for O(1) metadata lookup
   const bodyMap = React.useMemo(() => {
@@ -183,7 +183,7 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
 
   // Jump directly to a planet on the horizontal track
   const handleJumpToPlanet = (planetId) => {
-    const el = document.getElementById(`planet-card-${planetId}`);
+    const el = planetCardRefs.current.get(planetId);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
       triggerSynth('beep');
@@ -246,7 +246,7 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
                   type="button"
                   onClick={() => handleJumpToPlanet(item.id)}
                   style={{ touchAction: 'manipulation' }}
-                  className="px-2 py-0.5 rounded-lg text-[10px] font-black uppercase whitespace-nowrap bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/80 shrink-0 transition-all flex items-center gap-1"
+                  className="px-2.5 py-1.5 rounded-lg text-[11px] font-black uppercase whitespace-nowrap bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/80 shrink-0 transition-all flex items-center gap-1"
                 >
                   <span>{item.emoji}</span>
                   <span className="hidden lg:inline">{item.name}</span>
@@ -257,7 +257,6 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
 
           {/* Main Panoramic Highway Canvas (Centered Sun & Moderate Stagger) */}
           <div
-            ref={scrollContainerRef}
             className="relative flex-1 w-full h-full flex items-center overflow-x-auto overflow-y-hidden pl-16 sm:pl-24 md:pl-28 lg:pl-32 pr-10 sm:pr-14 md:pr-16 gap-3 sm:gap-4 md:gap-5 pointer-events-auto scrollbar-none"
             style={{ touchAction: 'pan-x' }}
           >
@@ -303,6 +302,10 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
                   {/* Planet Column */}
                   <div
                     id={`planet-card-${item.id}`}
+                    ref={(el) => {
+                      if (el) planetCardRefs.current.set(item.id, el);
+                      else planetCardRefs.current.delete(item.id);
+                    }}
                     role="button"
                     tabIndex={0}
                     onClick={() => handleOpenPlanetarySystem(item)}
@@ -527,68 +530,61 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
                       return (
                         <div
                           key={`planetary-moon-${moon.id}`}
-                          role="button"
-                          tabIndex={0}
-                          onClick={() => {
-                            setSelectedSubBodyId(moon.id);
-                            triggerSynth('twinkle');
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
-                              e.preventDefault();
-                              setSelectedSubBodyId(moon.id);
-                              triggerSynth('twinkle');
-                            }
-                          }}
-                          style={{ touchAction: 'manipulation' }}
-                          className={`relative z-10 flex flex-col items-center w-[124px] sm:w-[144px] md:w-[160px] p-2 sm:p-2.5 rounded-2xl transition-all duration-200 shadow-xl hover:scale-105 active:scale-95 cursor-pointer group shrink-0 select-none text-center ${
+                          className={`relative z-10 flex flex-col items-center w-[124px] sm:w-[144px] md:w-[160px] p-2 sm:p-2.5 rounded-2xl transition-all duration-200 shadow-xl shrink-0 select-none text-center ${
                             isMoonFocused
                               ? 'bg-slate-900 border-2 border-yellow-400 ring-4 ring-yellow-400/40 scale-105'
                               : 'bg-slate-900/80 hover:bg-slate-900 border border-slate-700/80 hover:border-yellow-300'
                           }`}
                         >
-                          {/* Moon Circular Visual Orb (Real Photo / Cartoon) */}
-                          <div
-                            className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-2 border-white/20 shadow-md flex items-center justify-center mb-1.5 transition-transform group-hover:rotate-6"
-                            style={{
-                              backgroundColor: moon.color || '#e0e0e0',
-                              boxShadow: `0 0 24px ${moon.color || '#e0e0e0'}77`,
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedSubBodyId(moon.id);
+                              triggerSynth('twinkle');
                             }}
+                            style={{ touchAction: 'manipulation' }}
+                            className="flex flex-col items-center w-full bg-transparent border-0 p-0 cursor-pointer group focus:outline-none"
                           >
-                            {showRealPhoto && thumbPath && !imageErrorMap[moon.id] ? (
-                              <img
-                                src={getAssetUrl(thumbPath)}
-                                alt={moon.name}
-                                onError={() => setImageErrorMap((prev) => ({ ...prev, [moon.id]: true }))}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center p-1">
-                                <CartoonCelestialBody id={moon.id} size={54} />
-                              </div>
-                            )}
-                            <div className="absolute inset-0 rounded-full border border-white/25 pointer-events-none" />
-                          </div>
+                            {/* Moon Circular Visual Orb (Real Photo / Cartoon) */}
+                            <div
+                              className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-2 border-white/20 shadow-md flex items-center justify-center mb-1.5 transition-transform group-hover:rotate-6"
+                              style={{
+                                backgroundColor: moon.color || '#e0e0e0',
+                                boxShadow: `0 0 24px ${moon.color || '#e0e0e0'}77`,
+                              }}
+                            >
+                              {showRealPhoto && thumbPath && !imageErrorMap[moon.id] ? (
+                                <img
+                                  src={getAssetUrl(thumbPath)}
+                                  alt={moon.name}
+                                  onError={() => setImageErrorMap((prev) => ({ ...prev, [moon.id]: true }))}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center p-1">
+                                  <CartoonCelestialBody id={moon.id} size={54} />
+                                </div>
+                              )}
+                              <div className="absolute inset-0 rounded-full border border-white/25 pointer-events-none" />
+                            </div>
 
-                          {/* Moon Name */}
-                          <span className="text-xs sm:text-sm font-black text-white uppercase tracking-tight truncate w-full">
-                            {moon.name}
-                          </span>
+                            {/* Moon Name */}
+                            <span className="text-xs sm:text-sm font-black text-white uppercase tracking-tight truncate w-full">
+                              {moon.name}
+                            </span>
 
-                          {/* Moon Tagline */}
-                          <span className="text-[9px] sm:text-[10px] text-yellow-300/90 font-bold line-clamp-1 w-full my-0.5">
-                            {moon.tagline}
-                          </span>
+                            {/* Moon Tagline */}
+                            <span className="text-[9px] sm:text-[10px] text-yellow-300/90 font-bold line-clamp-1 w-full my-0.5">
+                              {moon.tagline}
+                            </span>
+                          </button>
 
                           {/* Visit Button */}
                           <button
                             type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleBlastOff(moon);
-                            }}
+                            onClick={() => handleBlastOff(moon)}
                             style={{ touchAction: 'manipulation' }}
-                            className="mt-1 px-3 py-1 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-black text-[10px] sm:text-xs uppercase tracking-wider shadow-md flex items-center gap-1 transition-all"
+                            className="mt-1 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-black text-[10px] sm:text-xs uppercase tracking-wider shadow-md flex items-center gap-1 transition-all"
                           >
                             <span>Visit</span>
                             <Rocket className="w-3 h-3" />

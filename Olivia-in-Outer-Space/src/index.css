@@ -12,6 +12,7 @@
     padding: 0;
     width: 100%;
     height: 100%;
+    height: 100dvh;
     overflow: hidden;
     user-select: none;
     -webkit-user-select: none;
@@ -47,6 +48,21 @@
 
 .animate-rumble {
   animation: screen-rumble 0.12s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rumble {
+    animation: none;
+  }
+
+  .animate-spin-slow,
+  .animate-float,
+  .animate-twinkle,
+  .animate-bounce,
+  .animate-ping {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }
 
 /* Rocket Blast-Off Zoom Keyframe */

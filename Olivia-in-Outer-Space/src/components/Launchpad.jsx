@@ -7,7 +7,7 @@ import { getAssetUrl } from '../utils/assets';
  * Cartoon Astronaut Avatar for the Launchpad
  */
 function EarthAstronaut({ name, isOlivia, isWalking, isCheering, usePhotoFace = false, onClick }) {
-  const uid = useId();
+  const uid = useId().replace(/:/g, '');
   const suitAccent = isOlivia ? '#38bdf8' : '#c084fc';
   const visorTint = isOlivia ? 'rgba(56, 189, 248, 0.25)' : 'rgba(216, 180, 254, 0.25)';
   const photoSrc = getAssetUrl(
@@ -28,6 +28,7 @@ function EarthAstronaut({ name, isOlivia, isWalking, isCheering, usePhotoFace = 
     <Wrapper
       type={onClick ? 'button' : undefined}
       onClick={onClick}
+      aria-label={onClick ? `Tap ${isOlivia ? 'Captain Olivia' : 'Navigator Anna'}` : undefined}
       style={{ touchAction: 'manipulation' }}
       className={`relative flex flex-col items-center select-none transition-all duration-300 ${
         onClick ? 'cursor-pointer bg-transparent border-0 p-0 ' : ''
@@ -123,30 +124,40 @@ function EarthAstronaut({ name, isOlivia, isWalking, isCheering, usePhotoFace = 
  * Animated Boarding & Blast-off Cinematic Sequence
  */
 function BoardingCinematic({ usePhotoFace, onComplete, onSkip }) {
-  const uid = useId();
+  const uid = useId().replace(/:/g, '');
   const launchClipId = `launch-porthole-clip-${uid}`;
   const { triggerSynth, speak, stopSpeaking } = useSpaceAudio();
   const [phase, setPhase] = useState('boarding'); // 'boarding' | 'countdown' | 'liftoff'
   const [count, setCount] = useState(3);
+
+  // Keep audio/callback refs stable so toggling mute or voice mode never restarts the cinematic
   const onCompleteRef = useRef(onComplete);
   onCompleteRef.current = onComplete;
+  const onSkipRef = useRef(onSkip);
+  onSkipRef.current = onSkip;
+  const speakRef = useRef(speak);
+  speakRef.current = speak;
+  const triggerSynthRef = useRef(triggerSynth);
+  triggerSynthRef.current = triggerSynth;
+  const stopSpeakingRef = useRef(stopSpeaking);
+  stopSpeakingRef.current = stopSpeaking;
 
   useEffect(() => {
     // 1. Boarding Phase
-    speak("All aboard the Adventure Rocket! Captain Olivia and Navigator Anna are climbing inside!");
-    triggerSynth('twinkle');
+    speakRef.current("All aboard the Adventure Rocket! Captain Olivia and Navigator Anna are climbing inside!");
+    triggerSynthRef.current('twinkle');
 
     const countdownTimer = setTimeout(() => {
       setPhase('countdown');
-      speak("Ready for ignition! 3...");
-      triggerSynth('beep');
+      speakRef.current("Ready for ignition! 3...");
+      triggerSynthRef.current('beep');
     }, 2800);
 
     return () => {
       clearTimeout(countdownTimer);
-      stopSpeaking();
+      stopSpeakingRef.current();
     };
-  }, [speak, triggerSynth, stopSpeaking]);
+  }, []);
 
   useEffect(() => {
     if (phase !== 'countdown') return;
@@ -154,28 +165,28 @@ function BoardingCinematic({ usePhotoFace, onComplete, onSkip }) {
     if (count === 3) {
       const t = setTimeout(() => {
         setCount(2);
-        speak("2...");
-        triggerSynth('beep');
+        speakRef.current("2...");
+        triggerSynthRef.current('beep');
       }, 1000);
       return () => clearTimeout(t);
     }
     if (count === 2) {
       const t = setTimeout(() => {
         setCount(1);
-        speak("1...");
-        triggerSynth('beep');
+        speakRef.current("1...");
+        triggerSynthRef.current('beep');
       }, 1000);
       return () => clearTimeout(t);
     }
     if (count === 1) {
       const t = setTimeout(() => {
         setPhase('liftoff');
-        speak("BLAST OFF! Into Outer Space!");
-        triggerSynth('blastoff');
+        speakRef.current("BLAST OFF! Into Outer Space!");
+        triggerSynthRef.current('blastoff');
       }, 1000);
       return () => clearTimeout(t);
     }
-  }, [phase, count, speak, triggerSynth]);
+  }, [phase, count]);
 
   useEffect(() => {
     if (phase === 'liftoff') {
@@ -187,9 +198,19 @@ function BoardingCinematic({ usePhotoFace, onComplete, onSkip }) {
   }, [phase]);
 
   const handleSkip = () => {
-    stopSpeaking();
-    onSkip();
+    stopSpeakingRef.current();
+    onSkipRef.current();
   };
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        handleSkip();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950 flex flex-col items-center justify-center overflow-hidden">
@@ -330,7 +351,7 @@ function BoardingCinematic({ usePhotoFace, onComplete, onSkip }) {
  * Main Launchpad / Start Screen Component
  */
 export default function Launchpad({ onBlastOff, usePhotoFace = false, onTogglePhotoFace }) {
-  const uid = useId();
+  const uid = useId().replace(/:/g, '');
   const rocketClipId = `earth-rocket-porthole-${uid}`;
   const { triggerSynth, speak } = useSpaceAudio();
   const [internalPhotoFace, setInternalPhotoFace] = useState(false);
@@ -360,7 +381,6 @@ export default function Launchpad({ onBlastOff, usePhotoFace = false, onTogglePh
   };
 
   const handleStartBlastOff = () => {
-    triggerSynth('blastoff');
     setIsCinematicActive(true);
   };
 
@@ -394,7 +414,7 @@ export default function Launchpad({ onBlastOff, usePhotoFace = false, onTogglePh
           }}
           style={{ touchAction: 'manipulation' }}
           title={activePhotoFace ? "Switch to Cartoon Face" : "Switch to Real Photo Face"}
-          className="cockpit-btn px-3.5 py-1.5 bg-slate-900/85 hover:bg-slate-800 text-yellow-300 border-2 border-yellow-400/60 rounded-2xl flex items-center gap-1.5 text-xs font-black shadow-xl backdrop-blur-md"
+          className="cockpit-btn min-h-[44px] px-3.5 py-2 bg-slate-900/85 hover:bg-slate-800 text-yellow-300 border-2 border-yellow-400/60 rounded-2xl flex items-center gap-1.5 text-xs font-black shadow-xl backdrop-blur-md"
         >
           <Camera className="w-4 h-4 text-cyan-300" />
           <span>{activePhotoFace ? '🎨 Cartoon Face' : '📸 Real Photo Face'}</span>

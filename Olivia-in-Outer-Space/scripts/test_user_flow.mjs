@@ -75,10 +75,19 @@ class CDPClient {
       this.ws.onerror = reject;
     });
 
+    this.ws.onclose = () => {
+      for (const [, { reject, timer }] of this.callbacks) {
+        clearTimeout(timer);
+        reject(new Error('CDP WebSocket closed unexpectedly'));
+      }
+      this.callbacks.clear();
+    };
+
     this.ws.onmessage = (event) => {
       const msg = JSON.parse(event.data);
       if (msg.id && this.callbacks.has(msg.id)) {
-        const { resolve, reject } = this.callbacks.get(msg.id);
+        const { resolve, reject, timer } = this.callbacks.get(msg.id);
+        clearTimeout(timer);
         this.callbacks.delete(msg.id);
         if (msg.error) reject(msg.error);
         else resolve(msg.result);
@@ -105,10 +114,14 @@ class CDPClient {
     };
   }
 
-  send(method, params = {}) {
+  send(method, params = {}, timeoutMs = 15000) {
     return new Promise((resolve, reject) => {
       const id = this.id++;
-      this.callbacks.set(id, { resolve, reject });
+      const timer = setTimeout(() => {
+        this.callbacks.delete(id);
+        reject(new Error(`CDP request timed out (${method}) after ${timeoutMs}ms`));
+      }, timeoutMs);
+      this.callbacks.set(id, { resolve, reject, timer });
       this.ws.send(JSON.stringify({ id, method, params }));
     });
   }
@@ -378,7 +391,7 @@ async function runTests() {
     await sleep(3000);
 
     // Destination view loaded!
-    const destTitle = await cdp.eval('document.querySelector("main h1")?.textContent?.trim()');
+    const destTitle = await cdp.eval('document.querySelector("main h2")?.textContent?.trim()');
     assert('Destination screen loaded for planet', destTitle === 'Earth', `Found "${destTitle}"`);
 
     // Verify Cartoon Visual is default

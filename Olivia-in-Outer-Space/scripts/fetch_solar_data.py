@@ -737,14 +737,16 @@ def verify_non_nulls(records: list, db_path: Path):
 
     # Verify SQLite DB
     conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    cursor.execute("SELECT COUNT(*) FROM celestial_bodies")
-    total_db_count = cursor.fetchone()[0]
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM celestial_bodies")
+        total_db_count = cursor.fetchone()[0]
 
-    null_checks = " OR ".join([f"{col} IS NULL" for col in columns])
-    cursor.execute(f"SELECT COUNT(*) FROM celestial_bodies WHERE {null_checks}")
-    null_count = cursor.fetchone()[0]
-    conn.close()
+        null_checks = " OR ".join([f"{col} IS NULL" for col in columns])
+        cursor.execute(f"SELECT COUNT(*) FROM celestial_bodies WHERE {null_checks}")
+        null_count = cursor.fetchone()[0]
+    finally:
+        conn.close()
 
     if null_count > 0:
         raise ValueError(f"Database contains {null_count} rows with null values!")
@@ -767,38 +769,42 @@ def run():
     print(f"\n[1/4] Initializing database at: {args.db_path} via {SCHEMA_PATH.name}")
     conn = init_db(args.db_path, SCHEMA_PATH)
 
-    # Step 2: Fetch and Normalize
-    print("\n[2/4] Fetching and normalizing primary celestial bodies (20 bodies)...")
-    normalized_records = []
-    api_available = True
+    try:
+        # Step 2: Fetch and Normalize
+        print("\n[2/4] Fetching and normalizing primary celestial bodies (20 bodies)...")
+        normalized_records = []
+        api_available = True
 
-    for target in CELESTIAL_TARGETS:
-        slug = target["id"]
-        api_id = target["api_id"]
-        record = None
+        for target in CELESTIAL_TARGETS:
+            slug = target["id"]
+            api_id = target["api_id"]
+            record = None
 
-        if not args.offline and api_available:
-            try:
-                raw_data = fetch_body_api(api_id, api_key=args.api_key)
-                record = normalize_solar_body(raw_data, target)
-                print(f"  [API] Fetched {record['english_name']} ({slug}) [{target['category']}]")
-            except urllib.error.HTTPError as e:
-                if e.code == 401 and api_available:
-                    print("  [!] API requires an API key (HTTP 401). Falling back seamlessly to curated baseline.")
-                    api_available = False
-            except Exception as e:
-                pass
+            if not args.offline and api_available:
+                try:
+                    raw_data = fetch_body_api(api_id, api_key=args.api_key)
+                    record = normalize_solar_body(raw_data, target)
+                    print(f"  [API] Fetched {record['english_name']} ({slug}) [{target['category']}]")
+                except urllib.error.HTTPError as e:
+                    if e.code == 401 and api_available:
+                        print("  [!] API requires an API key (HTTP 401). Falling back seamlessly to curated baseline.")
+                        api_available = False
+                    else:
+                        print(f"  [!] HTTP {e.code} for {slug}: {e.reason}. Falling back to baseline.")
+                except Exception as e:
+                    print(f"  [!] API fetch failed for {slug}: {e}. Falling back to baseline.")
 
-        if not record:
-            record = get_baseline_record(target)
-            print(f"  [Baseline] Loaded {record['english_name']} ({slug}) [{target['category']}]")
+            if not record:
+                record = get_baseline_record(target)
+                print(f"  [Baseline] Loaded {record['english_name']} ({slug}) [{target['category']}]")
 
-        normalized_records.append(record)
+            normalized_records.append(record)
 
-    # Step 3: Insert into SQLite
-    print(f"\n[3/4] Inserting {len(normalized_records)} normalized records into SQLite...")
-    store_records_in_db(conn, normalized_records)
-    conn.close()
+        # Step 3: Insert into SQLite
+        print(f"\n[3/4] Inserting {len(normalized_records)} normalized records into SQLite...")
+        store_records_in_db(conn, normalized_records)
+    finally:
+        conn.close()
 
     # Step 4: Export to JSON
     print(f"\n[4/4] Exporting to UTF-8 indented JSON at: {args.json_path}")

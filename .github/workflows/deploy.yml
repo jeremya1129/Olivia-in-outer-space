@@ -39,7 +39,6 @@ jobs:
       - name: Build Olivia in Outer Space
         working-directory: Olivia-in-Outer-Space
         env:
-          GITHUB_PAGES: 'true'
           VITE_BASE_URL: '/Olivia-in-outer-space/'
         run: npm run build
 

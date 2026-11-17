@@ -7,10 +7,11 @@
  * @returns {string} - Fully qualified base-aware URL
  */
 export function getAssetUrl(path) {
-  if (!path) return '';
+  if (!path || typeof path !== 'string') return '';
   if (
     path.startsWith('http://') ||
     path.startsWith('https://') ||
+    path.startsWith('//') ||
     path.startsWith('data:') ||
     path.startsWith('blob:')
   ) {

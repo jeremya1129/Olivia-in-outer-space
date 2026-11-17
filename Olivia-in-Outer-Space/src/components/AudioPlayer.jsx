@@ -1,4 +1,12 @@
-import React, { useState, useEffect, useCallback, useRef, createContext, useContext } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+  createContext,
+  useContext,
+} from 'react';
 import { Volume2, VolumeX, Sparkles } from 'lucide-react';
 import { getAssetUrl } from '../utils/assets';
 
@@ -14,7 +22,7 @@ export const useSpaceAudio = () => {
 
 /**
  * Procedural Web Audio API synthesizer for toddler-friendly sensory sound effects.
- * Acts as an instant fallback when recorded audio files are not yet present on disk!
+ * Acts as an instant fallback when recorded audio files are not yet present on disk.
  */
 class SynthesizedSoundFX {
   constructor() {
@@ -29,24 +37,35 @@ class SynthesizedSoundFX {
       }
     }
     if (this.ctx && this.ctx.state === 'suspended') {
-      this.ctx.resume();
+      this.ctx.resume().catch(() => {});
     }
+  }
+
+  /**
+   * Schedules a sequence of oscillator tones using a shared Web Audio setup.
+   */
+  _playNotes(freqs, { type = 'sine', volume = 0.12, step = 0.05, duration = 0.15 } = {}) {
+    this.init();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    freqs.forEach((freq, idx) => {
+      const start = now + idx * step;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, start);
+      gain.gain.setValueAtTime(volume, start);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(start);
+      osc.stop(start + duration);
+    });
   }
 
   playBeep(freq = 520, duration = 0.12) {
     try {
-      this.init();
-      if (!this.ctx) return;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-      gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start();
-      osc.stop(this.ctx.currentTime + duration);
+      this._playNotes([freq], { type: 'sine', volume: 0.2, step: 0, duration });
     } catch (e) {
       console.warn('Audio error:', e);
     }
@@ -54,21 +73,7 @@ class SynthesizedSoundFX {
 
   playRobotBeep() {
     try {
-      this.init();
-      if (!this.ctx) return;
-      // High-tech sci-fi dual blip: square/sawtooth wave jump for Astro-Bot droid
-      [660, 1320, 990].forEach((freq, idx) => {
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.045);
-        gain.gain.setValueAtTime(0.09, this.ctx.currentTime + idx * 0.045);
-        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.045 + 0.04);
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.start(this.ctx.currentTime + idx * 0.045);
-        osc.stop(this.ctx.currentTime + idx * 0.045 + 0.04);
-      });
+      this._playNotes([660, 1320, 990], { type: 'sawtooth', volume: 0.09, step: 0.045, duration: 0.04 });
     } catch (e) {
       console.warn('Robot beep error:', e);
     }
@@ -76,21 +81,7 @@ class SynthesizedSoundFX {
 
   playChildChime() {
     try {
-      this.init();
-      if (!this.ctx) return;
-      // Sweet cheerful ascending chime for Captain Olivia & Navigator Anna
-      [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.05);
-        gain.gain.setValueAtTime(0.12, this.ctx.currentTime + idx * 0.05);
-        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.05 + 0.15);
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.start(this.ctx.currentTime + idx * 0.05);
-        osc.stop(this.ctx.currentTime + idx * 0.05 + 0.15);
-      });
+      this._playNotes([523.25, 659.25, 783.99, 1046.5], { type: 'sine', volume: 0.12, step: 0.05, duration: 0.15 });
     } catch (e) {
       console.warn('Child chime error:', e);
     }
@@ -98,20 +89,7 @@ class SynthesizedSoundFX {
 
   playTwinkle() {
     try {
-      this.init();
-      if (!this.ctx) return;
-      [659.25, 783.99, 1046.5, 1318.5].forEach((freq, idx) => {
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.09);
-        gain.gain.setValueAtTime(0.15, this.ctx.currentTime + idx * 0.09);
-        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.09 + 0.3);
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.start(this.ctx.currentTime + idx * 0.09);
-        osc.stop(this.ctx.currentTime + idx * 0.09 + 0.3);
-      });
+      this._playNotes([659.25, 783.99, 1046.5, 1318.5], { type: 'triangle', volume: 0.15, step: 0.09, duration: 0.3 });
     } catch (e) {
       console.warn('Twinkle error:', e);
     }
@@ -217,18 +195,32 @@ export const AudioProvider = ({ children }) => {
   const [voices, setVoices] = useState([]);
 
   const voiceToggleTimeoutRef = useRef(null);
+  const activeAudiosRef = useRef(new Set());
 
-  // Clean up any pending timers or speech on unmount
+  const stopAllHtmlAudio = useCallback(() => {
+    activeAudiosRef.current.forEach((audio) => {
+      try {
+        audio.pause();
+        audio.currentTime = 0;
+      } catch {
+        // ignore audio cleanup errors
+      }
+    });
+    activeAudiosRef.current.clear();
+  }, []);
+
+  // Clean up any pending timers, HTML audio, or speech on unmount
   useEffect(() => {
     return () => {
       if (voiceToggleTimeoutRef.current) {
         clearTimeout(voiceToggleTimeoutRef.current);
       }
+      stopAllHtmlAudio();
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel();
       }
     };
-  }, []);
+  }, [stopAllHtmlAudio]);
 
   // Load available system/browser voices dynamically
   useEffect(() => {
@@ -242,10 +234,10 @@ export const AudioProvider = ({ children }) => {
     };
 
     loadVoices();
-    window.speechSynthesis.onvoiceschanged = loadVoices;
+    window.speechSynthesis.addEventListener?.('voiceschanged', loadVoices);
 
     return () => {
-      window.speechSynthesis.onvoiceschanged = null;
+      window.speechSynthesis.removeEventListener?.('voiceschanged', loadVoices);
     };
   }, []);
 
@@ -345,7 +337,12 @@ export const AudioProvider = ({ children }) => {
     const isAudioFile = typeof audioPath === 'string' && /\.(mp3|wav|ogg|webm|m4a)(\?.*)?$/i.test(audioPath);
     if (isAudioFile) {
       const audio = new Audio(getAssetUrl(audioPath));
+      activeAudiosRef.current.add(audio);
+      const cleanup = () => activeAudiosRef.current.delete(audio);
+      audio.addEventListener('ended', cleanup, { once: true });
+      audio.addEventListener('error', cleanup, { once: true });
       audio.play().catch(() => {
+        cleanup();
         // Fall back to synth sound if file is not found
         triggerSynth(fallbackKey || audioPath);
       });
@@ -357,7 +354,7 @@ export const AudioProvider = ({ children }) => {
 
   const speak = useCallback(
     (text, overrideMode) => {
-      if (isMuted || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+      if (isMuted || !text || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
       window.speechSynthesis.cancel();
 
       const activeMode = overrideMode || voiceMode;
@@ -402,7 +399,7 @@ export const AudioProvider = ({ children }) => {
 
   const speakWord = useCallback(
     (word) => {
-      if (isMuted || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+      if (isMuted || !word || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(word);
       const selectedVoice = getVoiceForMode(voiceMode);
@@ -418,7 +415,7 @@ export const AudioProvider = ({ children }) => {
 
   const readStory = useCallback(
     (text, { onBoundary, onEnd, onStart, onError } = {}) => {
-      if (isMuted || typeof window === 'undefined' || !('speechSynthesis' in window)) return null;
+      if (isMuted || !text || typeof window === 'undefined' || !('speechSynthesis' in window)) return null;
       window.speechSynthesis.cancel();
 
       if (voiceMode === 'robot') {
@@ -510,37 +507,56 @@ export const AudioProvider = ({ children }) => {
         clearTimeout(voiceToggleTimeoutRef.current);
         voiceToggleTimeoutRef.current = null;
       }
+      stopAllHtmlAudio();
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel();
       }
       setIsSpeaking(false);
+    } else {
+      // Play confirmation beep immediately upon unmuting (avoids stale isMuted closure)
+      synth.playBeep();
     }
-  }, [isMuted]);
+  }, [isMuted, stopAllHtmlAudio]);
+
+  const contextValue = useMemo(
+    () => ({
+      isMuted,
+      toggleMute,
+      playTrackOrSfx,
+      triggerSynth,
+      speak,
+      readStory,
+      stopSpeaking,
+      speakWord,
+      isSpeaking,
+      voiceMode,
+      setVoiceMode,
+      toggleVoiceMode,
+    }),
+    [
+      isMuted,
+      toggleMute,
+      playTrackOrSfx,
+      triggerSynth,
+      speak,
+      readStory,
+      stopSpeaking,
+      speakWord,
+      isSpeaking,
+      voiceMode,
+      toggleVoiceMode,
+    ]
+  );
 
   return (
-    <AudioContextState.Provider
-      value={{
-        isMuted,
-        toggleMute,
-        playTrackOrSfx,
-        triggerSynth,
-        speak,
-        readStory,
-        stopSpeaking,
-        speakWord,
-        isSpeaking,
-        voiceMode,
-        setVoiceMode,
-        toggleVoiceMode,
-      }}
-    >
+    <AudioContextState.Provider value={contextValue}>
       {children}
     </AudioContextState.Provider>
   );
 };
 
 export default function AudioPlayer() {
-  const { isMuted, toggleMute, triggerSynth, isSpeaking, voiceMode, toggleVoiceMode } = useSpaceAudio();
+  const { isMuted, toggleMute, isSpeaking, voiceMode, toggleVoiceMode } = useSpaceAudio();
 
   return (
     <div className="flex items-center gap-1.5 sm:gap-2">
@@ -554,11 +570,12 @@ export default function AudioPlayer() {
 
       {/* Voice Mode Toggle Button (Action if pressed) */}
       <button
+        type="button"
         onClick={toggleVoiceMode}
         aria-label={`Switch to ${voiceMode === 'robot' ? 'Child Voice' : 'Robot Voice'}`}
         title={`Switch to ${voiceMode === 'robot' ? 'Child Voice' : 'Robot Voice'}`}
         style={{ touchAction: 'manipulation' }}
-        className={`cockpit-btn px-2 sm:px-2.5 py-1 rounded-xl flex items-center gap-1.5 border shadow-md transition-all text-xs font-black ${
+        className={`cockpit-btn min-h-[40px] min-w-[40px] px-2.5 py-1.5 rounded-xl flex items-center justify-center gap-1.5 border shadow-md transition-all text-xs font-black ${
           voiceMode === 'robot'
             ? 'bg-amber-950/90 hover:bg-amber-900 text-amber-200 border-amber-400/60'
             : 'bg-purple-950/90 hover:bg-purple-900 text-purple-200 border-purple-400/60'
@@ -572,14 +589,12 @@ export default function AudioPlayer() {
 
       {/* Master Mute / Unmute Button (Action if pressed) */}
       <button
-        onClick={() => {
-          toggleMute();
-          if (isMuted) triggerSynth('beep');
-        }}
+        type="button"
+        onClick={toggleMute}
         aria-label={isMuted ? 'Unmute Audio' : 'Mute Audio'}
         title={isMuted ? 'Unmute Audio' : 'Mute Audio'}
         style={{ touchAction: 'manipulation' }}
-        className="cockpit-btn px-2 sm:px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-yellow-300 border border-slate-600 rounded-xl flex items-center gap-1.5 shadow-md text-xs font-bold"
+        className="cockpit-btn min-h-[40px] min-w-[40px] px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-yellow-300 border border-slate-600 rounded-xl flex items-center justify-center gap-1.5 shadow-md text-xs font-bold"
       >
         {isMuted ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-400" />}
         <span className="text-[11px] font-black uppercase tracking-wider hidden md:inline">
