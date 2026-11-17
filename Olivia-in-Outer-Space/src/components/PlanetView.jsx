@@ -1,22 +1,76 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSpaceAudio } from './AudioPlayer';
 import CartoonCelestialBody from './CartoonCelestialBody';
 import { ArrowLeft, Sparkles, Volume2, Music, Camera, Thermometer, Weight, Moon, X, RotateCcw, Rocket } from 'lucide-react';
 import { getAssetUrl } from '../utils/assets';
 
+/**
+ * Shared interaction GIF with automatic fallback to default.gif on load failure.
+ */
+function InteractionGif({ planetId, alt }) {
+  return (
+    <img
+      src={getAssetUrl(`/assets/cartoons/interactions/${planetId}.gif`)}
+      onError={(e) => {
+        e.currentTarget.onerror = null;
+        e.currentTarget.src = getAssetUrl('/assets/cartoons/interactions/default.gif');
+      }}
+      alt={alt}
+      className="w-full h-full object-cover"
+    />
+  );
+}
+
+/**
+ * Interactive destination view displaying NASA photography or cartoon art,
+ * toddler sensory actions, and physical fact cards.
+ */
 export default function PlanetView({ planet, onReturnToCockpit }) {
-  const { triggerSynth, speak } = useSpaceAudio();
+  const { triggerSynth, speak, stopSpeaking } = useSpaceAudio();
   const [activeActionCheer, setActiveActionCheer] = useState(null);
   const [showRealPhoto, setShowRealPhoto] = useState(false);
   const [showActionGifModal, setShowActionGifModal] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
+  const closeModalButtonRef = useRef(null);
+  const previousFocusRef = useRef(null);
+  const stopSpeakingRef = useRef(stopSpeaking);
+  stopSpeakingRef.current = stopSpeaking;
+
+  // Reset per-planet view state when destination changes
+  useEffect(() => {
+    setActiveActionCheer(null);
+    setShowActionGifModal(false);
+    setImageLoaded(false);
+    setImageError(false);
+  }, [planet?.id]);
+
+  // Reset image load state when toggling between cartoon and NASA photo
   useEffect(() => {
     setImageLoaded(false);
-  }, [planet?.id, showRealPhoto]);
+    setImageError(false);
+  }, [showRealPhoto]);
 
+  // Stop any active narration when leaving PlanetView
   useEffect(() => {
-    if (!showActionGifModal) return;
+    return () => {
+      stopSpeakingRef.current();
+    };
+  }, []);
+
+  // Modal Escape key handling & focus management
+  useEffect(() => {
+    if (!showActionGifModal) {
+      if (previousFocusRef.current && typeof previousFocusRef.current.focus === 'function') {
+        previousFocusRef.current.focus();
+        previousFocusRef.current = null;
+      }
+      return;
+    }
+    previousFocusRef.current = document.activeElement;
+    closeModalButtonRef.current?.focus();
+
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         setShowActionGifModal(false);
@@ -25,6 +79,10 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [showActionGifModal]);
+
+  if (!planet) return null;
+
+  const planetColor = planet.color || '#38bdf8';
 
   // Sensory action info from enriched dataset with safe defaults
   const actionEmoji = planet.action_emoji || '✨';
@@ -123,7 +181,7 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
             }}
             style={{ touchAction: 'manipulation' }}
             title={showRealPhoto ? "Switch to Cartoon Art" : "Switch to NASA Spacecraft Photo"}
-            className="cockpit-btn px-3 py-1.5 rounded-full bg-slate-900/90 border border-slate-600 text-xs font-bold text-yellow-300 flex items-center gap-1.5 shadow-md"
+            className="cockpit-btn min-h-[40px] px-3.5 py-2 rounded-full bg-slate-900/90 border border-slate-600 text-xs font-bold text-yellow-300 flex items-center gap-1.5 shadow-md"
           >
             <Camera className="w-4 h-4 text-cyan-300" />
             <span>{showRealPhoto ? '🎨 Cartoon Art' : '📸 NASA Photo'}</span>
@@ -148,15 +206,16 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
             aria-label={`Hear facts about ${planet.name}`}
             className="cockpit-btn relative w-48 h-48 sm:w-60 sm:h-60 md:w-72 md:h-72 rounded-full flex items-center justify-center transition-transform hover:scale-105 active:scale-95 duration-200 overflow-hidden cursor-pointer border-0 p-0"
             style={{
-              backgroundColor: planet.color || '#38bdf8',
-              boxShadow: `0 0 75px ${planet.color}aa, inset 0 0 30px rgba(0,0,0,0.4)`,
+              backgroundColor: planetColor,
+              boxShadow: `0 0 75px ${planetColor}aa, inset 0 0 30px rgba(0,0,0,0.4)`,
             }}
           >
-            {showRealPhoto && planet.real_image_path ? (
+            {showRealPhoto && planet.real_image_path && !imageError ? (
               <img
                 src={getAssetUrl(planet.real_image_path)}
                 alt={planet.name}
                 onLoad={() => setImageLoaded(true)}
+                onError={() => setImageError(true)}
                 className={`w-full h-full object-cover transition-opacity duration-300 ${
                   imageLoaded ? 'opacity-100' : 'opacity-80'
                 }`}
@@ -174,16 +233,16 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
         </div>
 
         {/* NASA Image Mission Credit Pill */}
-        {showRealPhoto && planet.nasa_asset_id && (
+        {showRealPhoto && planet.nasa_asset_id && !imageError && (
           <div className="text-[11px] sm:text-xs text-slate-300 font-semibold tracking-wider uppercase px-3 py-1 rounded-full bg-slate-900/80 border border-slate-700/80 mb-2">
             🚀 NASA Authentic Spacecraft Observation ID: <span className="text-yellow-300">{planet.nasa_asset_id}</span>
           </div>
         )}
 
         {/* Planet Name & Toddler Hook */}
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-wide">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-wide">
           {planet.name}
-        </h1>
+        </h2>
         <p className="text-base sm:text-xl md:text-2xl text-yellow-300 font-extrabold mt-1 max-w-xl px-2">
           "{planet.tagline}"
         </p>
@@ -207,7 +266,7 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
           </button>
 
           {/* If Action was triggered: Show interactive cartoon GIF & cheer */}
-          {activeActionCheer && (
+          {activeActionCheer && !showActionGifModal && (
             <div className="flex flex-col items-center gap-2 w-full pt-1 animate-fadeIn">
               <button
                 type="button"
@@ -218,14 +277,9 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
                 aria-label={`Expand ${planet.name} adventure animation`}
                 className="cursor-pointer group relative w-48 h-48 sm:w-56 sm:h-56 rounded-2xl overflow-hidden border-2 border-yellow-300 shadow-[0_0_25px_rgba(250,204,21,0.35)] transition-transform hover:scale-105 active:scale-95 bg-slate-950 p-0"
               >
-                <img
-                  src={getAssetUrl(`/assets/cartoons/interactions/${planet.id}.gif`)}
-                  onError={(e) => {
-                    e.currentTarget.onerror = null;
-                    e.currentTarget.src = getAssetUrl('/assets/cartoons/interactions/default.gif');
-                  }}
+                <InteractionGif
+                  planetId={planet.id}
                   alt={`${planet.name} interaction with Olivia and Anna`}
-                  className="w-full h-full object-cover"
                 />
                 <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-slate-900/80 border border-yellow-300 text-[10px] font-black text-yellow-300 flex items-center gap-1 shadow">
                   <Sparkles className="w-3 h-3 text-yellow-300" />
@@ -321,9 +375,10 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
           >
             {/* Close Button */}
             <button
+              ref={closeModalButtonRef}
               type="button"
               onClick={() => setShowActionGifModal(false)}
-              className="cockpit-btn absolute top-3 right-3 w-10 h-10 rounded-full bg-slate-800 border-2 border-slate-600 text-slate-300 hover:text-white flex items-center justify-center shadow-lg transition"
+              className="cockpit-btn absolute top-3 right-3 w-11 h-11 rounded-full bg-slate-800 border-2 border-slate-600 text-slate-300 hover:text-white flex items-center justify-center shadow-lg transition"
               aria-label="Close"
             >
               <X className="w-5 h-5 text-yellow-300" />
@@ -339,14 +394,9 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
 
             {/* Animated Cartoon GIF */}
             <div className="relative w-64 h-64 sm:w-72 sm:h-72 rounded-2xl overflow-hidden border-4 border-cyan-400 shadow-[0_0_35px_rgba(56,189,248,0.4)] bg-slate-950 flex items-center justify-center my-2">
-              <img
-                src={getAssetUrl(`/assets/cartoons/interactions/${planet.id}.gif`)}
-                onError={(e) => {
-                  e.currentTarget.onerror = null;
-                  e.currentTarget.src = getAssetUrl('/assets/cartoons/interactions/default.gif');
-                }}
+              <InteractionGif
+                planetId={planet.id}
                 alt={`${planet.name} with Olivia and Anna`}
-                className="w-full h-full object-cover"
               />
               <div className="absolute top-2 left-2 px-2.5 py-1 rounded-full bg-yellow-400 text-slate-950 font-black text-xs flex items-center gap-1 shadow-md">
                 <Sparkles className="w-3.5 h-3.5" />

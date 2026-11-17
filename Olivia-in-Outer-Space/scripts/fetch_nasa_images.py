@@ -122,6 +122,7 @@ def find_nasa_image_url(body_id: str, default_nasa_id: str = None) -> tuple:
                     return nasa_id, preferred_url, title
 
         except Exception as e:
+            print(f"  [!] Query '{query}' failed for '{body_id}': {e}")
             continue
 
     raise RuntimeError(f"Could not find any NASA imagery asset for body '{body_id}'")
@@ -185,13 +186,15 @@ def update_databases(updates: list):
     # 2. Update solar_system.db
     if SOLAR_DB_PATH.exists():
         conn = sqlite3.connect(SOLAR_DB_PATH)
-        with conn:
-            for u in updates:
-                conn.execute(
-                    "UPDATE celestial_bodies SET real_image_path = ?, thumbnail_image_path = ?, nasa_asset_id = ? WHERE id = ?",
-                    (u["real_image_path"], u["thumbnail_image_path"], u["nasa_asset_id"], u["id"])
-                )
-        conn.close()
+        try:
+            with conn:
+                for u in updates:
+                    conn.execute(
+                        "UPDATE celestial_bodies SET real_image_path = ?, thumbnail_image_path = ?, nasa_asset_id = ? WHERE id = ?",
+                        (u["real_image_path"], u["thumbnail_image_path"], u["nasa_asset_id"], u["id"])
+                    )
+        finally:
+            conn.close()
         print(f"  [+] Updated SQLite DB: {SOLAR_DB_PATH}")
 
     # 3. Synchronize celestial_bodies.json and .db if present
@@ -209,13 +212,15 @@ def update_databases(updates: list):
 
     if CELESTIAL_DB_PATH.exists():
         conn = sqlite3.connect(CELESTIAL_DB_PATH)
-        with conn:
-            for u in updates:
-                conn.execute(
-                    "UPDATE celestial_bodies SET real_image_path = ?, thumbnail_image_path = ?, nasa_asset_id = ? WHERE id = ?",
-                    (u["real_image_path"], u["thumbnail_image_path"], u["nasa_asset_id"], u["id"])
-                )
-        conn.close()
+        try:
+            with conn:
+                for u in updates:
+                    conn.execute(
+                        "UPDATE celestial_bodies SET real_image_path = ?, thumbnail_image_path = ?, nasa_asset_id = ? WHERE id = ?",
+                        (u["real_image_path"], u["thumbnail_image_path"], u["nasa_asset_id"], u["id"])
+                    )
+        finally:
+            conn.close()
         print(f"  [+] Updated SQLite DB: {CELESTIAL_DB_PATH}")
 
 def verify_all_assets(updates: list):
@@ -266,6 +271,7 @@ def run():
     print(f"\nProcessing {len(bodies)} celestial bodies from {SOLAR_JSON_PATH.name}...")
 
     updates = []
+    failures = []
     start_total = time.time()
 
     for idx, body in enumerate(bodies, 1):
@@ -292,16 +298,19 @@ def run():
             })
         except Exception as e:
             print(f"  [ERROR] Failed processing {name}: {e}")
-            raise e
+            failures.append((bid, str(e)))
 
     print(f"\nDone downloading & optimizing {len(updates)} images in {time.time() - start_total:.1f}s.")
+    if failures:
+        print(f"[!] {len(failures)} body/bodies failed: {failures}")
 
     # Update Databases
-    print("\nUpdating SQLite database and JSON catalog...")
-    update_databases(updates)
+    if updates:
+        print("\nUpdating SQLite database and JSON catalog...")
+        update_databases(updates)
 
-    # Verify All Images
-    verify_all_assets(updates)
+        # Verify All Images
+        verify_all_assets(updates)
 
 if __name__ == "__main__":
     run()

@@ -29,6 +29,7 @@ export default {
         'float': 'float 4s ease-in-out infinite',
         'twinkle': 'twinkle 2s ease-in-out infinite alternate',
         'fadeIn': 'fadeIn 0.25s ease-out forwards',
+        'slideRight': 'slideRight 2.4s ease-in-out forwards',
       },
       keyframes: {
         float: {

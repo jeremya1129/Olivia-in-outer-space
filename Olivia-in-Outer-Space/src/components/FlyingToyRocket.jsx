@@ -81,13 +81,17 @@ export default function FlyingToyRocket({ isBlasting, targetName, usePhotoFace =
   }
 
   return (
-    <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center">
+    <div
+      role="status"
+      aria-live="polite"
+      className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center"
+    >
       {/* Zooming Rocket */}
       <div className="relative flex flex-col items-center animate-[zoomForward_1.8s_cubic-bezier(0.2,0.8,0.2,1)_forwards]">
         <div className="text-sm md:text-base font-black px-5 py-1.5 rounded-full bg-yellow-400 text-slate-950 shadow-2xl mb-3 animate-bounce uppercase tracking-widest border-2 border-slate-900">
-          🚀 Destination: {targetName}!
+          🚀 Destination: {targetName || 'Space'}!
         </div>
-        <svg viewBox="0 0 160 220" className="w-44 h-56 md:w-56 md:h-72 drop-shadow-[0_0_60px_rgba(250,204,21,0.95)]">
+        <svg aria-hidden="true" viewBox="0 0 160 220" className="w-44 h-56 md:w-56 md:h-72 drop-shadow-[0_0_60px_rgba(250,204,21,0.95)]">
           <defs>
             <clipPath id={blastClipId}>
               <circle cx="80" cy="102" r="26" />

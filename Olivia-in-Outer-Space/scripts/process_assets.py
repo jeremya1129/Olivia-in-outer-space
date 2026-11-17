@@ -52,6 +52,8 @@ def apply_alpha_transparency(img, remove_solid_backdrop=False, tolerance=30):
     if not remove_solid_backdrop:
         return rgba
 
+    from PIL import ImageChops
+
     w, h = rgba.size
     corners = [
         rgba.getpixel((0, 0)),
@@ -63,19 +65,21 @@ def apply_alpha_transparency(img, remove_solid_backdrop=False, tolerance=30):
     avg_g = sum(c[1] for c in corners) // 4
     avg_b = sum(c[2] for c in corners) // 4
 
-    datas = rgba.getdata()
-    new_data = []
-    for item in datas:
-        diff = ((item[0] - avg_r) ** 2 + (item[1] - avg_g) ** 2 + (item[2] - avg_b) ** 2) ** 0.5
-        if diff < tolerance:
-            new_data.append((item[0], item[1], item[2], 0))
-        elif diff < tolerance * 1.5:
-            alpha = int(255 * ((diff - tolerance) / (tolerance * 0.5)))
-            new_data.append((item[0], item[1], item[2], min(item[3], alpha)))
-        else:
-            new_data.append(item)
+    # Compute per-pixel RGB distance using vectorized Pillow channel operations
+    r, g, b, a = rgba.split()
+    bg_r = r.point(lambda _: avg_r)
+    bg_g = g.point(lambda _: avg_g)
+    bg_b = b.point(lambda _: avg_b)
+    diff_max = ImageChops.lighter(
+        ImageChops.lighter(ImageChops.difference(r, bg_r), ImageChops.difference(g, bg_g)),
+        ImageChops.difference(b, bg_b),
+    )
 
-    rgba.putdata(new_data)
+    soft_edge = max(1, int(tolerance * 0.5))
+    mask = diff_max.point(
+        lambda d: 0 if d < tolerance else (int(255 * ((d - tolerance) / soft_edge)) if d < tolerance + soft_edge else 255)
+    )
+    rgba.putalpha(ImageChops.darker(a, mask))
     return rgba
 
 def process_single_image(input_path: Path, output_dir: Path, max_size=1024, auto_alpha=False):

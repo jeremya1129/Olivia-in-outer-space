@@ -6,7 +6,7 @@ import React, { useId } from 'react';
  * Used in selection views (Solar System Highway & Planetary System views),
  * while real spacecraft photography is showcased in the final destination view.
  */
-export default function CartoonCelestialBody({ id, size = 64, className = '' }) {
+function CartoonCelestialBody({ id, size = 64, className = '' }) {
   const s = size;
   const uid = useId().replace(/:/g, '');
   const defId = (name) => `${name}-${uid}`;
@@ -28,7 +28,12 @@ export default function CartoonCelestialBody({ id, size = 64, className = '' }) 
             </filter>
           </defs>
           {/* Radiant Sunburst Flares */}
-          <g filter={`url(#${defId('sun-glow')})`} opacity="0.75" className="animate-spin-slow origin-center">
+          <g
+            filter={`url(#${defId('sun-glow')})`}
+            opacity="0.75"
+            className="animate-spin-slow origin-center"
+            style={{ transformBox: 'fill-box' }}
+          >
             {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg) => (
               <polygon
                 key={`flare-${deg}`}
@@ -487,3 +492,5 @@ export default function CartoonCelestialBody({ id, size = 64, className = '' }) 
       );
   }
 }
+
+export default React.memo(CartoonCelestialBody);

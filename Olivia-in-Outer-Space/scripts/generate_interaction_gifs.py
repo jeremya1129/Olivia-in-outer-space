@@ -1,16 +1,29 @@
 import os
 import math
 import random
+from pathlib import Path
 from PIL import Image, ImageDraw
 
-OUTPUT_DIR = "public/assets/cartoons/interactions"
-os.makedirs(OUTPUT_DIR, exist_ok=True)
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+OUTPUT_DIR = str(PROJECT_ROOT / "public" / "assets" / "cartoons" / "interactions")
 
-OLIVIA_FACE = "public/assets/cartoons/characters/olivia_cartoon_circle.png"
-ANNA_FACE = "public/assets/cartoons/characters/anna_cartoon_circle.png"
+OLIVIA_FACE = str(PROJECT_ROOT / "public" / "assets" / "cartoons" / "characters" / "olivia_cartoon_circle.png")
+ANNA_FACE = str(PROJECT_ROOT / "public" / "assets" / "cartoons" / "characters" / "anna_cartoon_circle.png")
 
-olivia_face_img = Image.open(OLIVIA_FACE).convert("RGBA")
-anna_face_img = Image.open(ANNA_FACE).convert("RGBA")
+olivia_face_img = None
+anna_face_img = None
+
+
+def _ensure_assets_loaded():
+    """Lazily load character face images and ensure output directory exists."""
+    global olivia_face_img, anna_face_img
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    if olivia_face_img is None:
+        with Image.open(OLIVIA_FACE) as img:
+            olivia_face_img = img.convert("RGBA")
+    if anna_face_img is None:
+        with Image.open(ANNA_FACE) as img:
+            anna_face_img = img.convert("RGBA")
 
 CANVAS_SIZE = 360
 NUM_FRAMES = 10
@@ -958,6 +971,7 @@ def gen_default():
     save_gif(frames, "default.gif")
 
 def main():
+    _ensure_assets_loaded()
     generators = [
         gen_sun, gen_mercury, gen_venus, gen_earth, gen_mars,
         gen_jupiter, gen_saturn, gen_uranus, gen_neptune,

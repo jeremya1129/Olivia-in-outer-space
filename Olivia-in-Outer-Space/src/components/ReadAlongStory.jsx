@@ -39,10 +39,20 @@ export default function ReadAlongStory({ body, className = '' }) {
   const stopSpeakingRef = useRef(stopSpeaking);
   stopSpeakingRef.current = stopSpeaking;
 
+  const clearFallbackTimer = () => {
+    if (fallbackTimerRef.current) {
+      clearInterval(fallbackTimerRef.current);
+      fallbackTimerRef.current = null;
+    }
+  };
+
   // Clear timers and stop reading only if this component initiated playback
   useEffect(() => {
-    if (fallbackTimerRef.current) clearInterval(fallbackTimerRef.current);
-    if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
+    clearFallbackTimer();
+    if (tapTimeoutRef.current) {
+      clearTimeout(tapTimeoutRef.current);
+      tapTimeoutRef.current = null;
+    }
     if (isStoryActiveRef.current) {
       stopSpeakingRef.current();
       isStoryActiveRef.current = false;
@@ -53,8 +63,11 @@ export default function ReadAlongStory({ body, className = '' }) {
     setIsFinished(false);
 
     return () => {
-      if (fallbackTimerRef.current) clearInterval(fallbackTimerRef.current);
-      if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
+      clearFallbackTimer();
+      if (tapTimeoutRef.current) {
+        clearTimeout(tapTimeoutRef.current);
+        tapTimeoutRef.current = null;
+      }
       if (isStoryActiveRef.current) {
         stopSpeakingRef.current();
         isStoryActiveRef.current = false;
@@ -77,7 +90,7 @@ export default function ReadAlongStory({ body, className = '' }) {
   };
 
   const startVisualPacing = (completeAtEnd) => {
-    if (fallbackTimerRef.current) clearInterval(fallbackTimerRef.current);
+    clearFallbackTimer();
     const totalWords = words.length;
     if (totalWords === 0) {
       isStoryActiveRef.current = false;
@@ -92,14 +105,14 @@ export default function ReadAlongStory({ body, className = '' }) {
 
     fallbackTimerRef.current = setInterval(() => {
       if (!completeAtEnd && hasNativeBoundaries.current) {
-        clearInterval(fallbackTimerRef.current);
+        clearFallbackTimer();
         return;
       }
       currentIdx += 1;
       if (currentIdx < totalWords) {
         setActiveWordIndex(currentIdx);
       } else {
-        clearInterval(fallbackTimerRef.current);
+        clearFallbackTimer();
         if (completeAtEnd) {
           isStoryActiveRef.current = false;
           setActiveWordIndex(-1);
@@ -118,8 +131,11 @@ export default function ReadAlongStory({ body, className = '' }) {
       return;
     }
 
-    if (fallbackTimerRef.current) clearInterval(fallbackTimerRef.current);
-    if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
+    clearFallbackTimer();
+    if (tapTimeoutRef.current) {
+      clearTimeout(tapTimeoutRef.current);
+      tapTimeoutRef.current = null;
+    }
     setTappedWordId(null);
     hasNativeBoundaries.current = false;
     setActiveWordIndex(0);
@@ -143,9 +159,7 @@ export default function ReadAlongStory({ body, className = '' }) {
       },
       onBoundary: (charIndex) => {
         hasNativeBoundaries.current = true;
-        if (fallbackTimerRef.current) {
-          clearInterval(fallbackTimerRef.current);
-        }
+        clearFallbackTimer();
         const idx = findWordIndexByChar(charIndex);
         if (idx >= 0) {
           setActiveWordIndex(idx);
@@ -153,7 +167,7 @@ export default function ReadAlongStory({ body, className = '' }) {
       },
       onEnd: () => {
         isStoryActiveRef.current = false;
-        if (fallbackTimerRef.current) clearInterval(fallbackTimerRef.current);
+        clearFallbackTimer();
         setActiveWordIndex(-1);
         setIsPlaying(false);
         setIsFinished(true);
@@ -178,7 +192,7 @@ export default function ReadAlongStory({ body, className = '' }) {
       stopSpeaking();
       isStoryActiveRef.current = false;
     }
-    if (fallbackTimerRef.current) clearInterval(fallbackTimerRef.current);
+    clearFallbackTimer();
     setIsPlaying(false);
   };
 
@@ -197,7 +211,6 @@ export default function ReadAlongStory({ body, className = '' }) {
     setActiveWordIndex(index);
     triggerSynth('beep');
 
-    isStoryActiveRef.current = true;
     speakWord(token.cleanWord || token.word);
 
     // Keep highlight for 700ms then gently fade
@@ -273,8 +286,9 @@ export default function ReadAlongStory({ body, className = '' }) {
               type="button"
               onClick={handleReplayStory}
               style={{ touchAction: 'manipulation' }}
+              aria-label="Read story again"
               title="Read again"
-              className="cockpit-btn p-2 rounded-2xl bg-slate-800 hover:bg-slate-700 text-yellow-300 border border-slate-600 shadow-md transition-transform hover:scale-105 active:scale-95"
+              className="cockpit-btn min-h-[40px] min-w-[40px] p-2 rounded-2xl bg-slate-800 hover:bg-slate-700 text-yellow-300 border border-slate-600 shadow-md transition-transform hover:scale-105 active:scale-95"
             >
               <RotateCcw className="w-4 h-4" />
             </button>
@@ -343,7 +357,7 @@ export default function ReadAlongStory({ body, className = '' }) {
                 }}
                 style={{ touchAction: 'manipulation' }}
                 title={`Practice word: "${word}"`}
-                className="px-2 py-0.5 rounded-lg text-[10px] font-black uppercase bg-slate-800 hover:bg-amber-400 text-amber-200 hover:text-slate-950 border border-slate-700 hover:border-yellow-300 shrink-0 transition-all active:scale-95"
+                className="px-2.5 py-1.5 rounded-lg text-xs font-black uppercase bg-slate-800 hover:bg-amber-400 text-amber-200 hover:text-slate-950 border border-slate-700 hover:border-yellow-300 shrink-0 transition-all active:scale-95"
               >
                 {word}
               </button>

@@ -93,6 +93,6 @@ A Progressive Web App manifest ([`public/manifest.webmanifest`](public/manifest.
 | `npm run build` | Compile optimized production bundle into `dist/` (Root domain `/`) |
 | `npm run build:gh-pages` | Compile optimized production bundle for GitHub Pages subpath (`/Olivia-in-outer-space/`) |
 | `npm run preview` | Spin up local HTTP server to preview the compiled `dist/` build |
-| `npm run test:flow` | Run automated headless Chrome user testing suite (33 assertions) |
+| `npm run test:flow` | Run automated headless Chrome user testing suite (35 assertions against `BASE_URL`, default `http://localhost:3000/`) |
 | `npm run docker:build` | Build lightweight NGINX Alpine production container |
 | `npm run docker:run` | Run container locally on `http://localhost:8080` |
