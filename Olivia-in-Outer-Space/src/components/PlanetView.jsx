@@ -11,6 +11,7 @@ function InteractionGif({ planetId, alt }) {
   return (
     <img
       src={getAssetUrl(`/assets/cartoons/interactions/${planetId}.gif`)}
+      decoding="async"
       onError={(e) => {
         e.currentTarget.onerror = null;
         e.currentTarget.src = getAssetUrl('/assets/cartoons/interactions/default.gif');
@@ -35,6 +36,7 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
 
   const closeModalButtonRef = useRef(null);
   const previousFocusRef = useRef(null);
+  const ownedSpeechTokenRef = useRef(null);
   const stopSpeakingRef = useRef(stopSpeaking);
   stopSpeakingRef.current = stopSpeaking;
 
@@ -52,10 +54,13 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
     setImageError(false);
   }, [showRealPhoto]);
 
-  // Stop any active narration when leaving PlanetView
+  // Stop ONLY PlanetView-owned narration when leaving PlanetView
   useEffect(() => {
     return () => {
-      stopSpeakingRef.current();
+      if (ownedSpeechTokenRef.current != null) {
+        stopSpeakingRef.current(ownedSpeechTokenRef.current);
+        ownedSpeechTokenRef.current = null;
+      }
     };
   }, []);
 
@@ -124,17 +129,19 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
   };
 
   const getMoonsText = (m, type) => {
+    if (type === 'Star') return `Has ${m} planets orbiting warmly around it!`;
     if (type === 'Moon') return `Orbiting around parent planet ${planet.parent_body}!`;
     if (m === 0) return 'Traveling through space peacefully all on its own!';
     if (m === 1) return 'Has 1 glowing companion moon shining bright!';
-    return `Has ${m} dancing moons dancing in circles around it!`;
+    return `Has ${m} moons dancing in circles around it!`;
   };
 
   const gravityInfo = getGravityInfo(planet.gravity_m_s2);
 
   const handlePlayVoice = () => {
     triggerSynth('chime');
-    speak(`${planet.name}! ${planet.tagline}. Gravity: ${gravityInfo.text}`);
+    const res = speak(`${planet.name}! ${planet.tagline}. Gravity: ${gravityInfo.text}`);
+    ownedSpeechTokenRef.current = res?.token ?? null;
   };
 
   const handlePlaySfx = () => {
@@ -145,12 +152,11 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
     triggerSynth(planet.sfx || 'twinkle');
     setActiveActionCheer(actionCheer);
     setShowActionGifModal(true);
-    speak(actionCheer);
+    const res = speak(actionCheer);
+    ownedSpeechTokenRef.current = res?.token ?? null;
   };
 
   const handleBack = () => {
-    triggerSynth('beep');
-    speak('Back to the cockpit with Captain Olivia and Navigator Anna!');
     onReturnToCockpit();
   };
 
@@ -177,7 +183,8 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
               triggerSynth('beep');
               const nextMode = !showRealPhoto;
               setShowRealPhoto(nextMode);
-              speak(nextMode ? 'NASA Spacecraft Photograph' : 'Cartoon Art illustration');
+              const res = speak(nextMode ? 'NASA Spacecraft Photograph' : 'Cartoon Art illustration');
+              ownedSpeechTokenRef.current = res?.token ?? null;
             }}
             style={{ touchAction: 'manipulation' }}
             title={showRealPhoto ? "Switch to Cartoon Art" : "Switch to NASA Spacecraft Photo"}
@@ -214,6 +221,7 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
               <img
                 src={getAssetUrl(planet.real_image_path)}
                 alt={planet.name}
+                decoding="async"
                 onLoad={() => setImageLoaded(true)}
                 onError={() => setImageError(true)}
                 className={`w-full h-full object-cover transition-opacity duration-300 ${
@@ -370,7 +378,7 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
           onClick={() => setShowActionGifModal(false)}
         >
           <div
-            className="relative w-full max-w-md bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border-4 border-yellow-300 rounded-3xl p-5 shadow-[0_0_60px_rgba(250,204,21,0.45)] flex flex-col items-center text-center select-none"
+            className="relative w-full max-w-md bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border-4 border-yellow-300 rounded-3xl p-5 shadow-[0_0_60px_rgba(250,204,21,0.45)] flex flex-col items-center text-center select-none animate-celebration-pop"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}
@@ -415,7 +423,8 @@ export default function PlanetView({ planet, onReturnToCockpit }) {
                 type="button"
                 onClick={() => {
                   triggerSynth(planet.sfx || 'twinkle');
-                  speak(actionCheer);
+                  const res = speak(actionCheer);
+                  ownedSpeechTokenRef.current = res?.token ?? null;
                 }}
                 style={{ touchAction: 'manipulation' }}
                 className="cockpit-btn flex-1 py-3 px-4 rounded-2xl bg-gradient-to-r from-fuchsia-600 via-pink-600 to-rose-600 text-white font-black text-sm sm:text-base border-2 border-yellow-300 shadow-xl flex items-center justify-center gap-2"

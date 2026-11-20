@@ -6,8 +6,9 @@
   * {
     -webkit-tap-highlight-color: transparent;
   }
-  
-  html, body {
+
+  html,
+  body {
     margin: 0;
     padding: 0;
     width: 100%;
@@ -17,7 +18,8 @@
     user-select: none;
     -webkit-user-select: none;
     background-color: #030712;
-    font-family: ui-rounded, 'Hiragino Maru Gothic ProN', Quicksand, Comfortaa, system-ui, -apple-system, sans-serif;
+    font-family: ui-rounded, 'Hiragino Maru Gothic ProN', Quicksand, Comfortaa,
+      system-ui, -apple-system, sans-serif;
   }
 }
 
@@ -50,21 +52,6 @@
   animation: screen-rumble 0.12s ease-in-out infinite;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .animate-rumble {
-    animation: none;
-  }
-
-  .animate-spin-slow,
-  .animate-float,
-  .animate-twinkle,
-  .animate-bounce,
-  .animate-ping {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-  }
-}
-
 /* Rocket Blast-Off Zoom Keyframe */
 @keyframes zoomForward {
   0% {
@@ -85,17 +72,143 @@
   }
 }
 
-/* Starfield canvas overlay */
+/* GPU-composited countdown pop-in */
+@keyframes countdown-pop {
+  0% {
+    transform: scale(0.55);
+    opacity: 0;
+  }
+  65% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-countdown-pop {
+  animation: countdown-pop 0.45s cubic-bezier(0.22, 1.4, 0.36, 1) forwards;
+}
+
+/* Vibrant thruster flame flicker */
+@keyframes thruster-flicker {
+  0% {
+    transform: scaleY(0.92) scaleX(0.96);
+    opacity: 0.92;
+  }
+  100% {
+    transform: scaleY(1.14) scaleX(1.04);
+    opacity: 1;
+  }
+}
+
+.animate-thruster {
+  transform-origin: center top;
+  animation: thruster-flicker 0.18s ease-in-out infinite alternate;
+}
+
+/* Warp-speed space streaks during rocket blast-off */
+@keyframes warp-streak {
+  0% {
+    transform: translateY(-20vh) scaleY(0.7);
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translateY(115vh) scaleY(1.2);
+    opacity: 0;
+  }
+}
+
+.animate-warp-streak {
+  animation: warp-streak 0.7s linear infinite;
+  will-change: transform, opacity;
+}
+
+/* 3-bar speaking indicator equalizer */
+@keyframes eq-bar {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.animate-eq-bar {
+  height: 100%;
+  transform-origin: center bottom;
+  animation: eq-bar 0.55s ease-in-out infinite;
+}
+
+/* Bouncy modal celebration entrance */
+@keyframes celebration-pop {
+  0% {
+    transform: scale(0.86) translateY(12px);
+    opacity: 0;
+  }
+  65% {
+    transform: scale(1.03) translateY(-2px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-celebration-pop {
+  animation: celebration-pop 0.38s cubic-bezier(0.22, 1.35, 0.36, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rumble,
+  .animate-thruster,
+  .animate-warp-streak,
+  .animate-eq-bar {
+    animation: none !important;
+  }
+
+  .animate-spin-slow,
+  .animate-float,
+  .animate-twinkle,
+  .animate-bounce,
+  .animate-ping,
+  .animate-pulse,
+  .animate-spin,
+  .animate-countdown-pop,
+  .animate-celebration-pop {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* Multi-layer prime-sized starfield + subtle cosmic nebula glow */
 .stars-bg {
-  background-image: 
-    radial-gradient(2px 2px at 25px 35px, #ffffff, rgba(0,0,0,0)),
-    radial-gradient(2.5px 2.5px at 60px 80px, #93c5fd, rgba(0,0,0,0)),
-    radial-gradient(1.5px 1.5px at 110px 50px, #fde047, rgba(0,0,0,0)),
-    radial-gradient(2px 2px at 180px 140px, #ffffff, rgba(0,0,0,0)),
-    radial-gradient(2.5px 2.5px at 250px 210px, #f472b6, rgba(0,0,0,0)),
-    radial-gradient(1.5px 1.5px at 310px 90px, #ffffff, rgba(0,0,0,0));
-  background-repeat: repeat;
-  background-size: 340px 340px;
+  background-image:
+    radial-gradient(2px 2px at 29px 43px, #ffffff, rgba(0, 0, 0, 0)),
+    radial-gradient(1.5px 1.5px at 137px 181px, #e2e8f0, rgba(0, 0, 0, 0)),
+    radial-gradient(2.5px 2.5px at 73px 113px, #93c5fd, rgba(0, 0, 0, 0)),
+    radial-gradient(1.5px 1.5px at 263px 67px, #fde047, rgba(0, 0, 0, 0)),
+    radial-gradient(2px 2px at 199px 293px, #f472b6, rgba(0, 0, 0, 0)),
+    radial-gradient(2px 2px at 419px 149px, #c4b5fd, rgba(0, 0, 0, 0)),
+    radial-gradient(ellipse at 18% 22%, rgba(56, 189, 248, 0.08), rgba(0, 0, 0, 0) 55%),
+    radial-gradient(ellipse at 82% 78%, rgba(168, 85, 247, 0.09), rgba(0, 0, 0, 0) 55%);
+  background-repeat: repeat, repeat, repeat, repeat, repeat, repeat, no-repeat, no-repeat;
+  background-size:
+    233px 233px,
+    233px 233px,
+    379px 379px,
+    379px 379px,
+    521px 521px,
+    521px 521px,
+    100% 100%,
+    100% 100%;
 }
 
 /* Hide scrollbars cleanly while keeping horizontal touch scrolling */
