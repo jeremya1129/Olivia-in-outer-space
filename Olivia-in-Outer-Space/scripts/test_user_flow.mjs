@@ -193,13 +193,22 @@ async function runTests() {
     await cdp.send('Page.navigate', { url: BASE_URL });
     await sleep(2500);
 
-    // Ensure speech synthesis onstart triggers in headless environments
+    // Ensure speech synthesis onstart triggers in headless environments and log speak/cancel events
     await cdp.eval(`
+      window.__speechLog = [];
+      window.__lastUtterance = null;
       if ('speechSynthesis' in window) {
         const origSpeak = window.speechSynthesis.speak.bind(window.speechSynthesis);
+        const origCancel = window.speechSynthesis.cancel.bind(window.speechSynthesis);
         window.speechSynthesis.speak = function(u) {
+          window.__lastUtterance = u;
+          window.__speechLog.push({ type: 'speak', text: u?.text || '', at: Date.now() });
           setTimeout(() => { if (u.onstart) u.onstart(); }, 50);
           try { origSpeak(u); } catch(e) {}
+        };
+        window.speechSynthesis.cancel = function() {
+          window.__speechLog.push({ type: 'cancel', at: Date.now() });
+          try { origCancel(); } catch(e) {}
         };
       }
     `);
@@ -336,18 +345,17 @@ async function runTests() {
 
     // Verify tapping Companion Moon updates Read-Along story
     await cdp.eval(`{
-      const moonCard = Array.from(document.querySelectorAll("[role='button']"))
-        .find(el => el.textContent.includes("The Moon"));
-      if (moonCard) moonCard.click();
+      const moonBtn = document.querySelector("button[data-moon-id='moon']");
+      if (moonBtn) moonBtn.click();
     }`);
     await sleep(400);
-    const moonStoryActive = await cdp.eval('document.body.textContent.includes("Moon")');
-    assert('Tapping companion moon updates active focus', moonStoryActive);
+    const moonStoryActive = await cdp.eval('document.body.textContent.includes("Earth\\x27s Glowing Nightlight")');
+    assert('Tapping companion moon updates Read-Along story to Earth\\x27s Glowing Nightlight', moonStoryActive);
 
     await cdp.screenshot('screen_3_selection_side_by_side.png');
 
     // =========================================================================
-    // TEST 4: Read-Along Story Interaction (including Muted Fallback)
+    // TEST 4: Read-Along Story Interaction (including Pause + Cancel Guard)
     // =========================================================================
     console.log('\n--- 4. Testing Read-Along Story Interaction ---');
     const readToMeBtn = await cdp.eval(`
@@ -370,13 +378,24 @@ async function runTests() {
     `);
     assert('Story begins reading and button toggles to Pause (action if pressed)', isPlayingBtn);
 
-    // Pause story
+    // Pause story and simulate utterance onerror('canceled')
     await cdp.eval(`{
       const btn = Array.from(document.querySelectorAll("button"))
         .find(el => el.textContent.includes("Pause"));
       if (btn) btn.click();
+      if (window.__lastUtterance && typeof window.__lastUtterance.onerror === 'function') {
+        window.__lastUtterance.onerror({ error: 'canceled' });
+      }
     }`);
-    await sleep(400);
+    await sleep(300);
+
+    const pausedStateAfterCancel = await cdp.eval(`
+      Array.from(document.querySelectorAll("button"))
+        .some(el => el.textContent.includes("Resume")) &&
+      !Array.from(document.querySelectorAll("button"))
+        .some(el => el.textContent.includes("Pause"))
+    `);
+    assert('Pausing story with canceled error does not restart reading or fallback pacing', pausedStateAfterCancel);
 
     // =========================================================================
     // TEST 5: Fly to Destination Screen (Cartoon Default + Action GIF)
@@ -461,9 +480,10 @@ async function runTests() {
     await cdp.screenshot('screen_6_destination_with_embedded_gif.png');
 
     // =========================================================================
-    // TEST 7: Return to Cockpit and Launchpad
+    // TEST 7: Return to Cockpit, Sun Text Check, and Return to Launchpad
     // =========================================================================
-    console.log('\n--- 7. Testing Navigation Return ---');
+    console.log('\n--- 7. Testing Navigation Return & Transition Speech Safety ---');
+    const beforeCockpitIdx = await cdp.eval('window.__speechLog.length');
     // Click Cockpit back button
     await cdp.eval(`{
       const cockBtn = Array.from(document.querySelectorAll("button"))
@@ -475,7 +495,31 @@ async function runTests() {
     const backInCockpit = await cdp.eval('document.querySelector("header .text-cyan-300")?.textContent?.trim() === "FLIGHT DECK"');
     assert('Returned cleanly to Cockpit', backInCockpit);
 
+    const cockpitSpeechOk = await cdp.eval(`(() => {
+      const slice = window.__speechLog.slice(${beforeCockpitIdx});
+      const speakIdx = slice.findIndex(e => e.type === 'speak' && e.text.includes('Back to the cockpit'));
+      if (speakIdx === -1) return false;
+      return !slice.slice(speakIdx + 1).some(e => e.type === 'cancel');
+    })()`);
+    assert('Returning from PlanetView to Cockpit preserves transition announcement speech', cockpitSpeechOk);
+
+    // Check Sun destination text does not say "dancing moons dancing"
+    await cdp.eval('document.getElementById("planet-card-sun")?.click()');
+    await sleep(500);
+    await cdp.eval(`{
+      const flyBtn = Array.from(document.querySelectorAll("button"))
+        .find(el => el.textContent.includes("Fly to Sun"));
+      if (flyBtn) flyBtn.click();
+    }`);
+    await sleep(2500);
+    const sunTextCheck = await cdp.eval(`(() => {
+      const txt = document.body.textContent || '';
+      return !txt.includes('dancing moons dancing') && txt.includes('planets orbiting warmly around it');
+    })()`);
+    assert('Sun destination card describes orbiting planets without duplicate words', sunTextCheck);
+
     // Click Launchpad button in top header
+    const beforeLaunchpadIdx = await cdp.eval('window.__speechLog.length');
     await cdp.eval(`{
       const lBtn = Array.from(document.querySelectorAll("header button"))
         .find(el => el.textContent.includes("Launchpad"));
@@ -485,6 +529,14 @@ async function runTests() {
 
     const backAtLaunchpad = await cdp.eval('document.querySelector("header .text-cyan-300")?.textContent?.trim() === "EARTH SPACEPORT"');
     assert('Returned cleanly to Launchpad via top header button', backAtLaunchpad);
+
+    const launchpadSpeechOk = await cdp.eval(`(() => {
+      const slice = window.__speechLog.slice(${beforeLaunchpadIdx});
+      const speakIdx = slice.findIndex(e => e.type === 'speak' && e.text.includes('Returning to the Launchpad'));
+      if (speakIdx === -1) return false;
+      return !slice.slice(speakIdx + 1).some(e => e.type === 'cancel');
+    })()`);
+    assert('Returning to Launchpad preserves transition announcement speech', launchpadSpeechOk);
 
     // =========================================================================
     // TEST 8: Zero Runtime / Console / Network 4xx-5xx Errors

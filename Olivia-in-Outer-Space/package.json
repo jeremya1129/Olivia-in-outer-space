@@ -8,6 +8,7 @@
     "build": "vite build",
     "build:gh-pages": "vite build --base=/Olivia-in-outer-space/",
     "preview": "vite preview",
+    "test:audio": "node scripts/test_audio_and_pacing.mjs",
     "test:flow": "node scripts/test_user_flow.mjs",
     "docker:build": "docker build -t olivia-in-outer-space .",
     "docker:run": "docker run -p 8080:80 olivia-in-outer-space"

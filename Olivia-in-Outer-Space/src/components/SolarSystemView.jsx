@@ -1,9 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useSpaceAudio } from './AudioPlayer';
 import CartoonCelestialBody from './CartoonCelestialBody';
 import FlyingToyRocket from './FlyingToyRocket';
 import ReadAlongStory from './ReadAlongStory';
-import { Rocket, Sparkles, ArrowLeft, Orbit, Camera } from 'lucide-react';
+import { Rocket, ArrowLeft, Orbit, Camera, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getAssetUrl } from '../utils/assets';
 
 /**
@@ -153,7 +153,7 @@ const SOLAR_SYSTEM_ORDER = [
 ];
 
 export default function SolarSystemView({ celestialBodies = [], onSelectDestination, usePhotoFace = false }) {
-  const { triggerSynth, speak } = useSpaceAudio();
+  const { triggerSynth, speak, stopSpeaking } = useSpaceAudio();
 
   // View state: 'solarsystem' (Left-to-Right panoramic track) | 'planetary' (Specific planet + moons view)
   const [viewLevel, setViewLevel] = useState('solarsystem');
@@ -163,6 +163,19 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
   const [imageErrorMap, setImageErrorMap] = useState({});
 
   const planetCardRefs = useRef(new Map());
+  const highwayTrackRef = useRef(null);
+  const ownedSpeechTokenRef = useRef(null);
+  const stopSpeakingRef = useRef(stopSpeaking);
+  stopSpeakingRef.current = stopSpeaking;
+
+  useEffect(() => {
+    return () => {
+      if (ownedSpeechTokenRef.current != null) {
+        stopSpeakingRef.current(ownedSpeechTokenRef.current);
+        ownedSpeechTokenRef.current = null;
+      }
+    };
+  }, []);
 
   // Map bodies by ID for O(1) metadata lookup
   const bodyMap = React.useMemo(() => {
@@ -199,11 +212,13 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
 
     const body = bodyMap[planetConfig.id];
     const moonCount = (planetConfig.moonIds || []).length;
-    if (moonCount > 0) {
-      speak(`${body?.name || planetConfig.name} System! Found ${moonCount} companion ${moonCount === 1 ? 'moon' : 'moons'}! Tap to explore!`);
-    } else {
-      speak(`${body?.name || planetConfig.name}! ${body?.tagline || ''}`);
-    }
+    const res =
+      moonCount > 0
+        ? speak(
+            `${body?.name || planetConfig.name} System! Found ${moonCount} companion ${moonCount === 1 ? 'moon' : 'moons'}! Tap to explore!`
+          )
+        : speak(`${body?.name || planetConfig.name}! ${body?.tagline || ''}`);
+    ownedSpeechTokenRef.current = res?.token ?? null;
   };
 
   // Return from Planetary System to Left-to-Right Solar System
@@ -212,6 +227,10 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
     setViewLevel('solarsystem');
     triggerSynth('twinkle');
     speak('Back to the Solar System Highway!');
+  };
+
+  const handleScrollHighway = (delta) => {
+    highwayTrackRef.current?.scrollBy({ left: delta, behavior: 'smooth' });
   };
 
   // Blast off to any destination (planet or companion moon)
@@ -234,7 +253,7 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
           {/* Subtle Top Quick Jump Ribbon */}
           <div className="relative z-20 w-full px-3 py-1 flex items-center justify-between gap-2 bg-gradient-to-b from-slate-900/90 to-transparent">
             <div className="flex items-center gap-1.5 text-cyan-300 font-black text-xs">
-              <Orbit className="w-3.5 h-3.5 text-yellow-300 animate-spin" />
+              <Orbit className="w-3.5 h-3.5 text-yellow-300 animate-spin-slow" />
               <span className="hidden sm:inline">Solar Highway</span>
             </div>
 
@@ -256,10 +275,39 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
           </div>
 
           {/* Main Panoramic Highway Canvas (Centered Sun & Moderate Stagger) */}
-          <div
-            className="relative flex-1 w-full h-full flex items-center overflow-x-auto overflow-y-hidden pl-16 sm:pl-24 md:pl-28 lg:pl-32 pr-10 sm:pr-14 md:pr-16 gap-3 sm:gap-4 md:gap-5 pointer-events-auto scrollbar-none"
-            style={{ touchAction: 'pan-x' }}
-          >
+          <div className="relative flex-1 w-full h-full flex items-center overflow-hidden">
+            {/* Unobtrusive Left/Right Scroll Controls */}
+            <button
+              type="button"
+              onClick={() => handleScrollHighway(-320)}
+              aria-label="Scroll solar system left"
+              style={{ touchAction: 'manipulation' }}
+              className="hidden sm:flex absolute left-4 md:left-14 top-1/2 -translate-y-1/2 z-30 w-9 h-9 rounded-full bg-slate-900/80 hover:bg-slate-800 border border-slate-600/80 text-cyan-200 hover:text-yellow-300 items-center justify-center shadow-lg transition-all"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleScrollHighway(320)}
+              aria-label="Scroll solar system right"
+              style={{ touchAction: 'manipulation' }}
+              className="hidden sm:flex absolute right-4 md:right-14 top-1/2 -translate-y-1/2 z-30 w-9 h-9 rounded-full bg-slate-900/80 hover:bg-slate-800 border border-slate-600/80 text-cyan-200 hover:text-yellow-300 items-center justify-center shadow-lg transition-all"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+
+            <div
+              ref={highwayTrackRef}
+              onWheel={(e) => {
+                if (!highwayTrackRef.current) return;
+                if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+                  highwayTrackRef.current.scrollLeft += e.deltaY;
+                }
+              }}
+              className="relative flex-1 w-full h-full flex items-center overflow-x-auto overflow-y-hidden pl-16 sm:pl-24 md:pl-28 lg:pl-32 pr-10 sm:pr-14 md:pr-16 gap-3 sm:gap-4 md:gap-5 pointer-events-auto scrollbar-none"
+              style={{ touchAction: 'pan-x' }}
+            >
             {/* Ambient Cosmic Starry Glow */}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_left,_var(--tw-gradient-stops))] from-amber-950/20 via-slate-950 to-slate-950 pointer-events-none" />
 
@@ -372,6 +420,7 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
               );
             })}
 
+            </div>
           </div>
 
           {/* Gentle Footer Hint */}
@@ -406,7 +455,8 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
                   triggerSynth('beep');
                   const nextMode = !showRealPhoto;
                   setShowRealPhoto(nextMode);
-                  speak(nextMode ? 'NASA Spacecraft Photo' : 'Cartoon art mode');
+                  const res = speak(nextMode ? 'NASA Spacecraft Photo' : 'Cartoon art mode');
+                  ownedSpeechTokenRef.current = res?.token ?? null;
                 }}
                 style={{ touchAction: 'manipulation' }}
                 title={showRealPhoto ? "Switch to Cartoon Art" : "Switch to NASA Spacecraft Photo"}
@@ -452,6 +502,7 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
                       <img
                         src={getAssetUrl(activePlanetBody.real_image_path)}
                         alt={activePlanetBody.name}
+                        decoding="async"
                         onError={() => setImageErrorMap((prev) => ({ ...prev, [activePlanetBody.id]: true }))}
                         className="w-full h-full object-cover transition-opacity duration-300"
                       />
@@ -538,6 +589,7 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
                         >
                           <button
                             type="button"
+                            data-moon-id={moon.id}
                             onClick={() => {
                               setSelectedSubBodyId(moon.id);
                               triggerSynth('twinkle');
@@ -557,6 +609,7 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
                                 <img
                                   src={getAssetUrl(thumbPath)}
                                   alt={moon.name}
+                                  decoding="async"
                                   onError={() => setImageErrorMap((prev) => ({ ...prev, [moon.id]: true }))}
                                   className="w-full h-full object-cover"
                                 />

@@ -3,6 +3,15 @@ import { useSpaceAudio } from './AudioPlayer';
 import { Sparkles, Camera, ArrowRight } from 'lucide-react';
 import { getAssetUrl } from '../utils/assets';
 
+const CINEMATIC_WARP_STREAKS = [
+  { left: '10%', height: '95px', delay: '0s', duration: '0.52s', color: 'from-cyan-300/80' },
+  { left: '24%', height: '130px', delay: '0.18s', duration: '0.65s', color: 'from-yellow-200/85' },
+  { left: '39%', height: '80px', delay: '0.35s', duration: '0.48s', color: 'from-white/80' },
+  { left: '58%', height: '125px', delay: '0.1s', duration: '0.6s', color: 'from-sky-300/85' },
+  { left: '74%', height: '140px', delay: '0.28s', duration: '0.68s', color: 'from-amber-200/80' },
+  { left: '88%', height: '105px', delay: '0.14s', duration: '0.55s', color: 'from-white/85' },
+];
+
 /**
  * Cartoon Astronaut Avatar for the Launchpad
  */
@@ -37,7 +46,7 @@ function EarthAstronaut({ name, isOlivia, isWalking, isCheering, usePhotoFace = 
       }`}
     >
       {/* Speech Bubble Prompt */}
-      <div className="mb-2 px-3 py-1 bg-white text-slate-900 font-black text-xs sm:text-sm rounded-2xl shadow-lg border-2 border-slate-900 relative animate-pulse whitespace-nowrap">
+      <div className="mb-2 px-3 py-1 bg-white text-slate-900 font-black text-xs sm:text-sm rounded-2xl shadow-lg border-2 border-slate-900 relative whitespace-nowrap">
         {isOlivia ? "I'm Captain Olivia! 🚀" : "I'm Navigator Anna! 🧭"}
         <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-r-2 border-b-2 border-slate-900 rotate-45" />
       </div>
@@ -64,14 +73,14 @@ function EarthAstronaut({ name, isOlivia, isWalking, isCheering, usePhotoFace = 
         {/* Helmet Bubble Glass Visor */}
         <ellipse cx="85" cy="72" rx="43" ry="38" fill="#0f172a" stroke="#475569" strokeWidth="3.5" />
 
-        {/* Face Content: Real Photo Cutout or New Cartoon Face */}
+        {/* Face Content: Real Photo Cutout or Cartoon Face */}
         {usePhotoFace ? (
           <g clipPath={`url(#${clipId})`}>
             <rect x="40" y="32" width="90" height="80" fill="#0f172a" />
             <image
               href={photoSrc}
-              x={isOlivia ? "40" : "41"}
-              y={isOlivia ? "31" : "32"}
+              x={isOlivia ? '40' : '41'}
+              y={isOlivia ? '31' : '32'}
               width="90"
               height="80"
               preserveAspectRatio="xMidYMid slice"
@@ -81,7 +90,6 @@ function EarthAstronaut({ name, isOlivia, isWalking, isCheering, usePhotoFace = 
         ) : (
           <g clipPath={`url(#${clipId})`}>
             <rect x="40" y="32" width="90" height="80" fill="#0f172a" />
-            {/* New illustrated cartoon face from reference */}
             <image
               href={cartoonSrc}
               x="42"
@@ -107,7 +115,7 @@ function EarthAstronaut({ name, isOlivia, isWalking, isCheering, usePhotoFace = 
 
         {/* Spacesuit Body & Arms */}
         <path d="M54,124 Q40,140 34,168 Q44,174 54,152 L54,180 L116,180 L116,152 Q126,174 136,168 Q130,140 116,124 Z" fill="#ffffff" stroke="#334155" strokeWidth="4" />
-        
+
         {/* Mission Patch */}
         <circle cx="85" cy="144" r="10" fill={suitAccent} stroke="#1e293b" strokeWidth="2" />
         <polygon points="85,137 88,143 94,144 90,148 91,154 85,150 79,154 80,148 76,144 82,143" fill="#fbbf24" />
@@ -121,16 +129,65 @@ function EarthAstronaut({ name, isOlivia, isWalking, isCheering, usePhotoFace = 
 }
 
 /**
+ * Standing Little Tikes Adventure Rocket SVG shared between Launchpad & Boarding phase
+ */
+function StandingRocketSvg({ clipId, className = 'w-36 h-56 sm:w-48 sm:h-72 drop-shadow-2xl' }) {
+  return (
+    <svg viewBox="0 0 160 240" className={className} aria-hidden="true">
+      <defs>
+        <clipPath id={clipId}>
+          <circle cx="80" cy="100" r="26" />
+        </clipPath>
+      </defs>
+
+      {/* Fins */}
+      <path d="M42,152 L12,185 L42,182 Z" fill="#dc2626" stroke="#991b1b" strokeWidth="2" />
+      <path d="M118,152 L148,185 L118,182 Z" fill="#dc2626" stroke="#991b1b" strokeWidth="2" />
+
+      {/* Scalloped Base */}
+      <ellipse cx="80" cy="180" rx="44" ry="12" fill="#475569" stroke="#334155" strokeWidth="2.5" />
+
+      {/* Main White Bulbous Hull */}
+      <path d="M80,24 C108,50 120,110 118,165 L42,165 C40,110 52,50 80,24 Z" fill="#ffffff" stroke="#64748b" strokeWidth="3.5" />
+
+      {/* Nosecone */}
+      <path d="M80,24 C94,40 101,56 103,64 L57,64 C59,56 66,40 80,24 Z" fill="#1e293b" stroke="#0f172a" strokeWidth="2.5" />
+
+      {/* Red Crayon Scribbles */}
+      <path d="M54,76 Q60,68 68,76 T78,70 T88,75" fill="none" stroke="#ef4444" strokeWidth="2" opacity="0.8" />
+      <path d="M52,90 Q62,84 58,96 T70,92" fill="none" stroke="#ef4444" strokeWidth="2" opacity="0.8" />
+
+      {/* Purple Bubble Porthole */}
+      <circle cx="80" cy="100" r="28" fill="#ffffff" stroke="#94a3b8" strokeWidth="3" />
+      <g clipPath={`url(#${clipId})`}>
+        <circle cx="80" cy="100" r="24" fill="#3b0764" />
+        <circle cx="73" cy="94" r="2" fill="#ffffff" />
+        <circle cx="88" cy="98" r="1.5" fill="#ffffff" />
+        <circle cx="82" cy="108" r="1.5" fill="#fde047" />
+      </g>
+
+      {/* Red Badge */}
+      <rect x="104" y="94" width="14" height="9" rx="4.5" fill="#dc2626" stroke="#ffffff" strokeWidth="1" />
+      <text x="111" y="100" fontSize="4" fontWeight="900" fill="#ffffff" textAnchor="middle">OLIVIA</text>
+
+      {/* Orange Handle */}
+      <rect x="108" y="74" width="5" height="12" rx="2.5" fill="#f97316" />
+    </svg>
+  );
+}
+
+/**
  * Animated Boarding & Blast-off Cinematic Sequence
+ * Synchronizes each phase with speech completion so audio never interrupts transitions.
  */
 function BoardingCinematic({ usePhotoFace, onComplete, onSkip }) {
   const uid = useId().replace(/:/g, '');
+  const boardingClipId = `boarding-rocket-clip-${uid}`;
   const launchClipId = `launch-porthole-clip-${uid}`;
   const { triggerSynth, speak, stopSpeaking } = useSpaceAudio();
   const [phase, setPhase] = useState('boarding'); // 'boarding' | 'countdown' | 'liftoff'
-  const [count, setCount] = useState(3);
+  const [count, setCount] = useState(null);
 
-  // Keep audio/callback refs stable so toggling mute or voice mode never restarts the cinematic
   const onCompleteRef = useRef(onComplete);
   onCompleteRef.current = onComplete;
   const onSkipRef = useRef(onSkip);
@@ -142,62 +199,91 @@ function BoardingCinematic({ usePhotoFace, onComplete, onSkip }) {
   const stopSpeakingRef = useRef(stopSpeaking);
   stopSpeakingRef.current = stopSpeaking;
 
-  useEffect(() => {
-    // 1. Boarding Phase
-    speakRef.current("All aboard the Adventure Rocket! Captain Olivia and Navigator Anna are climbing inside!");
-    triggerSynthRef.current('twinkle');
+  const cancelledRef = useRef(false);
+  const completedNormallyRef = useRef(false);
+  const ownedSpeechTokenRef = useRef(null);
+  const timersRef = useRef(new Set());
 
-    const countdownTimer = setTimeout(() => {
+  const clearAllTimers = () => {
+    timersRef.current.forEach((id) => clearTimeout(id));
+    timersRef.current.clear();
+  };
+
+  useEffect(() => {
+    cancelledRef.current = false;
+    completedNormallyRef.current = false;
+
+    const delay = (ms) =>
+      new Promise((resolve) => {
+        const id = setTimeout(() => {
+          timersRef.current.delete(id);
+          resolve();
+        }, ms);
+        timersRef.current.add(id);
+      });
+
+    const capPromise = (p, maxMs) =>
+      Promise.race([p || Promise.resolve(), delay(maxMs)]);
+
+    const runSequence = async () => {
+      // Phase 1: Boarding
+      triggerSynthRef.current('twinkle');
+      const boardSpeech = speakRef.current(
+        'All aboard! Captain Olivia and Navigator Anna are climbing inside!'
+      );
+      ownedSpeechTokenRef.current = boardSpeech?.token ?? null;
+      await Promise.all([delay(2400), capPromise(boardSpeech?.promise, 4800)]);
+      if (cancelledRef.current) return;
+
+      // Phase 2: Get Ready + 3, 2, 1 Countdown
       setPhase('countdown');
-      speakRef.current("Ready for ignition! 3...");
-      triggerSynthRef.current('beep');
-    }, 2800);
+      setCount(null);
+      const readySpeech = speakRef.current('Ready for liftoff!');
+      ownedSpeechTokenRef.current = readySpeech?.token ?? null;
+      await Promise.all([delay(1100), capPromise(readySpeech?.promise, 2000)]);
+      if (cancelledRef.current) return;
+
+      for (const n of [3, 2, 1]) {
+        if (cancelledRef.current) return;
+        setCount(n);
+        triggerSynthRef.current(`countdown_${n}`);
+        const countSpeech = speakRef.current(`${n}!`, { playCue: false });
+        ownedSpeechTokenRef.current = countSpeech?.token ?? null;
+        await Promise.all([delay(850), capPromise(countSpeech?.promise, 1500)]);
+      }
+      if (cancelledRef.current) return;
+
+      // Phase 3: Liftoff
+      setPhase('liftoff');
+      triggerSynthRef.current('blastoff');
+      const liftSpeech = speakRef.current('Blast off! Into outer space!', {
+        playCue: false,
+      });
+      ownedSpeechTokenRef.current = liftSpeech?.token ?? null;
+      await Promise.all([delay(2800), capPromise(liftSpeech?.promise, 4200)]);
+      if (cancelledRef.current) return;
+
+      completedNormallyRef.current = true;
+      onCompleteRef.current();
+    };
+
+    runSequence();
 
     return () => {
-      clearTimeout(countdownTimer);
-      stopSpeakingRef.current();
+      cancelledRef.current = true;
+      clearAllTimers();
+      if (
+        !completedNormallyRef.current &&
+        ownedSpeechTokenRef.current != null
+      ) {
+        stopSpeakingRef.current(ownedSpeechTokenRef.current);
+      }
     };
   }, []);
 
-  useEffect(() => {
-    if (phase !== 'countdown') return;
-
-    if (count === 3) {
-      const t = setTimeout(() => {
-        setCount(2);
-        speakRef.current("2...");
-        triggerSynthRef.current('beep');
-      }, 1000);
-      return () => clearTimeout(t);
-    }
-    if (count === 2) {
-      const t = setTimeout(() => {
-        setCount(1);
-        speakRef.current("1...");
-        triggerSynthRef.current('beep');
-      }, 1000);
-      return () => clearTimeout(t);
-    }
-    if (count === 1) {
-      const t = setTimeout(() => {
-        setPhase('liftoff');
-        speakRef.current("BLAST OFF! Into Outer Space!");
-        triggerSynthRef.current('blastoff');
-      }, 1000);
-      return () => clearTimeout(t);
-    }
-  }, [phase, count]);
-
-  useEffect(() => {
-    if (phase === 'liftoff') {
-      const finishTimer = setTimeout(() => {
-        onCompleteRef.current();
-      }, 3200);
-      return () => clearTimeout(finishTimer);
-    }
-  }, [phase]);
-
   const handleSkip = () => {
+    cancelledRef.current = true;
+    clearAllTimers();
     stopSpeakingRef.current();
     onSkipRef.current();
   };
@@ -214,7 +300,6 @@ function BoardingCinematic({ usePhotoFace, onComplete, onSkip }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950 flex flex-col items-center justify-center overflow-hidden">
-      
       {/* Skip Button */}
       <button
         type="button"
@@ -255,10 +340,13 @@ function BoardingCinematic({ usePhotoFace, onComplete, onSkip }) {
               />
             </div>
 
-            {/* Standing Adventure Rocket */}
+            {/* Matching Standing Little Tikes Adventure Rocket */}
             <div className="relative flex flex-col items-center">
-              <div className="text-6xl sm:text-7xl animate-pulse">🚀</div>
-              <div className="w-24 h-4 bg-slate-800 rounded-full mt-2 opacity-50" />
+              <StandingRocketSvg
+                clipId={boardingClipId}
+                className="w-28 h-44 sm:w-36 sm:h-56 drop-shadow-2xl"
+              />
+              <div className="w-28 h-3 bg-slate-800 rounded-full mt-1 opacity-50" />
             </div>
           </div>
 
@@ -271,17 +359,31 @@ function BoardingCinematic({ usePhotoFace, onComplete, onSkip }) {
       {/* PHASE 2: COUNTDOWN */}
       {phase === 'countdown' && (
         <div className="relative w-full h-full flex flex-col items-center justify-center p-6 text-center bg-gradient-to-b from-slate-950 via-indigo-950 to-slate-900">
-          <div className="text-xl sm:text-3xl font-black text-cyan-300 uppercase tracking-widest mb-4">
+          <div className="text-xl sm:text-3xl font-black text-cyan-300 uppercase tracking-widest mb-6">
             MISSION COUNTDOWN
           </div>
 
-          {/* Giant Countdown Number */}
-          <div className="text-9xl sm:text-[14rem] font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 to-amber-500 animate-ping">
-            {count}
-          </div>
+          {count === null ? (
+            <div className="px-8 py-4 rounded-3xl bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 text-4xl sm:text-6xl font-black tracking-widest shadow-[0_0_50px_rgba(250,204,21,0.7)] border-4 border-yellow-200 animate-countdown-pop">
+              GET READY!
+            </div>
+          ) : (
+            <div className="relative flex items-center justify-center">
+              <div
+                key={`ring-${count}`}
+                className="absolute w-44 h-44 sm:w-64 sm:h-64 rounded-full border-4 border-yellow-300/60 animate-ping"
+              />
+              <div
+                key={`num-${count}`}
+                className="relative text-9xl sm:text-[14rem] leading-none font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 via-yellow-300 to-amber-500 drop-shadow-[0_0_35px_rgba(250,204,21,0.65)] animate-countdown-pop"
+              >
+                {count}
+              </div>
+            </div>
+          )}
 
-          <div className="text-lg sm:text-2xl font-black text-white mt-4 flex items-center gap-2">
-            <Sparkles className="w-6 h-6 text-yellow-300 animate-spin" />
+          <div className="text-lg sm:text-2xl font-black text-white mt-6 flex items-center gap-2">
+            <Sparkles className="w-6 h-6 text-yellow-300 animate-twinkle" />
             <span>Engines warming up...</span>
           </div>
         </div>
@@ -292,6 +394,22 @@ function BoardingCinematic({ usePhotoFace, onComplete, onSkip }) {
         <div className="relative w-full h-full flex flex-col items-center justify-center p-6 text-center overflow-hidden animate-rumble">
           {/* Space Horizon Background */}
           <div className="absolute inset-0 bg-gradient-to-b from-space-dark via-slate-950 to-indigo-950 stars-bg -z-10" />
+
+          {/* Speed Warp Streaks */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+            {CINEMATIC_WARP_STREAKS.map((streak, i) => (
+              <div
+                key={`cin-warp-${i}`}
+                className={`absolute top-0 w-[2.5px] rounded-full bg-gradient-to-b ${streak.color} to-transparent animate-warp-streak`}
+                style={{
+                  left: streak.left,
+                  height: streak.height,
+                  animationDelay: streak.delay,
+                  animationDuration: streak.duration,
+                }}
+              />
+            ))}
+          </div>
 
           {/* Soaring Rocket with Plume */}
           <div className="relative flex flex-col items-center animate-[zoomForward_2.8s_cubic-bezier(0.2,0.8,0.2,1)_forwards]">
@@ -308,16 +426,18 @@ function BoardingCinematic({ usePhotoFace, onComplete, onSkip }) {
               </defs>
 
               {/* Mega Thruster Plumes */}
-              <path d="M50,160 Q80,260 110,160 Q94,210 80,250 Q66,210 50,160 Z" fill="#ef4444" className="animate-pulse" />
-              <path d="M60,160 Q80,230 100,160 Q90,195 80,225 Q70,195 60,160 Z" fill="#f59e0b" />
-              <path d="M68,160 Q80,200 92,160 Q85,185 80,198 Q75,185 68,160 Z" fill="#fef08a" />
+              <g className="animate-thruster" style={{ transformOrigin: '80px 160px' }}>
+                <path d="M50,160 Q80,260 110,160 Q94,210 80,250 Q66,210 50,160 Z" fill="#ef4444" />
+                <path d="M60,160 Q80,230 100,160 Q90,195 80,225 Q70,195 60,160 Z" fill="#f59e0b" />
+                <path d="M68,160 Q80,200 92,160 Q85,185 80,198 Q75,185 68,160 Z" fill="#fef08a" />
+              </g>
 
               {/* Base */}
               <ellipse cx="80" cy="160" rx="46" ry="14" fill="#475569" stroke="#1e293b" strokeWidth="3" />
 
               {/* Hull */}
               <path d="M80,24 C112,52 126,112 122,160 L38,160 C34,112 48,52 80,24 Z" fill="#ffffff" stroke="#475569" strokeWidth="4" />
-              
+
               {/* Nosecone */}
               <path d="M80,24 C96,40 103,58 105,66 L55,66 C57,58 64,40 80,24 Z" fill="#1e293b" stroke="#0f172a" strokeWidth="3" />
 
@@ -326,7 +446,11 @@ function BoardingCinematic({ usePhotoFace, onComplete, onSkip }) {
               <g clipPath={`url(#${launchClipId})`}>
                 <circle cx="80" cy="102" r="26" fill="#3b0764" />
                 <image
-                  href={getAssetUrl(usePhotoFace ? "/assets/cartoons/characters/olivia_photo_face.png" : "/assets/cartoons/characters/olivia_cartoon_circle.webp")}
+                  href={getAssetUrl(
+                    usePhotoFace
+                      ? '/assets/cartoons/characters/olivia_photo_face.png'
+                      : '/assets/cartoons/characters/olivia_cartoon_circle.webp'
+                  )}
                   x="54"
                   y="76"
                   width="52"
@@ -342,7 +466,6 @@ function BoardingCinematic({ usePhotoFace, onComplete, onSkip }) {
           </div>
         </div>
       )}
-
     </div>
   );
 }
@@ -353,31 +476,46 @@ function BoardingCinematic({ usePhotoFace, onComplete, onSkip }) {
 export default function Launchpad({ onBlastOff, usePhotoFace = false, onTogglePhotoFace }) {
   const uid = useId().replace(/:/g, '');
   const rocketClipId = `earth-rocket-porthole-${uid}`;
-  const { triggerSynth, speak } = useSpaceAudio();
+  const { triggerSynth, speak, stopSpeaking } = useSpaceAudio();
   const [internalPhotoFace, setInternalPhotoFace] = useState(false);
   const activePhotoFace = onTogglePhotoFace !== undefined ? usePhotoFace : internalPhotoFace;
   const togglePhotoFace = () => {
     if (onTogglePhotoFace) {
       onTogglePhotoFace();
     } else {
-      setInternalPhotoFace(p => !p);
+      setInternalPhotoFace((p) => !p);
     }
   };
   const [isCinematicActive, setIsCinematicActive] = useState(false);
 
+  const ownedSpeechTokenRef = useRef(null);
+  const stopSpeakingRef = useRef(stopSpeaking);
+  stopSpeakingRef.current = stopSpeaking;
+
+  useEffect(() => {
+    return () => {
+      if (ownedSpeechTokenRef.current != null) {
+        stopSpeakingRef.current(ownedSpeechTokenRef.current);
+      }
+    };
+  }, []);
+
   const handleTapOlivia = () => {
     triggerSynth('twinkle');
-    speak("Captain Olivia reporting for duty! All systems ready for space!");
+    const res = speak('Captain Olivia reporting for duty! All systems ready for space!');
+    ownedSpeechTokenRef.current = res?.token ?? null;
   };
 
   const handleTapAnna = () => {
     triggerSynth('twinkle');
-    speak("Navigator Anna is excited! Look at the big rocket!");
+    const res = speak('Navigator Anna is excited! Look at the big rocket!');
+    ownedSpeechTokenRef.current = res?.token ?? null;
   };
 
   const handleTapRocket = () => {
     triggerSynth('rover_beep');
-    speak("The Adventure Rocket is fueled and ready to blast off!");
+    const res = speak('The Adventure Rocket is fueled and ready to blast off!');
+    ownedSpeechTokenRef.current = res?.token ?? null;
   };
 
   const handleStartBlastOff = () => {
@@ -386,7 +524,6 @@ export default function Launchpad({ onBlastOff, usePhotoFace = false, onTogglePh
 
   return (
     <div className="relative w-full h-full flex flex-col justify-between overflow-hidden select-none bg-gradient-to-b from-sky-400 via-sky-300 to-emerald-400">
-      
       {/* Cinematic Modal when Blast Off is clicked */}
       {isCinematicActive && (
         <BoardingCinematic
@@ -399,7 +536,7 @@ export default function Launchpad({ onBlastOff, usePhotoFace = false, onTogglePh
       {/* Top Controls: Photo Toggle & Mission Welcome */}
       <div className="relative z-20 w-full max-w-6xl mx-auto px-4 pt-3 flex items-center justify-between">
         <div className="px-3.5 py-1.5 rounded-full bg-slate-900/80 border border-slate-700 text-yellow-300 font-black text-xs sm:text-sm flex items-center gap-2 shadow-lg backdrop-blur-md">
-          <Sparkles className="w-4 h-4 text-yellow-300 animate-spin" />
+          <Sparkles className="w-4 h-4 text-yellow-300 animate-twinkle" />
           <span>Earth Spaceport Launchpad</span>
         </div>
 
@@ -410,10 +547,11 @@ export default function Launchpad({ onBlastOff, usePhotoFace = false, onTogglePh
             triggerSynth('twinkle');
             const next = !activePhotoFace;
             togglePhotoFace();
-            speak(next ? "Olivia and Anna's photo mode!" : "Cartoon art mode!");
+            const res = speak(next ? "Olivia and Anna's photo mode!" : 'Cartoon art mode!');
+            ownedSpeechTokenRef.current = res?.token ?? null;
           }}
           style={{ touchAction: 'manipulation' }}
-          title={activePhotoFace ? "Switch to Cartoon Face" : "Switch to Real Photo Face"}
+          title={activePhotoFace ? 'Switch to Cartoon Face' : 'Switch to Real Photo Face'}
           className="cockpit-btn min-h-[44px] px-3.5 py-2 bg-slate-900/85 hover:bg-slate-800 text-yellow-300 border-2 border-yellow-400/60 rounded-2xl flex items-center gap-1.5 text-xs font-black shadow-xl backdrop-blur-md"
         >
           <Camera className="w-4 h-4 text-cyan-300" />
@@ -423,15 +561,24 @@ export default function Launchpad({ onBlastOff, usePhotoFace = false, onTogglePh
 
       {/* Main Ground Stage: Earth Hills, Rocket, and Astronauts */}
       <div className="relative flex-1 w-full max-w-5xl mx-auto flex flex-col items-center justify-end pb-4 sm:pb-6 z-10 px-4">
-        
-        {/* Sky Elements: Fluffy Clouds & Sun */}
-        <div className="absolute top-8 left-8 w-28 sm:w-36 h-12 bg-white/70 rounded-full blur-[1px] -z-10 animate-float" />
-        <div className="absolute top-16 right-12 w-32 sm:w-44 h-14 bg-white/75 rounded-full blur-[1px] -z-10 animate-float" />
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-20 rounded-full bg-yellow-300 shadow-[0_0_60px_rgba(253,224,71,0.8)] -z-20" />
+        {/* Sky Elements: Staggered Fluffy Clouds & Sun with gentle Corona */}
+        <div
+          className="absolute top-8 left-8 w-28 sm:w-36 h-12 bg-white/75 rounded-full blur-[1px] -z-10 animate-float"
+          style={{ animationDelay: '0s' }}
+        />
+        <div
+          className="absolute top-16 right-12 w-32 sm:w-44 h-14 bg-white/75 rounded-full blur-[1px] -z-10 animate-float"
+          style={{ animationDelay: '1.6s' }}
+        />
+        <div
+          className="hidden sm:block absolute top-24 left-1/4 w-24 h-10 bg-white/60 rounded-full blur-[1px] -z-10 animate-float"
+          style={{ animationDelay: '3.1s' }}
+        />
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 w-28 h-28 rounded-full bg-yellow-200/35 blur-md -z-20 animate-pulse" />
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-20 rounded-full bg-yellow-300 shadow-[0_0_60px_rgba(253,224,71,0.85)] -z-20" />
 
         {/* The Adventure Rocket & Boarding Platform */}
         <div className="relative w-full flex items-end justify-center gap-6 sm:gap-12 mb-3">
-          
           {/* Captain Olivia (Standing Left) */}
           <EarthAstronaut
             name="Olivia"
@@ -455,47 +602,7 @@ export default function Launchpad({ onBlastOff, usePhotoFace = false, onTogglePh
               <div className="w-full h-1 bg-yellow-400" />
             </div>
 
-            {/* Standing Rocket SVG */}
-            <svg viewBox="0 0 160 240" className="w-36 h-56 sm:w-48 sm:h-72 drop-shadow-2xl">
-              <defs>
-                <clipPath id={rocketClipId}>
-                  <circle cx="80" cy="100" r="26" />
-                </clipPath>
-              </defs>
-
-              {/* Fins */}
-              <path d="M42,152 L12,185 L42,182 Z" fill="#dc2626" stroke="#991b1b" strokeWidth="2" />
-              <path d="M118,152 L148,185 L118,182 Z" fill="#dc2626" stroke="#991b1b" strokeWidth="2" />
-
-              {/* Scalloped Base */}
-              <ellipse cx="80" cy="180" rx="44" ry="12" fill="#475569" stroke="#334155" strokeWidth="2.5" />
-
-              {/* Main White Bulbous Hull */}
-              <path d="M80,24 C108,50 120,110 118,165 L42,165 C40,110 52,50 80,24 Z" fill="#ffffff" stroke="#64748b" strokeWidth="3.5" />
-
-              {/* Nosecone */}
-              <path d="M80,24 C94,40 101,56 103,64 L57,64 C59,56 66,40 80,24 Z" fill="#1e293b" stroke="#0f172a" strokeWidth="2.5" />
-
-              {/* Red Crayon Scribbles */}
-              <path d="M54,76 Q60,68 68,76 T78,70 T88,75" fill="none" stroke="#ef4444" strokeWidth="2" opacity="0.8" />
-              <path d="M52,90 Q62,84 58,96 T70,92" fill="none" stroke="#ef4444" strokeWidth="2" opacity="0.8" />
-
-              {/* Purple Bubble Porthole */}
-              <circle cx="80" cy="100" r="28" fill="#ffffff" stroke="#94a3b8" strokeWidth="3" />
-              <g clipPath={`url(#${rocketClipId})`}>
-                <circle cx="80" cy="100" r="24" fill="#3b0764" />
-                <circle cx="73" cy="94" r="2" fill="#ffffff" />
-                <circle cx="88" cy="98" r="1.5" fill="#ffffff" />
-                <circle cx="82" cy="108" r="1.5" fill="#fde047" />
-              </g>
-
-              {/* Red Badge */}
-              <rect x="104" y="94" width="14" height="9" rx="4.5" fill="#dc2626" stroke="#ffffff" strokeWidth="1" />
-              <text x="111" y="100" fontSize="4" fontWeight="900" fill="#ffffff" textAnchor="middle">OLIVIA</text>
-
-              {/* Orange Handle */}
-              <rect x="108" y="74" width="5" height="12" rx="2.5" fill="#f97316" />
-            </svg>
+            <StandingRocketSvg clipId={rocketClipId} />
 
             {/* Launchpad Base Platform */}
             <div className="w-48 sm:w-64 h-5 bg-gradient-to-r from-slate-700 via-slate-600 to-slate-700 rounded-xl border-2 border-slate-500 shadow-xl flex items-center justify-around px-2">
@@ -514,14 +621,11 @@ export default function Launchpad({ onBlastOff, usePhotoFace = false, onTogglePh
             usePhotoFace={activePhotoFace}
             onClick={handleTapAnna}
           />
-
         </div>
-
       </div>
 
       {/* Bottom Command Bar: GIANT BLAST OFF BUTTON */}
       <div className="relative z-30 w-full bg-gradient-to-t from-slate-950 via-slate-900 to-slate-900/90 border-t-8 border-slate-700 px-4 py-4 sm:py-5 shadow-[0_-15px_35px_rgba(0,0,0,0.6)] flex flex-col items-center">
-        
         {/* Giant Tactile Blast Off Push-Button */}
         <button
           type="button"
@@ -538,7 +642,6 @@ export default function Launchpad({ onBlastOff, usePhotoFace = false, onTogglePh
           Tap the big button to board the rocket and blast off into space!
         </div>
       </div>
-
     </div>
   );
 }

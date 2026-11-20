@@ -169,7 +169,7 @@
     "action": "spin_rings",
     "action_emoji": "💫",
     "action_title": "Spin Like the Rings!",
-    "action_prompt": "Stand up and do a gentle spin like Saturn giant rings!",
+    "action_prompt": "Stand up and do a gentle spin like Saturn's giant rings!",
     "action_cheer": "Wheeeeee! Look at those glittery spinning rings!",
     "sfx": "whoosh",
     "factAudio": "audio/voice/saturn.mp3"
@@ -219,7 +219,7 @@
     "action": "wind_dance",
     "action_emoji": "💨",
     "action_title": "Super-Wind Dance!",
-    "action_prompt": "Sway your arms back and forth in Neptune fast space breeze!",
+    "action_prompt": "Sway your arms back and forth in Neptune's fast space breeze!",
     "action_cheer": "Whooosh! What a windy dance on Neptune!",
     "sfx": "whoosh",
     "factAudio": "audio/voice/neptune.mp3"
@@ -319,7 +319,7 @@
     "action": "splash",
     "action_emoji": "🌊",
     "action_title": "Secret Ocean Splash!",
-    "action_prompt": "Pretend to swim and splash in Europa secret warm ocean!",
+    "action_prompt": "Pretend to swim and splash in Europa's secret warm ocean!",
     "action_cheer": "Splish splash! Hidden space ocean discovered!",
     "sfx": "bird_chirp",
     "factAudio": "audio/voice/europa.mp3"
@@ -394,7 +394,7 @@
     "action": "bubble_pop",
     "action_emoji": "🫧",
     "action_title": "Pop the Moon Bubbles!",
-    "action_prompt": "Pop imaginary space bubbles floating in Titan orange sky!",
+    "action_prompt": "Pop imaginary space bubbles floating in Titan's orange sky!",
     "action_cheer": "Pop! Pop! Pop! Titan is so magical!",
     "sfx": "bird_chirp",
     "factAudio": "audio/voice/titan.mp3"
@@ -420,7 +420,7 @@
     "action_emoji": "🚀",
     "action_title": "Jump with the Geyser!",
     "action_prompt": "Squat down low and JUMP up high like an ice fountain shooting into space!",
-    "action_cheer": "WHOOSH! You jumped as high as Enceladus ice geysers!",
+    "action_cheer": "WHOOSH! You jumped as high as Enceladus's ice geysers!",
     "sfx": "whoosh",
     "factAudio": "audio/voice/enceladus.mp3"
   },
@@ -468,8 +468,8 @@
     "discovered_by": "Clyde Tombaugh",
     "action": "heart_hug",
     "action_emoji": "💖",
-    "action_title": "Touch Pluto Heart!",
-    "action_prompt": "Make a heart shape with your hands for Pluto giant heart glacier!",
+    "action_title": "Touch Pluto's Heart!",
+    "action_prompt": "Make a heart shape with your hands for Pluto's giant heart glacier!",
     "action_cheer": "Captain Olivia and Anna sent so much love to tiny Pluto!",
     "sfx": "twinkle",
     "factAudio": "audio/voice/pluto.mp3"

@@ -15,11 +15,15 @@ export default function Cockpit({
   const [blastingTarget, setBlastingTarget] = useState(null);
   const [isBlasting, setIsBlasting] = useState(false);
   const blastTimeoutRef = useRef(null);
+  const speakDelayRef = useRef(null);
 
   useEffect(() => {
     return () => {
       if (blastTimeoutRef.current) {
         clearTimeout(blastTimeoutRef.current);
+      }
+      if (speakDelayRef.current) {
+        clearTimeout(speakDelayRef.current);
       }
     };
   }, []);
@@ -31,9 +35,15 @@ export default function Cockpit({
     setBlastingTarget(body);
     setIsBlasting(true);
 
-    // 1. Rocket sound cue & audio announcement
+    // 1. Rocket ignition sound first, then voice announcement after 160ms beat
     triggerSynth('blastoff');
-    speak(`Blast off to ${body.name}! Here we go!`);
+    if (speakDelayRef.current) {
+      clearTimeout(speakDelayRef.current);
+    }
+    speakDelayRef.current = setTimeout(() => {
+      speakDelayRef.current = null;
+      speak(`Blast off to ${body.name}! Here we go!`, { playCue: false });
+    }, 160);
 
     // 2. Transition rocket toward that body after rumble effect (~1.8s)
     if (blastTimeoutRef.current) {

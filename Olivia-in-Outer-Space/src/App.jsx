@@ -54,7 +54,7 @@ class AppErrorBoundary extends React.Component {
  * Main application shell managing view routing between Launchpad, Cockpit, and PlanetView.
  */
 function SpaceApp() {
-  const { triggerSynth, speak, stopSpeaking } = useSpaceAudio();
+  const { triggerSynth, speak } = useSpaceAudio();
   const [selectedPlanet, setSelectedPlanet] = useState(null);
   const [currentView, setCurrentView] = useState('launchpad'); // 'launchpad' | 'cockpit' | 'planet'
   const [usePhotoFace, setUsePhotoFace] = useState(false); // Default to cartoon faces
@@ -69,12 +69,12 @@ function SpaceApp() {
   };
 
   const handleReturnToCockpit = () => {
-    stopSpeaking();
+    triggerSynth('beep');
+    speak('Back to the cockpit with Captain Olivia and Navigator Anna!');
     setCurrentView('cockpit');
   };
 
   const handleReturnToEarth = () => {
-    stopSpeaking();
     triggerSynth('beep');
     speak('Returning to the Launchpad!');
     setCurrentView('launchpad');

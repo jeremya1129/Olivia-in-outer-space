@@ -1,6 +1,16 @@
 import React, { useId } from 'react';
 import { getAssetUrl } from '../utils/assets';
 
+const WARP_STREAKS = [
+  { left: '8%', height: '90px', delay: '0s', duration: '0.55s', color: 'from-cyan-300/80' },
+  { left: '19%', height: '130px', delay: '0.2s', duration: '0.68s', color: 'from-yellow-200/85' },
+  { left: '31%', height: '75px', delay: '0.4s', duration: '0.52s', color: 'from-white/80' },
+  { left: '47%', height: '115px', delay: '0.1s', duration: '0.64s', color: 'from-sky-300/85' },
+  { left: '63%', height: '140px', delay: '0.32s', duration: '0.7s', color: 'from-amber-200/80' },
+  { left: '76%', height: '85px', delay: '0.15s', duration: '0.58s', color: 'from-cyan-200/85' },
+  { left: '89%', height: '120px', delay: '0.38s', duration: '0.62s', color: 'from-white/85' },
+];
+
 /**
  * Olivia's Animated Flying Toy Rocket
  * Exact replica of the Little Tikes Adventure Rocket:
@@ -35,10 +45,10 @@ export default function FlyingToyRocket({ isBlasting, targetName, usePhotoFace =
 
           {/* Scalloped Charcoal Base */}
           <ellipse cx="80" cy="168" rx="42" ry="12" fill="#475569" stroke="#334155" strokeWidth="2.5" />
-          
+
           {/* Main White Bulbous Hull */}
           <path d="M80,24 C108,50 120,105 118,152 L42,152 C40,105 52,50 80,24 Z" fill="#ffffff" stroke="#64748b" strokeWidth="3" />
-          
+
           {/* Dark Charcoal Nosecone */}
           <path d="M80,24 C94,40 101,56 103,64 L57,64 C59,56 66,40 80,24 Z" fill="#1e293b" stroke="#0f172a" strokeWidth="2.5" />
 
@@ -74,7 +84,12 @@ export default function FlyingToyRocket({ isBlasting, targetName, usePhotoFace =
           <circle cx="103" cy="136" r="7" fill="#1d4ed8" stroke="#1e40af" strokeWidth="1.5" />
 
           {/* Idle Thruster Flame */}
-          <path d="M72,168 Q80,186 88,168 Q80,178 72,168 Z" fill="#f59e0b" />
+          <path
+            d="M72,168 Q80,188 88,168 Q80,178 72,168 Z"
+            fill="#f59e0b"
+            className="animate-thruster"
+            style={{ transformOrigin: '80px 168px' }}
+          />
         </svg>
       </div>
     );
@@ -84,8 +99,24 @@ export default function FlyingToyRocket({ isBlasting, targetName, usePhotoFace =
     <div
       role="status"
       aria-live="polite"
-      className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center"
+      className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center overflow-hidden"
     >
+      {/* Pure-CSS Warp Speed Space Streaks */}
+      <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
+        {WARP_STREAKS.map((streak, i) => (
+          <div
+            key={`warp-${i}`}
+            className={`absolute top-0 w-[2px] rounded-full bg-gradient-to-b ${streak.color} to-transparent animate-warp-streak`}
+            style={{
+              left: streak.left,
+              height: streak.height,
+              animationDelay: streak.delay,
+              animationDuration: streak.duration,
+            }}
+          />
+        ))}
+      </div>
+
       {/* Zooming Rocket */}
       <div className="relative flex flex-col items-center animate-[zoomForward_1.8s_cubic-bezier(0.2,0.8,0.2,1)_forwards]">
         <div className="text-sm md:text-base font-black px-5 py-1.5 rounded-full bg-yellow-400 text-slate-950 shadow-2xl mb-3 animate-bounce uppercase tracking-widest border-2 border-slate-900">
@@ -99,19 +130,20 @@ export default function FlyingToyRocket({ isBlasting, targetName, usePhotoFace =
           </defs>
 
           {/* Roaring Rocket Thruster Flames */}
-          <path
-            d="M55,160 Q80,240 105,160 Q92,195 80,225 Q68,195 55,160 Z"
-            fill="#ef4444"
-            className="animate-pulse"
-          />
-          <path
-            d="M62,160 Q80,215 98,160 Q88,188 80,205 Q72,188 62,160 Z"
-            fill="#f59e0b"
-          />
-          <path
-            d="M68,160 Q80,190 92,160 Q85,178 80,188 Q75,178 68,160 Z"
-            fill="#fef08a"
-          />
+          <g className="animate-thruster" style={{ transformOrigin: '80px 160px' }}>
+            <path
+              d="M55,160 Q80,240 105,160 Q92,195 80,225 Q68,195 55,160 Z"
+              fill="#ef4444"
+            />
+            <path
+              d="M62,160 Q80,215 98,160 Q88,188 80,205 Q72,188 62,160 Z"
+              fill="#f59e0b"
+            />
+            <path
+              d="M68,160 Q80,190 92,160 Q85,178 80,188 Q75,178 68,160 Z"
+              fill="#fef08a"
+            />
+          </g>
 
           {/* Scalloped Launch Base */}
           <ellipse cx="80" cy="160" rx="46" ry="14" fill="#475569" stroke="#1e293b" strokeWidth="3" />
