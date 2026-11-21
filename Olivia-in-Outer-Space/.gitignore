@@ -1,5 +1,8 @@
 # Temporary files & raw captures
 assets/raw_references/
+assets/cartoons/references/Anna/
+assets/cartoons/references/Olivia/
+assets/cartoons/characters/*_test.png
 *.pyc
 __pycache__/
 .env
