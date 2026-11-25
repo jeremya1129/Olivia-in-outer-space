@@ -9,7 +9,6 @@ import FlyingToyRocket from './FlyingToyRocket';
 export default function Cockpit({
   celestialBodies = [],
   onSelectDestination,
-  usePhotoFace = false,
 }) {
   const { triggerSynth, speak } = useSpaceAudio();
   const [blastingTarget, setBlastingTarget] = useState(null);
@@ -86,14 +85,13 @@ export default function Cockpit({
           <SolarSystemView
             celestialBodies={celestialBodies}
             onSelectDestination={handleDestinationTap}
-            usePhotoFace={usePhotoFace}
           />
         </div>
       </div>
 
       {/* Blast-Off Event: Zooming Toy Rocket Transition */}
       {isBlasting && (
-        <FlyingToyRocket isBlasting={true} targetName={blastingTarget?.name} usePhotoFace={usePhotoFace} />
+        <FlyingToyRocket isBlasting={true} targetName={blastingTarget?.name} />
       )}
     </div>
   );

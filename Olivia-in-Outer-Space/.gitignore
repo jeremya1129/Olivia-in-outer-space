@@ -2,7 +2,13 @@
 assets/raw_references/
 assets/cartoons/references/Anna/
 assets/cartoons/references/Olivia/
+assets/cartoons/references/Rocket/
+assets/cartoons/references/*.png
+assets/cartoons/references/*.jpg
+assets/cartoons/references/*.jpeg
+assets/cartoons/references/*.webp
 assets/cartoons/characters/*_test.png
+**/*_photo_face.*
 *.pyc
 __pycache__/
 .env

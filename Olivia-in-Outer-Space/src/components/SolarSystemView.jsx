@@ -152,7 +152,7 @@ const SOLAR_SYSTEM_ORDER = [
   },
 ];
 
-export default function SolarSystemView({ celestialBodies = [], onSelectDestination, usePhotoFace = false }) {
+export default function SolarSystemView({ celestialBodies = [], onSelectDestination }) {
   const { triggerSynth, speak, stopSpeaking } = useSpaceAudio();
 
   // View state: 'solarsystem' (Left-to-Right panoramic track) | 'planetary' (Specific planet + moons view)
@@ -369,7 +369,7 @@ export default function SolarSystemView({ celestialBodies = [], onSelectDestinat
                     {/* Adventure Rocket Floating Directly Centered Above Earth */}
                     {item.id === 'earth' && (
                       <div className="absolute -top-24 sm:-top-28 md:-top-32 left-1/2 -translate-x-1/2 z-30 pointer-events-none flex flex-col items-center">
-                        <FlyingToyRocket isBlasting={false} usePhotoFace={usePhotoFace} />
+                        <FlyingToyRocket isBlasting={false} />
                       </div>
                     )}
                     {/* Planet Interactive Visual Card */}

@@ -234,8 +234,28 @@ async function runTests() {
     assert('Header Subtitle shows ASTRO-LAB', headerSub?.includes('ASTRO-LAB'), `Found "${headerSub}"`);
     assert('Header Subtitle shows EARTH SPACEPORT', headerSub?.includes('EARTH SPACEPORT'), `Found "${headerSub}"`);
 
-    const launchpadFaceBtn = await cdp.eval('document.querySelector(".cockpit-btn.bg-slate-900\\\\/85")?.textContent?.trim()');
-    assert('Launchpad Face button labeled with action', launchpadFaceBtn?.includes('Real Photo Face'), `Found "${launchpadFaceBtn}"`);
+    const launchpadHasPhotoToggle = await cdp.eval(`
+      Array.from(document.querySelectorAll("button"))
+        .some(b => {
+          const t = b.textContent || "";
+          return t.includes("Real Photo") || t.includes("Photo Face");
+        })
+    `);
+    assert('Launchpad has no Real Photo Face toggle button', !launchpadHasPhotoToggle);
+
+    const launchpadFaceCheck = await cdp.eval(`(() => {
+      const imgs = Array.from(document.querySelectorAll("image, img"))
+        .map(el => el.getAttribute("href") || el.getAttribute("src") || "");
+      const oliviaOk = imgs.some(s => s.includes("olivia_cartoon_circle.webp"));
+      const annaOk = imgs.some(s => s.includes("anna_cartoon_circle.webp"));
+      const hasPhotoFace = imgs.some(s => s.includes("photo_face"));
+      return { oliviaOk, annaOk, hasPhotoFace, imgs };
+    })()`);
+    assert(
+      'Launchpad astronauts use cartoon faces only',
+      launchpadFaceCheck.oliviaOk && launchpadFaceCheck.annaOk && !launchpadFaceCheck.hasPhotoFace,
+      JSON.stringify(launchpadFaceCheck.imgs)
+    );
 
     const voiceBtn = await cdp.eval('document.querySelectorAll("header button")[0]?.textContent?.trim()');
     assert('Voice button labeled with action if pressed', voiceBtn?.includes('Robot'), `Found "${voiceBtn}"`);
@@ -290,13 +310,27 @@ async function runTests() {
     `);
     assert('Launchpad button is present in header', Boolean(launchpadBtnText), `Found "${launchpadBtnText}"`);
 
-    // Verify Astronaut Face Toggle button in header says "Photos" (action)
-    const faceToggleBtn = await cdp.eval(`
+    // Verify Astronaut Photo Face Toggle is removed from header and rocket uses cartoon face
+    const headerPhotoToggle = await cdp.eval(`
       Array.from(document.querySelectorAll("header button"))
-        .map(b => b.textContent.trim())
-        .find(t => t.includes("Photos") || t.includes("Cartoon"))
+        .some(b => {
+          const t = b.textContent || "";
+          return t.includes("Photos") || t.includes("Photo Face");
+        })
     `);
-    assert('Astronaut face toggle labeled as action if pressed', faceToggleBtn?.includes('Photos'), `Found "${faceToggleBtn}"`);
+    assert('Cockpit header has no Photos face toggle button', !headerPhotoToggle);
+
+    const cockpitFaceCheck = await cdp.eval(`(() => {
+      const imgs = Array.from(document.querySelectorAll("image, img"))
+        .map(el => el.getAttribute("href") || el.getAttribute("src") || "");
+      const rocketCartoonOk = imgs.some(s => s.includes("olivia_cartoon_circle.webp"));
+      const hasPhotoFace = imgs.some(s => s.includes("photo_face"));
+      return { rocketCartoonOk, hasPhotoFace };
+    })()`);
+    assert(
+      'Cockpit cruising rocket uses cartoon face only',
+      cockpitFaceCheck.rocketCartoonOk && !cockpitFaceCheck.hasPhotoFace
+    );
 
     await cdp.screenshot('screen_2_cockpit_solarsystem.png');
 

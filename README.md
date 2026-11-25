@@ -2,7 +2,7 @@
 
 An interactive, touch-friendly, personalized space exploration web application designed for toddlers **Olivia** and **Anna**.
 
-Built with React 18, Vite, and Tailwind CSS, featuring an Earth Spaceport Launchpad, a Solar System Highway cockpit, word-by-word read-along stories, procedural Web Audio feedback, authentic NASA spacecraft photography, and customized cartoon and real-photo avatars.
+Built with React 18, Vite, and Tailwind CSS, featuring an Earth Spaceport Launchpad, a Solar System Highway cockpit, word-by-word read-along stories, procedural Web Audio feedback, authentic NASA spacecraft photography, and custom cartoon astronaut avatars.
 
 ---
 

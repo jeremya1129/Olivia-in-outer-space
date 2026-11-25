@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Olivia in Outer Space - Asset Processing Pipeline
-Processes raw reference photos of Anna, Olivia, and the toy rocket into cartoon reference assets.
+Processes local design reference images into cropped PNGs and generates cartoon SVG placeholders.
 """
 
 import sys
@@ -350,7 +350,7 @@ def scan_assets():
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Process raw photo references of Anna, Olivia, and the rocket for Olivia in Outer Space."
+        description="Process local design reference images and generate cartoon SVG placeholders for Olivia in Outer Space."
     )
     parser.add_argument("--max-size", type=int, default=1024, help="Max dimension for downscaling (default: 1024)")
     parser.add_argument("--auto-alpha", action="store_true", help="Attempt automatic backdrop transparency keying")

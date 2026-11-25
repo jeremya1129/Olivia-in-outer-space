@@ -1,3 +1,3 @@
 # Cartoon References
-Processed reference images downscaled to max 1024x1024 PNG with alpha transparency from `assets/raw_references/`.
-Used as direct design guides for character, cockpit, and rocket art.
+Local-only design guides excluded from Git via `.gitignore` (no reference photos are tracked in version control).
+Used locally as design guides for character, cockpit, and rocket cartoon art.

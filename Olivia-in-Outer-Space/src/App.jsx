@@ -57,7 +57,6 @@ function SpaceApp() {
   const { triggerSynth, speak } = useSpaceAudio();
   const [selectedPlanet, setSelectedPlanet] = useState(null);
   const [currentView, setCurrentView] = useState('launchpad'); // 'launchpad' | 'cockpit' | 'planet'
-  const [usePhotoFace, setUsePhotoFace] = useState(false); // Default to cartoon faces
 
   const handleBlastOffFromEarth = () => {
     setCurrentView('cockpit');
@@ -113,40 +112,21 @@ function SpaceApp() {
           </div>
         </div>
 
-        {/* Right: Unified Controls (Photos, Radio, Launchpad, Audio) */}
+        {/* Right: Unified Controls (Radio, Launchpad, Audio) */}
         <div className="flex items-center gap-1.5 sm:gap-2">
           {currentView === 'cockpit' && (
-            <>
-              {/* Personalized Real Photo vs Cartoon Pilot Face Toggle (Action if pressed) */}
-              <button
-                type="button"
-                onClick={() => {
-                  triggerSynth('twinkle');
-                  const next = !usePhotoFace;
-                  setUsePhotoFace(next);
-                  speak(next ? "Olivia and Anna's photo faces!" : 'Cartoon faces!');
-                }}
-                style={{ touchAction: 'manipulation' }}
-                aria-label={usePhotoFace ? 'Switch to Cartoon faces' : 'Switch to Photo faces'}
-                title={usePhotoFace ? 'Switch to Cartoon faces' : 'Switch to Photo faces'}
-                className="cockpit-btn min-h-[40px] px-2.5 sm:px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-yellow-300 border border-yellow-400/50 rounded-xl flex items-center gap-1 text-[11px] font-black shadow-md"
-              >
-                <span>{usePhotoFace ? '🎨 Cartoon' : '📸 Photos'}</span>
-              </button>
-
-              {/* Crew Radio Check */}
-              <button
-                type="button"
-                onClick={handleRadioCheck}
-                style={{ touchAction: 'manipulation' }}
-                aria-label="Radio check with Astro-Lab Mission Control"
-                title="Radio check with Astro-Lab Mission Control"
-                className="cockpit-btn min-h-[40px] min-w-[40px] px-2.5 sm:px-3 py-1.5 bg-indigo-950 hover:bg-indigo-900 text-cyan-200 border border-indigo-400/50 rounded-xl flex items-center justify-center gap-1 text-[11px] font-black shadow-md"
-              >
-                <Radio className="w-3.5 h-3.5 text-yellow-300 animate-pulse" />
-                <span className="hidden md:inline">Radio</span>
-              </button>
-            </>
+            /* Crew Radio Check */
+            <button
+              type="button"
+              onClick={handleRadioCheck}
+              style={{ touchAction: 'manipulation' }}
+              aria-label="Radio check with Astro-Lab Mission Control"
+              title="Radio check with Astro-Lab Mission Control"
+              className="cockpit-btn min-h-[40px] min-w-[40px] px-2.5 sm:px-3 py-1.5 bg-indigo-950 hover:bg-indigo-900 text-cyan-200 border border-indigo-400/50 rounded-xl flex items-center justify-center gap-1 text-[11px] font-black shadow-md"
+            >
+              <Radio className="w-3.5 h-3.5 text-yellow-300 animate-pulse" />
+              <span className="hidden md:inline">Radio</span>
+            </button>
           )}
 
           {/* Destination View: Return to Cockpit Shortcut */}
@@ -193,18 +173,13 @@ function SpaceApp() {
         >
           {/* View Routing */}
           {currentView === 'launchpad' && (
-            <Launchpad
-              onBlastOff={handleBlastOffFromEarth}
-              usePhotoFace={usePhotoFace}
-              onTogglePhotoFace={() => setUsePhotoFace((prev) => !prev)}
-            />
+            <Launchpad onBlastOff={handleBlastOffFromEarth} />
           )}
 
           {currentView === 'cockpit' && (
             <Cockpit
               celestialBodies={celestialData}
               onSelectDestination={handleSelectDestination}
-              usePhotoFace={usePhotoFace}
             />
           )}
 

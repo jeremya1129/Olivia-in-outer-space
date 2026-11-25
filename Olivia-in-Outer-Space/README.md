@@ -2,7 +2,7 @@
 
 An interactive, touch-friendly, personalized space exploration web application designed for toddlers **Olivia** and **Anna**.
 
-Built with React 18, Vite, and Tailwind CSS, featuring oversized tactile launchpad and flight deck controls, procedural Web Audio feedback, read-along storybooks, authentic NASA spacecraft photography, and customized cartoon and real-photo avatars.
+Built with React 18, Vite, and Tailwind CSS, featuring oversized tactile launchpad and flight deck controls, procedural Web Audio feedback, read-along storybooks, authentic NASA spacecraft photography, and custom cartoon astronaut avatars.
 
 ---
 
@@ -11,7 +11,7 @@ Built with React 18, Vite, and Tailwind CSS, featuring oversized tactile launchp
 - **Earth Spaceport Launchpad (`Launchpad.jsx`)**:
   - Sunny Earth launchpad with interactive Captain Olivia and Navigator Anna avatars, animated Adventure Rocket, and an oversized blast-off push button (`min-h-[96px]`) with `touch-action: manipulation`.
   - 3-phase **Boarding & Blast-Off Cinematic** (boarding ramp, 3-2-1 countdown, liftoff) with a Skip button and `Escape` key support.
-  - Toggle between **Custom Cartoon Art** and **Personalized Real Photo Faces** of Olivia and Anna in their astronaut helmets.
+  - Custom cartoon astronaut avatars for Captain Olivia and Navigator Anna inside their spacesuit helmets.
 
 - **Solar System Highway & Cockpit (`Cockpit.jsx` & `SolarSystemView.jsx`)**:
   - Fullscreen cockpit canopy framing an interactive horizontal **Solar System Highway** from the Sun to Pluto, with quick-jump chips and an Asteroid Belt divider.
@@ -88,7 +88,7 @@ Olivia-in-Outer-Space/
 │   ├── ingest_celestial_data.py # Initial 8-body celestial ingestion script
 │   ├── process_assets.py        # Pillow asset preprocessing pipeline
 │   ├── generate_interaction_gifs.py # Procedural Pillow GIF generator for all 20 bodies
-│   └── test_user_flow.mjs       # Headless Chrome CDP end-to-end test suite (35 assertions)
+│   └── test_user_flow.mjs       # Headless Chrome CDP end-to-end test suite
 ├── src/
 │   ├── components/
 │   │   ├── AudioPlayer.jsx      # Web Audio synthesizer & Web Speech narrator context
@@ -153,8 +153,8 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## 🎨 Asset Management & Hygiene
 
-- **Reference Media**: Raw private references placed in `assets/raw_references/` are excluded from version control via `.gitignore`.
-- **Pre-processing**: Process raw reference photos into cropped transparent PNGs:
+- **Reference Media**: Local-only design references placed in `assets/raw_references/` or personal reference subfolders under `assets/cartoons/references/` are excluded from version control via `.gitignore` and never committed; the published app uses cartoon character art only.
+- **Pre-processing**: Generate cartoon SVG placeholders or process local-only design references into cropped transparent PNGs:
   ```bash
   python3 scripts/process_assets.py
   ```

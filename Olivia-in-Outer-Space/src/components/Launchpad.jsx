@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useId, useRef } from 'react';
 import { useSpaceAudio } from './AudioPlayer';
-import { Sparkles, Camera, ArrowRight } from 'lucide-react';
+import { Sparkles, ArrowRight } from 'lucide-react';
 import { getAssetUrl } from '../utils/assets';
 
 const CINEMATIC_WARP_STREAKS = [
@@ -15,15 +15,10 @@ const CINEMATIC_WARP_STREAKS = [
 /**
  * Cartoon Astronaut Avatar for the Launchpad
  */
-function EarthAstronaut({ name, isOlivia, isWalking, isCheering, usePhotoFace = false, onClick }) {
+function EarthAstronaut({ name, isOlivia, isWalking, isCheering, onClick }) {
   const uid = useId().replace(/:/g, '');
   const suitAccent = isOlivia ? '#38bdf8' : '#c084fc';
   const visorTint = isOlivia ? 'rgba(56, 189, 248, 0.25)' : 'rgba(216, 180, 254, 0.25)';
-  const photoSrc = getAssetUrl(
-    isOlivia
-      ? '/assets/cartoons/characters/olivia_photo_face.png'
-      : '/assets/cartoons/characters/anna_photo_face.png'
-  );
   const cartoonSrc = getAssetUrl(
     isOlivia
       ? '/assets/cartoons/characters/olivia_cartoon_circle.webp'
@@ -73,34 +68,19 @@ function EarthAstronaut({ name, isOlivia, isWalking, isCheering, usePhotoFace = 
         {/* Helmet Bubble Glass Visor */}
         <ellipse cx="85" cy="72" rx="43" ry="38" fill="#0f172a" stroke="#475569" strokeWidth="3.5" />
 
-        {/* Face Content: Real Photo Cutout or Cartoon Face */}
-        {usePhotoFace ? (
-          <g clipPath={`url(#${clipId})`}>
-            <rect x="40" y="32" width="90" height="80" fill="#0f172a" />
-            <image
-              href={photoSrc}
-              x={isOlivia ? '40' : '41'}
-              y={isOlivia ? '31' : '32'}
-              width="90"
-              height="80"
-              preserveAspectRatio="xMidYMid slice"
-            />
-            <ellipse cx="85" cy="72" rx="41" ry="36" fill={visorTint} />
-          </g>
-        ) : (
-          <g clipPath={`url(#${clipId})`}>
-            <rect x="40" y="32" width="90" height="80" fill="#0f172a" />
-            <image
-              href={cartoonSrc}
-              x="42"
-              y="32"
-              width="86"
-              height="80"
-              preserveAspectRatio="xMidYMid slice"
-            />
-            <ellipse cx="85" cy="72" rx="41" ry="36" fill={visorTint} />
-          </g>
-        )}
+        {/* Face Content: Cartoon Face */}
+        <g clipPath={`url(#${clipId})`}>
+          <rect x="40" y="32" width="90" height="80" fill="#0f172a" />
+          <image
+            href={cartoonSrc}
+            x="42"
+            y="32"
+            width="86"
+            height="80"
+            preserveAspectRatio="xMidYMid slice"
+          />
+          <ellipse cx="85" cy="72" rx="41" ry="36" fill={visorTint} />
+        </g>
 
         {/* Visor Glare / Curved Glass Highlight */}
         <path
@@ -180,7 +160,7 @@ function StandingRocketSvg({ clipId, className = 'w-36 h-56 sm:w-48 sm:h-72 drop
  * Animated Boarding & Blast-off Cinematic Sequence
  * Synchronizes each phase with speech completion so audio never interrupts transitions.
  */
-function BoardingCinematic({ usePhotoFace, onComplete, onSkip }) {
+function BoardingCinematic({ onComplete, onSkip }) {
   const uid = useId().replace(/:/g, '');
   const boardingClipId = `boarding-rocket-clip-${uid}`;
   const launchClipId = `launch-porthole-clip-${uid}`;
@@ -330,13 +310,11 @@ function BoardingCinematic({ usePhotoFace, onComplete, onSkip }) {
                 name="Olivia"
                 isOlivia={true}
                 isWalking={true}
-                usePhotoFace={usePhotoFace}
               />
               <EarthAstronaut
                 name="Anna"
                 isOlivia={false}
                 isWalking={true}
-                usePhotoFace={usePhotoFace}
               />
             </div>
 
@@ -446,11 +424,7 @@ function BoardingCinematic({ usePhotoFace, onComplete, onSkip }) {
               <g clipPath={`url(#${launchClipId})`}>
                 <circle cx="80" cy="102" r="26" fill="#3b0764" />
                 <image
-                  href={getAssetUrl(
-                    usePhotoFace
-                      ? '/assets/cartoons/characters/olivia_photo_face.png'
-                      : '/assets/cartoons/characters/olivia_cartoon_circle.webp'
-                  )}
+                  href={getAssetUrl('/assets/cartoons/characters/olivia_cartoon_circle.webp')}
                   x="54"
                   y="76"
                   width="52"
@@ -473,19 +447,10 @@ function BoardingCinematic({ usePhotoFace, onComplete, onSkip }) {
 /**
  * Main Launchpad / Start Screen Component
  */
-export default function Launchpad({ onBlastOff, usePhotoFace = false, onTogglePhotoFace }) {
+export default function Launchpad({ onBlastOff }) {
   const uid = useId().replace(/:/g, '');
   const rocketClipId = `earth-rocket-porthole-${uid}`;
   const { triggerSynth, speak, stopSpeaking } = useSpaceAudio();
-  const [internalPhotoFace, setInternalPhotoFace] = useState(false);
-  const activePhotoFace = onTogglePhotoFace !== undefined ? usePhotoFace : internalPhotoFace;
-  const togglePhotoFace = () => {
-    if (onTogglePhotoFace) {
-      onTogglePhotoFace();
-    } else {
-      setInternalPhotoFace((p) => !p);
-    }
-  };
   const [isCinematicActive, setIsCinematicActive] = useState(false);
 
   const ownedSpeechTokenRef = useRef(null);
@@ -527,36 +492,17 @@ export default function Launchpad({ onBlastOff, usePhotoFace = false, onTogglePh
       {/* Cinematic Modal when Blast Off is clicked */}
       {isCinematicActive && (
         <BoardingCinematic
-          usePhotoFace={activePhotoFace}
           onComplete={onBlastOff}
           onSkip={onBlastOff}
         />
       )}
 
-      {/* Top Controls: Photo Toggle & Mission Welcome */}
+      {/* Top Controls: Mission Welcome */}
       <div className="relative z-20 w-full max-w-6xl mx-auto px-4 pt-3 flex items-center justify-between">
         <div className="px-3.5 py-1.5 rounded-full bg-slate-900/80 border border-slate-700 text-yellow-300 font-black text-xs sm:text-sm flex items-center gap-2 shadow-lg backdrop-blur-md">
           <Sparkles className="w-4 h-4 text-yellow-300 animate-twinkle" />
           <span>Earth Spaceport Launchpad</span>
         </div>
-
-        {/* Toggle Photo Face (Action if pressed) */}
-        <button
-          type="button"
-          onClick={() => {
-            triggerSynth('twinkle');
-            const next = !activePhotoFace;
-            togglePhotoFace();
-            const res = speak(next ? "Olivia and Anna's photo mode!" : 'Cartoon art mode!');
-            ownedSpeechTokenRef.current = res?.token ?? null;
-          }}
-          style={{ touchAction: 'manipulation' }}
-          title={activePhotoFace ? 'Switch to Cartoon Face' : 'Switch to Real Photo Face'}
-          className="cockpit-btn min-h-[44px] px-3.5 py-2 bg-slate-900/85 hover:bg-slate-800 text-yellow-300 border-2 border-yellow-400/60 rounded-2xl flex items-center gap-1.5 text-xs font-black shadow-xl backdrop-blur-md"
-        >
-          <Camera className="w-4 h-4 text-cyan-300" />
-          <span>{activePhotoFace ? '🎨 Cartoon Face' : '📸 Real Photo Face'}</span>
-        </button>
       </div>
 
       {/* Main Ground Stage: Earth Hills, Rocket, and Astronauts */}
@@ -583,7 +529,6 @@ export default function Launchpad({ onBlastOff, usePhotoFace = false, onTogglePh
           <EarthAstronaut
             name="Olivia"
             isOlivia={true}
-            usePhotoFace={activePhotoFace}
             onClick={handleTapOlivia}
           />
 
@@ -618,7 +563,6 @@ export default function Launchpad({ onBlastOff, usePhotoFace = false, onTogglePh
           <EarthAstronaut
             name="Anna"
             isOlivia={false}
-            usePhotoFace={activePhotoFace}
             onClick={handleTapAnna}
           />
         </div>

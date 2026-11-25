@@ -22,16 +22,12 @@ const WARP_STREAKS = [
  * - Olivia's authentic red crayon scribbles on hull!
  * - Scalloped charcoal launch booster base
  */
-export default function FlyingToyRocket({ isBlasting, targetName, usePhotoFace = false }) {
+export default function FlyingToyRocket({ isBlasting, targetName }) {
   const uid = useId().replace(/:/g, '');
   const idleClipId = `rocket-porthole-clip-idle-${uid}`;
   const blastClipId = `rocket-porthole-clip-blasting-${uid}`;
 
-  const rocketFaceSrc = getAssetUrl(
-    usePhotoFace
-      ? '/assets/cartoons/characters/olivia_photo_face.png'
-      : '/assets/cartoons/characters/olivia_cartoon_circle.webp'
-  );
+  const rocketFaceSrc = getAssetUrl('/assets/cartoons/characters/olivia_cartoon_circle.webp');
 
   if (!isBlasting) {
     return (
